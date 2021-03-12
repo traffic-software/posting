@@ -1,6 +1,9 @@
 from os import path
 import sqlite3
 class psThread:
+	def __del__(self):
+		#self.conn.close()
+		pass
 	def __init__(self,dbName):
 		self.db = dbName
 		if self.dbfile():
@@ -30,7 +33,7 @@ class psThread:
 		self.conn.commit()
 		return True
 
-	def get_messsage(self, chat_id, name):
+	def get_message(self, chat_id, name):
 		chat_info = self.get_chat_info(chat_id)
 		if chat_info == None:
 			self.chat_insert(chat_id, name)
@@ -55,23 +58,7 @@ class psThread:
 
 		return lines[int(mess_no)]
 
-	def get_chat_info(self, chat_id):
-		c = self.conn.cursor()
-		sql = "SELECT * FROM conversation WHERE chat_id = '{}'".format(str(chat_id))
 
-		c.execute("SELECT * FROM conversation WHERE chat_id =?", (str(chat_id),))
-		# c.execute("SELECT * FROM account WHERE id = "+id+" ORDER BY random() LIMIT 1")
-		chat_info = c.fetchone()
-		return chat_info
-
-	def chat_insert(self, chat_id, name):
-		c = self.conn.cursor()
-		sql = "INSERT INTO conversation (chat_id,name) VALUES  ('" + str(chat_id) + "','" + str(name) + "')"
-
-		c.execute(sql)
-
-		self.conn.commit()
-		return 'insert'
 
 	def update_tbl(self, tbl, row, velu, where, where_velu):
 		c = self.conn.cursor()

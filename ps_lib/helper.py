@@ -1,30 +1,34 @@
 import sqlite3
 class helper:
-	db = sqlite3.connect("data/databases.db")
+
 	def __init__(self):
-		db = sqlite3.connect("data/databases.db")
+		self.db = sqlite3.connect("data/databases.db")
+
 	def all_account_active(self):
 		c = self.db.cursor()
-		# c.execute("SELECT * FROM account WHERE runing = 0")
-		sql = "UPDATE account SET runing =0 WHERE runing =1"
+		sql = "UPDATE accounts SET runing =1 WHERE runing =0"
 		c.execute(sql)
 		self.db.commit()
+
 	def all_account_delete(self):
 		c = self.db.cursor()
-		# c.execute("SELECT * FROM account WHERE runing = 0")
-		sql = "DELETE FROM account"
+		sql = "DELETE FROM accounts"
 		c.execute(sql)
 		self.db.commit()
+	def account_delete(self,id):
+		c = self.db.cursor()
+		sql = "DELETE FROM accounts WHERE id = "+str(id)
+		c.execute(sql)
+		self.db.commit()
+
 	def account_inactive(self,id):
 		c = self.db.cursor()
 		# c.execute("SELECT * FROM account WHERE runing = 0")
-		sql = "UPDATE account SET runing =0 WHERE id = "+str(id)
+		sql = "UPDATE accounts SET runing =0 WHERE id = "+str(id)
 		c.execute(sql)
 		self.db.commit()
 	def account_ban(self,id):
 		c = self.db.cursor()
-		# c.execute("SELECT * FROM account WHERE runing = 0")
-		sql = "UPDATE account SET runing =2 WHERE id = "+str(id)
+		sql = "UPDATE accounts SET runing =2 WHERE id = "+str(id)
 		c.execute(sql)
-		self.db.commit()
 		self.db.commit()

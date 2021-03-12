@@ -1,6 +1,8 @@
 import email
 import imaplib
 import re
+from ps_lib.ps_str import ps_str
+
 
 
 class imap:
@@ -21,7 +23,7 @@ class imap:
 
 	def messages(self,site_email):
 		# tmp, data = self.i.search('utf8','(UNSEEN)')
-		tmp, data = self.i.search('utf8', '(FROM {})'.format(site_email))
+		tmp, data = self.i.search('utf8', '(TO {})'.format(site_email))
 		messages = []
 
 		for num in data[0].split():
@@ -45,16 +47,25 @@ class imap:
 		for part in e.walk():
 			if part.get_content_type() == "text/plain":
 				body = part.get_payload(decode=True)
-				return body.decode('utf-8')
+				#body.decode('utf-8')
+				return body
 				break
 			else:
 				continue
 	def get_link(self):
+		urls=[]
 		for m in self.ps_messges:
-			x = re.findall(r"sd", m)
-			print(x)
+			st = ps_str(m)
+			url = st.find_urls("main.php?page=post_manage&idp=")
+			if url!=None:
+				urls.append(url)
+				break
+
+
+
 
 		self.ps_messges=None
+		return urls
 
 
 	def close(self):
@@ -62,6 +73,4 @@ class imap:
 		self.i.logout()
 
 
-popmail = imap('aliviafarnsworth007@gmail.com', "CXQrJ7Rnq75nQaLf", 'imap.gmail.com')
-popmail.messages('malaknoyn100@gmail.com')
-popmail.get_link()
+

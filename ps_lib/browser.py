@@ -40,7 +40,7 @@ class browser:
 		while True:
 			try:
 				element = self.driver.find_element_by_css_selector(selector)
-				if element.is_displayed() and element.is_enabled():
+				if element.is_displayed():
 					print("element ", selector)
 					break
 			except:
@@ -159,3 +159,8 @@ class browser:
 		wait = WebDriverWait(self.driver, 10)
 		clickable = wait.until(EC.element_to_be_clickable((By.ID, Element)))
 		return clickable
+
+	def current_url(self):
+		return self.driver.current_url
+	def script_run(self,script):
+		return self.driver.execute_script(script)

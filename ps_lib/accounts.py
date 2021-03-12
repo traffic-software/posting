@@ -1,6 +1,8 @@
 import sqlite3
 import os
 class accounts:
+    def __del__(self):
+        self.conn.close()
     def __init__(self):
         self.conn = sqlite3.connect('data/databases.db')
 
@@ -29,14 +31,14 @@ class accounts:
         self.ps_proxys_insert(proxy)
     def insert(self,combos):
         c = self.conn.cursor()
-        c.executemany("INSERT INTO account (data,runing) VALUES  (?,?)", combos)
+        c.executemany("INSERT INTO accounts (data,runing) VALUES  (?,?)", combos)
         self.conn.commit()
 
 
     def get_accounts(self,limit):
         c = self.conn.cursor()
         # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "SELECT * FROM account WHERE runing = 0 ORDER BY random() LIMIT " + str(limit)
+        sql = "SELECT * FROM accounts WHERE runing = 0 ORDER BY random() LIMIT " + str(limit)
         c.execute(sql)
         account = c.fetchall()
         # c.fetchall()
@@ -47,15 +49,16 @@ class accounts:
 
     def get_account(self):
         c = self.conn.cursor()
-        # c.execute("SELECT * FROM account WHERE runing = 0")
-        c.execute("SELECT * FROM account WHERE runing = 0 ORDER BY random() LIMIT 1")
+        # c.execute("SELECT * FROM accounts WHERE runing = 0")
+        c.execute("SELECT * FROM accounts WHERE runing = 0 ORDER BY random() LIMIT 1")
         a = c.fetchone()
-        # c.fetchall()
-        # c.fetchmany()()
-        # c.fetchone()
         self.conn.commit()
+        a = self.get_formated_data(c.description,a)
         return a
 
+    def get_formated_data(self, headers, data):
+        data = dict(zip([c[0] for c in headers], data))
+        return data
     def get_account_for_inactive(self):
         file = open('active.txt', "r+")
         lines = file.readlines()
@@ -73,21 +76,21 @@ class accounts:
     def account_active(self,acc_id):
         c = self.conn.cursor()
         # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "UPDATE account SET runing =1 WHERE id = " + str(acc_id)
+        sql = "UPDATE accounts SET runing =1 WHERE id = " + str(acc_id)
         c.execute(sql)
         self.conn.commit()
 
     def account_inactive(self,id):
         c = self.conn.cursor()
         # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "UPDATE account SET runing =0 WHERE id = " + str(id)
+        sql = "UPDATE accounts SET runing =0 WHERE id = " + str(id)
         c.execute(sql)
         self.conn.commit()
 
     def account_ban(self,id):
         c = self.conn.cursor()
         # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "UPDATE account SET runing =2 WHERE id = " + str(id)
+        sql = "UPDATE accounts SET runing =2 WHERE id = " + str(id)
         c.execute(sql)
         self.conn.commit()
     def save(self):
