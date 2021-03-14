@@ -37,6 +37,7 @@ class browser:
 		self.driver.quit()
 
 	def select_element(self,selector):
+		co=0
 		while True:
 			try:
 				element = self.driver.find_element_by_css_selector(selector)
@@ -44,7 +45,11 @@ class browser:
 					print("element ", selector)
 					break
 			except:
+				co = co+1
+				if co >10:
+					break
 				print("waiting for ",selector)
+				self.driver.implicitly_wait(1)
 		return element
 	def select_element_xpath(self,selector):
 

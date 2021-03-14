@@ -12,6 +12,25 @@ from ps_lib.post import post
 from ps_lib.captcha import capcha
 from ps_lib.imap import imap
 import random
+from pynput.mouse import Button, Controller
+
+mouse = Controller()
+input('place Your mouse on the tuxler vpn IP change button then type any key in your keyboard')
+# Read pointer position
+x,y=mouse.position
+# Set pointer position
+mouse.position = (x,y)
+mouse.move(1,1)
+# Press and release
+mouse.press(Button.left)
+mouse.release(Button.left)
+
+# Double click; this is different from pressing and releasing
+# twice on macOS
+# mouse.click(Button.left, 2)
+
+# Scroll two steps down
+# mouse.scroll(0, 2)
 # b = browser('545')
 #
 # b.get_url('http://httpbin.org/get')
@@ -30,7 +49,7 @@ def main(account_data,url,postinfo):
 	b = browser(account_id)
 
 	b.get_url(url)
-	time.sleep(2)
+	b.driver.implicitly_wait(1)
 	accept_button = b.select_element('div.modal-footer > button')
 	accept_button.click()
 	post_button = b.select_element('[data-href="/fe/main.php?page=post_insert"]')
@@ -56,7 +75,7 @@ def main(account_data,url,postinfo):
 
 
 	b.scroll_element_into_view(b_checkbox1)
-	time.sleep(1)
+	b.driver.implicitly_wait(1)
 	b_checkbox1.click()
 	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f')
 
@@ -92,18 +111,19 @@ def main(account_data,url,postinfo):
 	published_btn = b.select_element('[id="pub-gratis"]')
 	b.scroll_element_into_view(published_btn)
 	published_btn.click()
-
-
-
-
-	time.sleep(1)
+	b.driver.implicitly_wait(1)
 
 
 	popmail = imap('michaelnguyen1144@gmail.com', "jqjokiwa@@# ", 'imap.gmail.com')
 
 	counter=0
+	postdone = False
 
 	while True:
+		if postdone == True:
+			break
+			postdone = False
+
 		counter = counter+1
 		popmail.messages(email)
 		links = popmail.get_link()
@@ -112,20 +132,21 @@ def main(account_data,url,postinfo):
 			conf_link = 'window.location.href = "{};'.format(link)
 			print(conf_link)
 			b.script_run(conf_link)
-			time.sleep(30)
+			postdone = True
+
 
 
 		if counter > 5:
-			time.sleep(100)
+			b.driver.implicitly_wait(5)
 			exit("link not recived")
 			#7fdb52b52b4ceceebfbde0833d7cc8a1
 			break
-
 	print('browser close')
-	time.sleep(9)
+	b.driver.implicitly_wait(1)
 	b.exit()
-	account_id = 'profiles/'+account_id
+	account_id = 'profiles/' + account_id
 	shutil.rmtree(account_id)
+
 
 	print(datetime.now().strftime("%H:%M:%S"))
 
@@ -139,11 +160,6 @@ setup = table()
 # worker = w + 1
 worker = 2
 # ........................start worker....................
-mess1 = "how are you?"
-mess2 = "where are you from"
-mess3 = "Basically I don't use lovoo all the time, let's talk about it in the mail"
-# driver.get("https://www.lovoo.com")
-# driver.close()
 open('active.txt', "w+")
 utility = helper()
 utility.all_account_active()
@@ -265,7 +281,16 @@ urls = [	'https://agrigento.bakecaincontrii.com/donna-cerca-uomo',
 
 acc = accounts()
 post = post()
+co=0
 while True:
+	if co >5:
+		co=0
+		mouse.position = (x, y)
+		mouse.move(1, 1)
+		# Press and release
+		mouse.press(Button.left)
+		mouse.release(Button.left)
+
 	acc.save()
 	post.save()
 
@@ -293,6 +318,7 @@ while True:
 		t.setName(one_account['id'])
 		t.start()
 		time.sleep(50)
+		co = co+1
 
 	else:
 
