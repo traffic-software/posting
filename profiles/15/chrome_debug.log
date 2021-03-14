@@ -1,0 +1,4 @@
+[7016:8052:0314/070941.599:INFO:CONSOLE(1495)] "nascondo", source: https://laspezia.bakecaincontrii.com/v20210215123317/fe/js/post/img_crop_upload.js (1495)
+[7016:8052:0314/070949.559:INFO:CONSOLE(76)] "Geocoding Service: You must enable Billing on the Google Cloud Project at https://console.cloud.google.com/project/_/billing/enable Learn more at https://developers.google.com/maps/gmp-get-started", source: https://maps.googleapis.com/maps/api/js?key=AIzaSyBi0OP9C9i9GdNzE2xISoJ1YqfU1rt6o8U&libraries=places (76)
+[7016:8052:0314/071220.109:INFO:CONSOLE(4)] "Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience. For more help, check https://xhr.spec.whatwg.org/.", source: https://laspezia.bakecaincontrii.com/v20210215123317/fe/js/jquery-1.9.1.min.js (4)
+[7016:8052:0314/071228.860:INFO:CONSOLE(57)] "show modal", source: https://laspezia.bakecaincontrii.com/static/js/app.js?46d779e10fd3cbb355e1 (57)

@@ -1,6 +1,7 @@
 import threading
 from selenium.webdriver.common.keys import Keys
 import time
+import shutil
 from datetime import datetime
 from ps_lib.browser import browser
 from ps_lib.accounts import accounts
@@ -11,6 +12,10 @@ from ps_lib.post import post
 from ps_lib.captcha import capcha
 from ps_lib.imap import imap
 import random
+# b = browser('545')
+#
+# b.get_url('http://httpbin.org/get')
+# exit()
 
 
 def main(account_data,url,postinfo):
@@ -24,7 +29,8 @@ def main(account_data,url,postinfo):
 	worker = psThread(account_id)
 	b = browser(account_id)
 
-	print(b.get_url(url))
+	b.get_url(url)
+	time.sleep(2)
 	accept_button = b.select_element('div.modal-footer > button')
 	accept_button.click()
 	post_button = b.select_element('[data-href="/fe/main.php?page=post_insert"]')
@@ -50,7 +56,7 @@ def main(account_data,url,postinfo):
 
 
 	b.scroll_element_into_view(b_checkbox1)
-	time.sleep(5)
+	time.sleep(1)
 	b_checkbox1.click()
 	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f')
 
@@ -70,36 +76,56 @@ def main(account_data,url,postinfo):
 	print(chacha_respons.get_attribute('innerHTML'))
 	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'none';")
 	b.select_element('[id="accept-gdpr"]').click()
-	pulic_link = b.select_element('[id="pub-gratis"]')
-	b.scroll_element_into_view(pulic_link)
-	pulic_link.click()
+	# pulic_link = b.select_element('[id="pub-gratis"]')
+	# b.scroll_element_into_view(pulic_link)
+	# pulic_link.click()
 
 	set_submit = b.select_element('[id="submit-ins"]')
 	b.scroll_element_into_view(set_submit)
-
-
-
+	time.sleep(1)
 	set_submit.click()
+	time.sleep(1)
+	promo_premium = b.select_element('[id="promo-premium-actions"] > a')
+	b.scroll_element_into_view(promo_premium)
+	promo_premium.click()
+	time.sleep(1)
+	published_btn = b.select_element('[id="pub-gratis"]')
+	b.scroll_element_into_view(published_btn)
+	published_btn.click()
 
 
 
-	time.sleep()
-	popmail = imap('ziesehhhhh1995@gmail.com', "Foh2Sahj5poo ", 'imap.gmail.com')
-	link = None
+
+	time.sleep(1)
+
+
+	popmail = imap('michaelnguyen1144@gmail.com', "jqjokiwa@@# ", 'imap.gmail.com')
+
 	counter=0
 
 	while True:
 		counter = counter+1
 		popmail.messages(email)
 		links = popmail.get_link()
-		if len(links)!=0:
-			link =links[0]
-			break
-		time.time(60)
+		for link in links:
+
+			conf_link = 'window.location.href = "{};'.format(link)
+			print(conf_link)
+			b.script_run(conf_link)
+			time.sleep(30)
+
+
 		if counter > 5:
-			b.exit()
+			time.sleep(100)
 			exit("link not recived")
+			#7fdb52b52b4ceceebfbde0833d7cc8a1
+			break
+
+	print('browser close')
+	time.sleep(9)
 	b.exit()
+	account_id = 'profiles/'+account_id
+	shutil.rmtree(account_id)
 
 	print(datetime.now().strftime("%H:%M:%S"))
 

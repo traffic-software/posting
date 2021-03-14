@@ -40,12 +40,12 @@ class imap:
 		self.ps_messges = messages
 		self.i.expunge()
 
-		self.close()
+
 		return messages
 	def get_body(self,e):
 		# Body details
 		for part in e.walk():
-			if part.get_content_type() == "text/plain":
+			if part.get_content_type() == "text/html":
 				body = part.get_payload(decode=True)
 				#body.decode('utf-8')
 				return body
@@ -56,7 +56,8 @@ class imap:
 		urls=[]
 		for m in self.ps_messges:
 			st = ps_str(m)
-			url = st.find_urls("main.php?page=post_manage&idp=")
+			#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
+			url = st.find_urls("main.php?page=post_publish&idp=")
 			if url!=None:
 				urls.append(url)
 				break
@@ -71,6 +72,9 @@ class imap:
 	def close(self):
 		self.i.close()
 		self.i.logout()
+
+popmail = imap('michaelnguyen1144@gmail.com', "jqjokiwa@@# ", 'imap.gmail.com')
+popmail.messages("elizabethgreen1932@gmail.com")
 
 
 

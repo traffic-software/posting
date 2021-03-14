@@ -44,7 +44,6 @@ class browser:
 					print("element ", selector)
 					break
 			except:
-				time.sleep(1)
 				print("waiting for ",selector)
 		return element
 	def select_element_xpath(self,selector):

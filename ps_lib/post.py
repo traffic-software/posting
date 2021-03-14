@@ -20,7 +20,7 @@ class post:
 	def save(self):
 		my_file = open('post.txt', 'r+')
 		lines = my_file.readlines()
-		my_file.truncate()
+		my_file.truncate(0)
 		my_file.close()
 		list_data = []
 		for line in lines:

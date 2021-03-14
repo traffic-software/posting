@@ -1,8 +1,7 @@
 import sqlite3
 import os
 class accounts:
-    def __del__(self):
-        self.conn.close()
+
     def __init__(self):
         self.conn = sqlite3.connect('data/databases.db')
 
@@ -50,9 +49,9 @@ class accounts:
     def get_account(self):
         c = self.conn.cursor()
         # c.execute("SELECT * FROM accounts WHERE runing = 0")
-        c.execute("SELECT * FROM accounts WHERE runing = 0 ORDER BY random() LIMIT 1")
+        #c.execute("SELECT * FROM accounts WHERE runing = 0 ORDER BY random() LIMIT 1")
+        c.execute("SELECT * FROM accounts ORDER BY random() LIMIT 1")
         a = c.fetchone()
-        self.conn.commit()
         a = self.get_formated_data(c.description,a)
         return a
 
@@ -63,11 +62,8 @@ class accounts:
         file = open('active.txt', "r+")
         lines = file.readlines()
 
-        file.truncate()
-
-        print(lines)
-        # print(type(lines))
-        list_data = []
+        file.truncate(0)
+        file.close()
         for line in lines:
             account_id = line.rstrip("\n")
             self.account_inactive(account_id)
@@ -97,7 +93,9 @@ class accounts:
 
         my_file = open('account.txt', 'r+', encoding="utf8")
         lines = my_file.readlines()
-        my_file.truncate()
+        my_file.truncate(0)
+        my_file.close()
+
         list_data = []
         for key, line in enumerate(lines):
 
