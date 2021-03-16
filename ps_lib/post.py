@@ -26,12 +26,17 @@ class post:
 		for line in lines:
 
 
-			data = line.split("||")
+			data = line.split(":")
 			if 1 < len(data):
 				post = (data[0],data[1].rstrip("\n"))
 				list_data.append(post)
 		self.insert(list_data)
 
 	def get_formated_data(self,headers,data):
-		data = dict(zip([c[0] for c in headers], data))
+		try:
+			data = dict(zip([c[0] for c in headers], data))
+		except:
+			data = None
 		return data
+
+

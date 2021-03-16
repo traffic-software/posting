@@ -2,6 +2,7 @@ import threading
 from selenium.webdriver.common.keys import Keys
 import time
 import shutil
+from os import path
 from datetime import datetime
 from ps_lib.browser import browser
 from ps_lib.accounts import accounts
@@ -14,16 +15,16 @@ from ps_lib.imap import imap
 import random
 from pynput.mouse import Button, Controller
 
-mouse = Controller()
-input('place Your mouse on the tuxler vpn IP change button then type any key in your keyboard')
-# Read pointer position
-x,y=mouse.position
-# Set pointer position
-mouse.position = (x,y)
-mouse.move(1,1)
-# Press and release
-mouse.press(Button.left)
-mouse.release(Button.left)
+# mouse = Controller()
+# input('place Your mouse on the tuxler vpn IP change button then type any key in your keyboard')
+# # Read pointer position
+# x,y=mouse.position
+# # Set pointer position
+# mouse.position = (x,y)
+# mouse.move(1,1)
+# # Press and release
+# mouse.press(Button.left)
+# mouse.release(Button.left)
 
 # Double click; this is different from pressing and releasing
 # twice on macOS
@@ -142,6 +143,10 @@ def main(account_data,url,postinfo):
 			#7fdb52b52b4ceceebfbde0833d7cc8a1
 			break
 	print('browser close')
+	#
+	#href="https://mantova.bakecaincontrii.com/donna-cerca-uomo/sono-disponibile-per-te-8nrp377656803/"
+	postlink = b.select_element('#colonna-unica > div.ins-messaggio.pub > p:nth-child(2) > a')
+	b.link_save(postlink.get_attribute('href'))
 	b.driver.implicitly_wait(1)
 	b.exit()
 	account_id = 'profiles/' + account_id
@@ -156,6 +161,7 @@ def main(account_data,url,postinfo):
 
 
 setup = table()
+setup.license_verify()
 #w = int(input('how much worker you need? '))
 # worker = w + 1
 worker = 2
@@ -283,13 +289,15 @@ acc = accounts()
 post = post()
 co=0
 while True:
-	if co >5:
+	if co >3:
 		co=0
-		mouse.position = (x, y)
-		mouse.move(1, 1)
-		# Press and release
-		mouse.press(Button.left)
-		mouse.release(Button.left)
+		# mouse.position = (x, y)
+		# mouse.move(1, 1)
+		# # Press and release
+		# mouse.press(Button.left)
+		# mouse.release(Button.left)
+		# mouse.press(Button.left)
+		# mouse.release(Button.left)
 
 	acc.save()
 	post.save()
@@ -302,14 +310,18 @@ while True:
 
 		url = random.choice(urls)
 		one_account = acc.get_account()
-		print(one_account)
+		print("account info: ", one_account)
 		postinfo = post.get_post()
-		if one_account == None and postinfo== None:
+		print("post info: ",postinfo)
+		if one_account == None or postinfo == None:
+			print('post or account not find for worker')
 			time.sleep(10)
 			acc.get_account_for_inactive()
 
 			continue
 		acc.account_active(one_account['id'])
+		if path.isdir('profiles/' +str(one_account['id'])) == True:
+			shutil.rmtree('profiles/' +str(one_account['id']))
 
 		t = threading.Thread(target=main, args=(one_account,url,postinfo,))
 		acc.account_active(one_account['id'])
@@ -318,9 +330,10 @@ while True:
 		t.setName(one_account['id'])
 		t.start()
 		time.sleep(50)
+
 		co = co+1
 
 	else:
 
-		print('..............active thread :' + str(threading.active_count()) + '...............')
-		time.sleep(50)
+		# print('..............active thread :' + str(threading.active_count()) + '...............')
+		time.sleep(2)

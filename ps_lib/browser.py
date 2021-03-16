@@ -8,6 +8,7 @@ from selenium import webdriver
 import time
 import warnings
 class browser:
+
 	def __init__(self,pofileLocation):
 
 		#warnings.filterwarnings('ignore')
@@ -38,6 +39,7 @@ class browser:
 
 	def select_element(self,selector):
 		co=0
+		element=False
 		while True:
 			try:
 				element = self.driver.find_element_by_css_selector(selector)
@@ -50,6 +52,10 @@ class browser:
 					break
 				print("waiting for ",selector)
 				self.driver.implicitly_wait(1)
+		if element == False:
+			print("element not find: ",selector)
+			self.exit()
+			exit()
 		return element
 	def select_element_xpath(self,selector):
 
@@ -168,3 +174,6 @@ class browser:
 		return self.driver.current_url
 	def script_run(self,script):
 		return self.driver.execute_script(script)
+	def link_save(self,link):
+		with open('links.txt', 'a') as file:
+			file.write(link)

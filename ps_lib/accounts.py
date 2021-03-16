@@ -37,7 +37,7 @@ class accounts:
     def get_accounts(self,limit):
         c = self.conn.cursor()
         # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "SELECT * FROM accounts WHERE runing = 0 ORDER BY random() LIMIT " + str(limit)
+        sql = "SELECT * FROM accounts WHERE runing = 1 ORDER BY random() LIMIT " + str(limit)
         c.execute(sql)
         account = c.fetchall()
         # c.fetchall()
@@ -50,14 +50,18 @@ class accounts:
         c = self.conn.cursor()
         # c.execute("SELECT * FROM accounts WHERE runing = 0")
         #c.execute("SELECT * FROM accounts WHERE runing = 0 ORDER BY random() LIMIT 1")
-        c.execute("SELECT * FROM accounts ORDER BY random() LIMIT 1")
+        c.execute("SELECT * FROM accounts WHERE runing = 1 ORDER BY random() LIMIT 1")
         a = c.fetchone()
         a = self.get_formated_data(c.description,a)
         return a
 
     def get_formated_data(self, headers, data):
-        data = dict(zip([c[0] for c in headers], data))
+        try:
+            data = dict(zip([c[0] for c in headers], data))
+        except:
+            data = None
         return data
+
     def get_account_for_inactive(self):
         file = open('active.txt', "r+")
         lines = file.readlines()
@@ -98,12 +102,14 @@ class accounts:
 
         list_data = []
         for key, line in enumerate(lines):
-
-
-            ps_data = line.split(":")
-            username = ps_data[0]
-            password = ps_data[1].rstrip("\n")
-            combos_tada = (username+":"+password, 0)
-            list_data.append(combos_tada)
+            try:
+                ps_data = line.split(":")
+                print(ps_data)
+                username = ps_data[0]
+                password = ps_data[1].rstrip("\n")
+                combos_tada = (username+":"+password, 0)
+                list_data.append(combos_tada)
+            except:
+                print('data format problem please check your data in account file')
         self.insert(list_data)
 
