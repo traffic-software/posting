@@ -50,12 +50,6 @@ def main(account_data,url,postinfo):
 	worker_acc=accounts()
 
 	b.get_url(url+'fe/main.php?page=post_insert')
-
-	# b.driver.implicitly_wait(1)
-	# accept_button = b.select_element('div.modal-footer > button')
-	# accept_button.click()
-	# post_button = b.select_element('[data-href="/fe/main.php?page=post_insert"]')
-	# post_button.click()
 	accept2_button = b.select_element('[id="accetto"]')
 	accept2_button.click()
 	b.select_dropdown('[id = "categoria-ins"]',"31")
@@ -77,7 +71,6 @@ def main(account_data,url,postinfo):
 
 
 	b.scroll_element_into_view(b_checkbox1)
-	# b.driver.implicitly_wait(1)
 	b_checkbox1.click()
 	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da')
 
@@ -92,27 +85,17 @@ def main(account_data,url,postinfo):
 	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'block';")
 	script = 'document.getElementById("g-recaptcha-response").innerHTML="{}";'.format(chacha_key)
 	b.script_run(script)
-	# chacha_respons.send_keys(chacha_key)
-	# print(chacha_respons.get_attribute('innerHTML'))
 	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'none';")
 	b.select_element('[id="accept-gdpr"]').click()
-	# pulic_link = b.select_element('[id="pub-gratis"]')
-	# b.scroll_element_into_view(pulic_link)
-	# pulic_link.click()
 
 	set_submit = b.select_element('[id="submit-ins"]')
 	b.scroll_element_into_view(set_submit)
 	set_submit.click()
 	promo_premium = b.select_element_xpath("//*[text()='Non mostrare più questo messaggio']")
-	# """"<a class="lb-close-w" href="javascript:void(0)" onclick="javascript:dontShowMsgPromoVideoChiama('bakecaincontrii.com');">Non mostrare più questo messaggio</a>"""
-	# promo_premium = b.select_element('[id="promo-premium-actions"] > a')
-	#//*[@id="promo-premium-actions"]/a
-	# b.script_run("return dontShowMsgPromoVideoChiama('bakecaincontrii.com');")
-	# b.scroll_element_into_view(promo_premium)
+
 	promo_premium.click()
-	# time.sleep(1)
 	published_btn = b.select_element('[id="pub-gratis"]')
-	b.scroll_element_into_view(published_btn)
+	# b.scroll_element_into_view(published_btn)
 	published_btn.click()
 
 
@@ -132,7 +115,6 @@ def main(account_data,url,postinfo):
 		for link in links:
 
 			conf_link = 'window.location.href = "{};'.format(link)
-			print(conf_link)
 			b.script_run(conf_link)
 			postlink = b.select_element('#colonna-unica > div.ins-messaggio.pub > p:nth-child(2) > a')
 			b.link_save(postlink.get_attribute('href'))
