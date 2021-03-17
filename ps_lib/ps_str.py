@@ -14,6 +14,8 @@ class ps_str:
 		encodeinfo =chardet.detect(text)
 		print(encodeinfo["encoding"])
 		return text.decode(encodeinfo["encoding"])
+	def get_text(self):
+		return self.str
 
 	def find_urls(self,condition):
 		expression=r'(https?://\S+)'

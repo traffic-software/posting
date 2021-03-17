@@ -73,7 +73,7 @@ class imap:
 		self.i.close()
 		self.i.logout()
 
-popmail = imap('michaelnguyen1144@gmail.com', "jqjokiwa@@# ", 'imap.gmail.com')
+popmail = imap('bonacatagreco100@gmail.com', "mdmdmdmd123", 'imap.gmail.com')
 popmail.messages("elizabethgreen1932@gmail.com")
 
 

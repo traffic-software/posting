@@ -5,11 +5,15 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
+from ps_lib.accounts import accounts
 import time
 import warnings
 class browser:
+	account_id=None
+
 
 	def __init__(self,pofileLocation):
+		self.account_id=pofileLocation
 
 		#warnings.filterwarnings('ignore')
 		self.service_args = [
@@ -48,17 +52,20 @@ class browser:
 					break
 			except:
 				co = co+1
-				if co >10:
+				if co >100:
 					break
 				print("waiting for ",selector)
-				self.driver.implicitly_wait(1)
+				# self.driver.implicitly_wait(1)
 		if element == False:
 			print("element not find: ",selector)
+			account = accounts()
+			account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
 	def select_element_xpath(self,selector):
-
+		co = 0
+		element = False
 		while True:
 			try:
 				element = self.driver.find_element_by_xpath(selector)
@@ -66,8 +73,17 @@ class browser:
 					print("element ", selector)
 					break
 			except:
-				time.sleep(1)
+				co = co + 1
+				if co > 60:
+					break
 				print("waiting for ",selector)
+				time.sleep(1)
+		if element == False:
+			print("element not find: ",selector)
+			account = accounts()
+			account.account_inactive(self.account_id)
+			self.exit()
+			exit()
 		return element
 
 	def select_dropdown(self,parent,child):
@@ -156,7 +172,7 @@ class browser:
 	def	scroll_element_into_view(self,element):
 		"""Scroll element into view"""
 		y = element.location['y']-200
-		print(y)
+
 		s = "window.scrollTo(0,{})".format(y)
 		self.driver.execute_script(s)
 
@@ -176,4 +192,4 @@ class browser:
 		return self.driver.execute_script(script)
 	def link_save(self,link):
 		with open('links.txt', 'a') as file:
-			file.write(link)
+			file.write(link+"\n")

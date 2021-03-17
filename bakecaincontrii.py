@@ -44,18 +44,19 @@ def main(account_data,url,postinfo):
 	# thread name
 	account_id = threading.currentThread().getName()
 
-	print(str(account_id) + "\t" + str(account_data))
 
 	worker = psThread(account_id)
 	b = browser(account_id)
+	worker_acc=accounts()
 
-	b.get_url(url)
-	b.driver.implicitly_wait(1)
-	accept_button = b.select_element('div.modal-footer > button')
-	accept_button.click()
-	post_button = b.select_element('[data-href="/fe/main.php?page=post_insert"]')
-	post_button.click()
-	accept2_button = b.select_element('[name="subprocedi18"]')
+	b.get_url(url+'fe/main.php?page=post_insert')
+
+	# b.driver.implicitly_wait(1)
+	# accept_button = b.select_element('div.modal-footer > button')
+	# accept_button.click()
+	# post_button = b.select_element('[data-href="/fe/main.php?page=post_insert"]')
+	# post_button.click()
+	accept2_button = b.select_element('[id="accetto"]')
 	accept2_button.click()
 	b.select_dropdown('[id = "categoria-ins"]',"31")
 	ps_data = account_data['data'].split(":")
@@ -76,24 +77,23 @@ def main(account_data,url,postinfo):
 
 
 	b.scroll_element_into_view(b_checkbox1)
-	b.driver.implicitly_wait(1)
+	# b.driver.implicitly_wait(1)
 	b_checkbox1.click()
-	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f')
+	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da')
 
 
 
 
 	site_url = b.current_url()
 
-	chacha_key = chacha_worker.anticaptcha('6LfWoxsTAAAAABGVn50YiJZfNmDDe-rD-59LAWh4', site_url)
-	print(chacha_key)
+	chacha_key = chacha_worker.two_captcha('6LfWoxsTAAAAABGVn50YiJZfNmDDe-rD-59LAWh4', site_url)
+
 	chacha_respons = b.driver.find_element_by_id('g-recaptcha-response')
 	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'block';")
 	script = 'document.getElementById("g-recaptcha-response").innerHTML="{}";'.format(chacha_key)
 	b.script_run(script)
-	print(chacha_respons)
 	# chacha_respons.send_keys(chacha_key)
-	print(chacha_respons.get_attribute('innerHTML'))
+	# print(chacha_respons.get_attribute('innerHTML'))
 	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'none';")
 	b.select_element('[id="accept-gdpr"]').click()
 	# pulic_link = b.select_element('[id="pub-gratis"]')
@@ -102,20 +102,21 @@ def main(account_data,url,postinfo):
 
 	set_submit = b.select_element('[id="submit-ins"]')
 	b.scroll_element_into_view(set_submit)
-	time.sleep(1)
 	set_submit.click()
-	time.sleep(1)
-	promo_premium = b.select_element('[id="promo-premium-actions"] > a')
-	b.scroll_element_into_view(promo_premium)
+	promo_premium = b.select_element_xpath("//*[text()='Non mostrare più questo messaggio']")
+	# """"<a class="lb-close-w" href="javascript:void(0)" onclick="javascript:dontShowMsgPromoVideoChiama('bakecaincontrii.com');">Non mostrare più questo messaggio</a>"""
+	# promo_premium = b.select_element('[id="promo-premium-actions"] > a')
+	#//*[@id="promo-premium-actions"]/a
+	# b.script_run("return dontShowMsgPromoVideoChiama('bakecaincontrii.com');")
+	# b.scroll_element_into_view(promo_premium)
 	promo_premium.click()
-	time.sleep(1)
+	# time.sleep(1)
 	published_btn = b.select_element('[id="pub-gratis"]')
 	b.scroll_element_into_view(published_btn)
 	published_btn.click()
-	b.driver.implicitly_wait(1)
 
 
-	popmail = imap('michaelnguyen1144@gmail.com', "jqjokiwa@@# ", 'imap.gmail.com')
+	popmail = imap('bonacatagreco100@gmail.com', "mdmdmdmd123", 'imap.gmail.com')
 
 	counter=0
 	postdone = False
@@ -133,21 +134,19 @@ def main(account_data,url,postinfo):
 			conf_link = 'window.location.href = "{};'.format(link)
 			print(conf_link)
 			b.script_run(conf_link)
+			postlink = b.select_element('#colonna-unica > div.ins-messaggio.pub > p:nth-child(2) > a')
+			b.link_save(postlink.get_attribute('href'))
 			postdone = True
 
 
 
-		if counter > 5:
-			b.driver.implicitly_wait(5)
-			exit("link not recived")
-			#7fdb52b52b4ceceebfbde0833d7cc8a1
+		if counter > 10:
+			worker_acc.account_ban(account_id)
+			time.sleep(6)
+			print("link not recived")
 			break
 	print('browser close')
-	#
-	#href="https://mantova.bakecaincontrii.com/donna-cerca-uomo/sono-disponibile-per-te-8nrp377656803/"
-	postlink = b.select_element('#colonna-unica > div.ins-messaggio.pub > p:nth-child(2) > a')
-	b.link_save(postlink.get_attribute('href'))
-	b.driver.implicitly_wait(1)
+
 	b.exit()
 	account_id = 'profiles/' + account_id
 	shutil.rmtree(account_id)
@@ -168,121 +167,120 @@ worker = 2
 # ........................start worker....................
 open('active.txt', "w+")
 utility = helper()
-utility.all_account_active()
 threads = []
 headers = {}
 profile_ids = {}
 pid = threading.local()
-urls = [	'https://agrigento.bakecaincontrii.com/donna-cerca-uomo',
-			'https://ancona.bakecaincontrii.com/donna-cerca-uomo',
-			'https://arezzo.bakecaincontrii.com/donna-cerca-uomo',
-			'https://asti.bakecaincontrii.com/donna-cerca-uomo',
-			'https://bari.bakecaincontrii.com/donna-cerca-uomo',
-			'https://belluno.bakecaincontrii.com/donna-cerca-uomo',
-			'https://bergamo.bakecaincontrii.com/donna-cerca-uomo',
-			'https://bologna.bakecaincontrii.com/donna-cerca-uomo',
-			'https://brescia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://cagliari.bakecaincontrii.com/donna-cerca-uomo',
-			'https://campobasso.bakecaincontrii.com/donna-cerca-uomo',
-			'https://caserta.bakecaincontrii.com/donna-cerca-uomo',
-			'https://catanzaro.bakecaincontrii.com/donna-cerca-uomo',
-			'https://cremona.bakecaincontrii.com/donna-cerca-uomo',
-			'https://cremona.bakecaincontrii.com/donna-cerca-uomo',
-			'https://cuneo.bakecaincontrii.com/donna-cerca-uomo',
-			'https://fermo.bakecaincontrii.com/donna-cerca-uomo',
-			'https://firenze.bakecaincontrii.com/donna-cerca-uomo',
-			'https://forli.bakecaincontrii.com/donna-cerca-uomo',
-			'https://genova.bakecaincontrii.com/donna-cerca-uomo',
-			'https://grosseto.bakecaincontrii.com/donna-cerca-uomo',
-			'https://isernia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://laspezia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://lecce.bakecaincontrii.com/donna-cerca-uomo',
-			'https://livorno.bakecaincontrii.com/donna-cerca-uomo',
-			'https://lucca.bakecaincontrii.com/donna-cerca-uomo',
-			'https://mantova.bakecaincontrii.com/donna-cerca-uomo',
-			'https://matera.bakecaincontrii.com/donna-cerca-uomo',
-			'https://messina.bakecaincontrii.com/donna-cerca-uomo',
-			'https://modena.bakecaincontrii.com/donna-cerca-uomo',
-			'https://napoli.bakecaincontrii.com/donna-cerca-uomo',
-			'https://nuoro.bakecaincontrii.com/donna-cerca-uomo',
-			'https://olbiatempio.bakecaincontrii.com/donna-cerca-uomo',
-			'https://padova.bakecaincontrii.com/donna-cerca-uomo',
-			'https://parma.bakecaincontrii.com/donna-cerca-uomo',
-			'https://perugia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://piacenza.bakecaincontrii.com/donna-cerca-uomo',
-			'https://pistoia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://potenza.bakecaincontrii.com/donna-cerca-uomo',
-			'https://ragusa.bakecaincontrii.com/donna-cerca-uomo',
-			'https://reggiocalabria.bakecaincontrii.com/donna-cerca-uomo',
-			'https://rieti.bakecaincontrii.com/donna-cerca-uomo',
-			'https://roma.bakecaincontrii.com/donna-cerca-uomo',
-			'https://salerno.bakecaincontrii.com/donna-cerca-uomo',
-			'https://savona.bakecaincontrii.com/donna-cerca-uomo',
-			'https://siracusa.bakecaincontrii.com/donna-cerca-uomo',
-			'https://taranto.bakecaincontrii.com/donna-cerca-uomo',
-			'https://terni.bakecaincontrii.com/donna-cerca-uomo',
-			'https://trapani.bakecaincontrii.com/donna-cerca-uomo',
-			'https://treviso.bakecaincontrii.com/donna-cerca-uomo',
-			'https://varese.bakecaincontrii.com/donna-cerca-uomo',
-			'https://verbania.bakecaincontrii.com/donna-cerca-uomo',
-			'https://verona.bakecaincontrii.com/donna-cerca-uomo',
-			'https://vicenza.bakecaincontrii.com/donna-cerca-uomo',
-			'https://viterbo.bakecaincontrii.com/donna-cerca-uomo',
-			'https://vibovalentia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://vercelli.bakecaincontrii.com/donna-cerca-uomo',
-			'https://venezia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://urbino.bakecaincontrii.com/donna-cerca-uomo',
-			'https://udine.bakecaincontrii.com/donna-cerca-uomo',
-			'https://trieste.bakecaincontrii.com/donna-cerca-uomo',
-			'https://trento.bakecaincontrii.com/donna-cerca-uomo',
-			'https://torino.bakecaincontrii.com/donna-cerca-uomo',
-			'https://teramo.bakecaincontrii.com/donna-cerca-uomo',
-			'https://sondrio.bakecaincontrii.com/donna-cerca-uomo',
-			'https://siena.bakecaincontrii.com/donna-cerca-uomo',
-			'https://sassari.bakecaincontrii.com/donna-cerca-uomo',
-			'https://rovigo.bakecaincontrii.com/donna-cerca-uomo',
-			'https://rimini.bakecaincontrii.com/donna-cerca-uomo',
-			'https://reggioemilia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://ravenna.bakecaincontrii.com/donna-cerca-uomo',
-			'https://prato.bakecaincontrii.com/donna-cerca-uomo',
-			'https://pordenone.bakecaincontrii.com/donna-cerca-uomo',
-			'https://pisa.bakecaincontrii.com/donna-cerca-uomo',
-			'https://pescara.bakecaincontrii.com/donna-cerca-uomo',
-			'https://pavia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://palermo.bakecaincontrii.com/donna-cerca-uomo',
-			'https://oristano.bakecaincontrii.com/donna-cerca-uomo',
-			'https://ogliastra.bakecaincontrii.com/donna-cerca-uomo',
-			'https://novara.bakecaincontrii.com/donna-cerca-uomo',
-			'https://monza.bakecaincontrii.com/donna-cerca-uomo',
-			'https://milano.bakecaincontrii.com/donna-cerca-uomo',
-			'https://mediocampidano.bakecaincontrii.com/donna-cerca-uomo',
-			'https://massacarrara.bakecaincontrii.com/donna-cerca-uomo',
-			'https://macerata.bakecaincontrii.com/donna-cerca-uomo',
-			'https://lodi.bakecaincontrii.com/donna-cerca-uomo',
-			'https://lecco.bakecaincontrii.com/donna-cerca-uomo',
-			'https://latina.bakecaincontrii.com/donna-cerca-uomo',
-			'https://laquila.bakecaincontrii.com/donna-cerca-uomo',
-			'https://imperia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://gorizia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://frosinone.bakecaincontrii.com/donna-cerca-uomo',
-			'https://foggia.bakecaincontrii.com/donna-cerca-uomo',
-			'https://ferrara.bakecaincontrii.com/donna-cerca-uomo',
-			'https://enna.bakecaincontrii.com/donna-cerca-uomo',
-			'https://crotone.bakecaincontrii.com/donna-cerca-uomo',
-			'https://cosenza.bakecaincontrii.com/donna-cerca-uomo',
-			'https://chieti.bakecaincontrii.com/donna-cerca-uomo',
-			'https://catania.bakecaincontrii.com/donna-cerca-uomo',
-			'https://carboniaiglesias.bakecaincontrii.com/donna-cerca-uomo',
-			'https://caltanissetta.bakecaincontrii.com/donna-cerca-uomo',
-			'https://brindisi.bakecaincontrii.com/donna-cerca-uomo',
-			'https://bolzano.bakecaincontrii.com/donna-cerca-uomo',
-			'https://biella.bakecaincontrii.com/donna-cerca-uomo',
-			'https://benevento.bakecaincontrii.com/donna-cerca-uomo',
-			'https://barletta.bakecaincontrii.com/donna-cerca-uomo',
-			'https://avellino.bakecaincontrii.com/donna-cerca-uomo',
-			'https://ascoli.bakecaincontrii.com/donna-cerca-uomo',
-			'https://aosta.bakecaincontrii.com/donna-cerca-uomo',
-			'https://alessandria.bakecaincontrii.com/donna-cerca-uomo'
+urls = [	'https://agrigento.bakecaincontrii.com/',
+			'https://ancona.bakecaincontrii.com/',
+			'https://arezzo.bakecaincontrii.com/',
+			'https://asti.bakecaincontrii.com/',
+			'https://bari.bakecaincontrii.com/',
+			'https://belluno.bakecaincontrii.com/',
+			'https://bergamo.bakecaincontrii.com/',
+			'https://bologna.bakecaincontrii.com/',
+			'https://brescia.bakecaincontrii.com/',
+			'https://cagliari.bakecaincontrii.com/',
+			'https://campobasso.bakecaincontrii.com/',
+			'https://caserta.bakecaincontrii.com/',
+			'https://catanzaro.bakecaincontrii.com/',
+			'https://cremona.bakecaincontrii.com/',
+			'https://cremona.bakecaincontrii.com/',
+			'https://cuneo.bakecaincontrii.com/',
+			'https://fermo.bakecaincontrii.com/',
+			'https://firenze.bakecaincontrii.com/',
+			'https://forli.bakecaincontrii.com/',
+			'https://genova.bakecaincontrii.com/',
+			'https://grosseto.bakecaincontrii.com/',
+			'https://isernia.bakecaincontrii.com/',
+			'https://laspezia.bakecaincontrii.com/',
+			'https://lecce.bakecaincontrii.com/',
+			'https://livorno.bakecaincontrii.com/',
+			'https://lucca.bakecaincontrii.com/',
+			'https://mantova.bakecaincontrii.com/',
+			'https://matera.bakecaincontrii.com/',
+			'https://messina.bakecaincontrii.com/',
+			'https://modena.bakecaincontrii.com/',
+			'https://napoli.bakecaincontrii.com/',
+			'https://nuoro.bakecaincontrii.com/',
+			'https://olbiatempio.bakecaincontrii.com/',
+			'https://padova.bakecaincontrii.com/',
+			'https://parma.bakecaincontrii.com/',
+			'https://perugia.bakecaincontrii.com/',
+			'https://piacenza.bakecaincontrii.com/',
+			'https://pistoia.bakecaincontrii.com/',
+			'https://potenza.bakecaincontrii.com/',
+			'https://ragusa.bakecaincontrii.com/',
+			'https://reggiocalabria.bakecaincontrii.com/',
+			'https://rieti.bakecaincontrii.com/',
+			'https://roma.bakecaincontrii.com/',
+			'https://salerno.bakecaincontrii.com/',
+			'https://savona.bakecaincontrii.com/',
+			'https://siracusa.bakecaincontrii.com/',
+			'https://taranto.bakecaincontrii.com/',
+			'https://terni.bakecaincontrii.com/',
+			'https://trapani.bakecaincontrii.com/',
+			'https://treviso.bakecaincontrii.com/',
+			'https://varese.bakecaincontrii.com/',
+			'https://verbania.bakecaincontrii.com/',
+			'https://verona.bakecaincontrii.com/',
+			'https://vicenza.bakecaincontrii.com/',
+			'https://viterbo.bakecaincontrii.com/',
+			'https://vibovalentia.bakecaincontrii.com/',
+			'https://vercelli.bakecaincontrii.com/',
+			'https://venezia.bakecaincontrii.com/',
+			'https://urbino.bakecaincontrii.com/',
+			'https://udine.bakecaincontrii.com/',
+			'https://trieste.bakecaincontrii.com/',
+			'https://trento.bakecaincontrii.com/',
+			'https://torino.bakecaincontrii.com/',
+			'https://teramo.bakecaincontrii.com/',
+			'https://sondrio.bakecaincontrii.com/',
+			'https://siena.bakecaincontrii.com/',
+			'https://sassari.bakecaincontrii.com/',
+			'https://rovigo.bakecaincontrii.com/',
+			'https://rimini.bakecaincontrii.com/',
+			'https://reggioemilia.bakecaincontrii.com/',
+			'https://ravenna.bakecaincontrii.com/',
+			'https://prato.bakecaincontrii.com/',
+			'https://pordenone.bakecaincontrii.com/',
+			'https://pisa.bakecaincontrii.com/',
+			'https://pescara.bakecaincontrii.com/',
+			'https://pavia.bakecaincontrii.com/',
+			'https://palermo.bakecaincontrii.com/',
+			'https://oristano.bakecaincontrii.com/',
+			'https://ogliastra.bakecaincontrii.com/',
+			'https://novara.bakecaincontrii.com/',
+			'https://monza.bakecaincontrii.com/',
+			'https://milano.bakecaincontrii.com/',
+			'https://mediocampidano.bakecaincontrii.com/',
+			'https://massacarrara.bakecaincontrii.com/',
+			'https://macerata.bakecaincontrii.com/',
+			'https://lodi.bakecaincontrii.com/',
+			'https://lecco.bakecaincontrii.com/',
+			'https://latina.bakecaincontrii.com/',
+			'https://laquila.bakecaincontrii.com/',
+			'https://imperia.bakecaincontrii.com/',
+			'https://gorizia.bakecaincontrii.com/',
+			'https://frosinone.bakecaincontrii.com/',
+			'https://foggia.bakecaincontrii.com/',
+			'https://ferrara.bakecaincontrii.com/',
+			'https://enna.bakecaincontrii.com/',
+			'https://crotone.bakecaincontrii.com/',
+			'https://cosenza.bakecaincontrii.com/',
+			'https://chieti.bakecaincontrii.com/',
+			'https://catania.bakecaincontrii.com/',
+			'https://carboniaiglesias.bakecaincontrii.com/',
+			'https://caltanissetta.bakecaincontrii.com/',
+			'https://brindisi.bakecaincontrii.com/',
+			'https://bolzano.bakecaincontrii.com/',
+			'https://biella.bakecaincontrii.com/',
+			'https://benevento.bakecaincontrii.com/',
+			'https://barletta.bakecaincontrii.com/',
+			'https://avellino.bakecaincontrii.com/',
+			'https://ascoli.bakecaincontrii.com/',
+			'https://aosta.bakecaincontrii.com/',
+			'https://alessandria.bakecaincontrii.com/'
 		]
 
 acc = accounts()
@@ -310,21 +308,17 @@ while True:
 
 		url = random.choice(urls)
 		one_account = acc.get_account()
-		print("account info: ", one_account)
 		postinfo = post.get_post()
-		print("post info: ",postinfo)
 		if one_account == None or postinfo == None:
 			print('post or account not find for worker')
 			time.sleep(10)
-			acc.get_account_for_inactive()
-
 			continue
-		acc.account_active(one_account['id'])
+
 		if path.isdir('profiles/' +str(one_account['id'])) == True:
 			shutil.rmtree('profiles/' +str(one_account['id']))
 
 		t = threading.Thread(target=main, args=(one_account,url,postinfo,))
-		acc.account_active(one_account['id'])
+		acc.account_inactive(one_account['id'])
 
 		threads.append(t)
 		t.setName(one_account['id'])

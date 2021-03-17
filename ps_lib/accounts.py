@@ -73,10 +73,10 @@ class accounts:
             self.account_inactive(account_id)
             open('active.txt', "w+")
 
-    def account_active(self,acc_id):
+    def account_active(self,id):
         c = self.conn.cursor()
         # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "UPDATE accounts SET runing =1 WHERE id = " + str(acc_id)
+        sql = "UPDATE accounts SET runing =1 WHERE id = " + str(id)
         c.execute(sql)
         self.conn.commit()
 
