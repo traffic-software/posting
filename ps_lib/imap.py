@@ -1,5 +1,6 @@
 import email
 import imaplib
+import ssl
 import re
 from ps_lib.ps_str import ps_str
 
@@ -22,7 +23,7 @@ class imap:
 		self.i.select('Inbox')
 
 	def messages(self,site_email):
-		# tmp, data = self.i.search('utf8','(UNSEEN)')
+		#tmp, data = self.i.search('utf8','(FROM no_reply@bakecaincontrii.com)')
 		tmp, data = self.i.search('utf8', '(TO {})'.format(site_email))
 		messages = []
 
@@ -73,8 +74,11 @@ class imap:
 		self.i.close()
 		self.i.logout()
 
-popmail = imap('bonacatagreco100@gmail.com', "mdmdmdmd123", 'imap.gmail.com')
-popmail.messages("elizabethgreen1932@gmail.com")
+# popmail = imap('cindiapogfw@hotmail.com', "yn1dybq0dM5", 'outlook.office365.com')
+# popmail = imap('KaydeBoeve1990@yahoo.com', "XqQCYAY2q", 'imap.mail.yahoo.com')
+#imap.mail.yahoo.com
+#outlook.office365.com
+# print(popmail.messages("KaydeBoeve1990@yahoo.com"))
 
 
 
