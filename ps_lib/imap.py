@@ -2,7 +2,8 @@ import email
 import imaplib
 import ssl
 import re
-from ps_lib.ps_str import ps_str
+from sys import exit
+from ps_str import ps_str
 
 
 
@@ -23,11 +24,14 @@ class imap:
 		self.i.select('Inbox')
 
 	def messages(self,site_email):
-		#tmp, data = self.i.search('utf8','(FROM no_reply@bakecaincontrii.com)')
-		tmp, data = self.i.search('utf8', '(TO {})'.format(site_email))
+		tmp, data = self.i.search('utf8','(FROM no_reply@bakecaincontrii.com)')
+		# tmp, data = self.i.search('utf8', '(TO {})'.format(site_email))
 		messages = []
+		splitdata = data[0].split()
 
-		for num in data[0].split():
+		
+
+		for num in splitdata:
 			tmp, data = self.i.fetch(num, '(RFC822)')
 
 			# print('Message %s\n%s\n' % (num, data[0][1]))
@@ -76,9 +80,10 @@ class imap:
 
 # popmail = imap('cindiapogfw@hotmail.com', "yn1dybq0dM5", 'outlook.office365.com')
 # popmail = imap('KaydeBoeve1990@yahoo.com', "XqQCYAY2q", 'imap.mail.yahoo.com')
+popmail = imap('KaydeBoeve1990@yahoo.com', "dvjzwhxcpvrgryld", 'imap.mail.yahoo.com')
 #imap.mail.yahoo.com
 #outlook.office365.com
-# print(popmail.messages("KaydeBoeve1990@yahoo.com"))
+print(popmail.messages("KaydeBoeve1990@yahoo.com"))
 
 
 

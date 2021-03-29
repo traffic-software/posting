@@ -1,6 +1,7 @@
 from python_anticaptcha import AnticaptchaClient, NoCaptchaTaskProxylessTask
 import requests
 import time
+from sys import exit
 class capcha:
 
 	anti_api='071a73b48a5ce1528a7f8f441ebee35a'
@@ -20,7 +21,7 @@ class capcha:
 	def two_captcha(self,siteKe,pageUrl):
 			id = self.two_start(siteKe,pageUrl)
 			response =self.two_respond(id)
-			print('recaptcha task done')
+			print('task done')
 			return response
 
 	def two_start(self,siteKe,pageUrl):

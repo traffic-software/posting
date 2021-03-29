@@ -1,10 +1,14 @@
 import sqlite3
 from os import path
+from sys import exit
 import random
 import string
 import requests
+import winreg
+import time
 from datetime import datetime
 class table:
+    REG_PATH = r"Control Panel\Mouse"
     consumer_key = 'ck_7ce53f974f6ebf45de1394b4544f1951fe602413'
     consumer_secret = 'cs_f828c575f480a0a1be5f80f6661ef2957bec9c80'
     License = None
@@ -45,7 +49,7 @@ class table:
 
     def account_tebl_create(self):
         c = self.conn.cursor()
-        c.execute("CREATE TABLE accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT NOT NULL, runing INTEGER DEFAULT 0)")
+        c.execute("CREATE TABLE accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, data TEXT NOT NULL, runing INTEGER DEFAULT 0,used_at TEXT DEFAULT 0)")
         self.conn.commit()
         return True
     def settings_tebl_create(self):
@@ -59,8 +63,10 @@ class table:
 
         if licens== None:
             self.License =  str(input("please enter your license key : "))
+
             self.license_active()
             self.license_save()
+            self.set_reg("ps", self.License)
 
 
         else:
@@ -69,6 +75,7 @@ class table:
 
         r = requests.get(url)
         if "code" in r.json():
+            time.sleep(60)
             print("license key error")
             exit()
         else:
@@ -78,7 +85,18 @@ class table:
             now = datetime.now()
             if self.time_diff(expiresAt,now.strftime('%Y-%m-%d'))<1:
                 print("you need buy new license")
+                time.sleep(60)
                 exit()
+            if self.get_reg('ps') == None:
+                print("license key error")
+                time.sleep(60)
+                exit()
+            if not (self.License == self.get_reg('ps')):
+                print("license key error")
+                time.sleep(60)
+                exit()
+
+
 
 
 
@@ -123,6 +141,28 @@ class table:
         letters = string.ascii_lowercase
 
         return ''.join(random.choice(letters) for i in range(stringLength))
+
+    def set_reg(self,name, value):
+        try:
+            winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.REG_PATH)
+            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.REG_PATH, 0,
+                                          winreg.KEY_WRITE)
+            winreg.SetValueEx(registry_key, name, 0, winreg.REG_SZ, value)
+            winreg.CloseKey(registry_key)
+            return True
+        except WindowsError:
+            return False
+
+
+    def get_reg(self,name):
+        try:
+            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.REG_PATH, 0,
+                                          winreg.KEY_READ)
+            value, regtype = winreg.QueryValueEx(registry_key, name)
+            winreg.CloseKey(registry_key)
+            return value
+        except WindowsError:
+            return None
 
 
 

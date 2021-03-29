@@ -122,9 +122,9 @@ def main(account_data,url,postinfo):
 
 
 
-		if counter > 10:
+		if counter > 3:
 			worker_acc.account_ban(account_id)
-			time.sleep(6)
+			time.sleep(60)
 			print("link not recived")
 			break
 	print('browser close')

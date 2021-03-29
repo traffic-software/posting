@@ -1,4 +1,5 @@
 import sqlite3
+from sys import exit
 class helper:
 
 	def __init__(self):

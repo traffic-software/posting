@@ -6,38 +6,26 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
 from ps_lib.accounts import accounts
+import random
+import string
 import time
-from sys import exit
 import warnings
-class browser:
+from sys import exit
+class jsbrowser:
 	account_id=None
-
+	account = accounts()
 
 	def __init__(self,pofileLocation):
 		self.account_id=pofileLocation
 
-		#warnings.filterwarnings('ignore')
+		warnings.filterwarnings('ignore')
 		self.service_args = [
 				'--proxy=http://127.0.0.1:23321',
 				#'--proxy-auth=USER:PWD',
 				'--proxy-type=socks5',
 				]
-		driverUrl = 'chromedriver.exe'
-		options = webdriver.ChromeOptions()
-		# chromeOptions.add_argument("--no-sandbox")
-		# chromeOptions.add_argument("--disable-setuid-sandbox")
-		# options.add_argument("--remote-debugging-port=9222")
-		# chromeOptions.add_argument("--disable-dev-shm-using")
-		# chromeOptions.add_argument("--disable-extensions")
-		# chromeOptions.add_argument("--disable-gpu")
-		# chromeOptions.add_argument("start-maximized")
-		# chromeOptions.add_argument("disable-infobars")
-		# options.add_argument("--headless")
-		# options.add_argument("--no-sandbox")
-		# options.add_argument("--disable-dev-shm-usage")
-		options.add_argument("user-data-dir=profiles\\"+pofileLocation)
-		self.driver = webdriver.Chrome(driverUrl,chrome_options=options)
-		# self.driver = webdriver.PhantomJS(service_args=service_args)
+		self.driver = webdriver.PhantomJS(service_args=self.service_args)
+		self.driver.set_window_size(1120, 800)
 
 	def exit(self):
 		self.driver.quit()
@@ -59,8 +47,7 @@ class browser:
 				# self.driver.implicitly_wait(1)
 		if element == False:
 			print("element not find: ",selector)
-			account = accounts()
-			account.account_inactive(self.account_id)
+			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
@@ -75,14 +62,13 @@ class browser:
 					break
 			except:
 				co = co + 1
-				if co > 60:
+				if co > 100:
 					break
 				print("waiting for ",selector)
-				time.sleep(1)
+				self.get_screenshot()
 		if element == False:
 			print("element not find: ",selector)
-			account = accounts()
-			account.account_inactive(self.account_id)
+			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
@@ -101,10 +87,12 @@ class browser:
 		dropdown.select_by_value(child)
 		print("select_dropdown")
 		return True
-	def get_screenshot(self,filename):
+	def get_screenshot(self,filename=None):
 
 			try:
-				self.driver.save_screenshot(r''+filename)
+				letters = string.ascii_lowercase
+				filename =''.join(random.choice(letters) for i in range(10))
+				self.driver.save_screenshot(r''+filename+".png")
 
 			except:
 				time.sleep(1)

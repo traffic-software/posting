@@ -1,5 +1,6 @@
 from os import path
 import sqlite3
+from sys import exit
 class psThread:
 	def __del__(self):
 		#self.conn.close()

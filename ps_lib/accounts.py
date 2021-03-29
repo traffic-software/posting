@@ -1,9 +1,13 @@
 import sqlite3
 import os
+from sys import exit
+from datetime import datetime
+from datetime import timedelta
 class accounts:
 
     def __init__(self):
         self.conn = sqlite3.connect('data/databases.db')
+
 
     def ps_proxys_insert(self, proxys):
 
@@ -30,7 +34,7 @@ class accounts:
         self.ps_proxys_insert(proxy)
     def insert(self,combos):
         c = self.conn.cursor()
-        c.executemany("INSERT INTO accounts (data,runing) VALUES  (?,?)", combos)
+        c.executemany("INSERT INTO accounts (data,runing,used_at) VALUES  (?,?,?)", combos)
         self.conn.commit()
 
 
@@ -41,7 +45,7 @@ class accounts:
         c.execute(sql)
         account = c.fetchall()
         # c.fetchall()
-        # c.fetchmany()()
+        # c.fetchmany()
         # c.fetchone()
         self.conn.commit()
         return account
@@ -107,7 +111,8 @@ class accounts:
                 print(ps_data)
                 username = ps_data[0]
                 password = ps_data[1].rstrip("\n")
-                combos_tada = (username+":"+password, 0)
+                now = datetime.now()+ timedelta(days= -2)
+                combos_tada = (username+":"+password, 1,now.strftime('%Y-%m-%d'))
                 list_data.append(combos_tada)
             except:
                 print('data format problem please check your data in account file')

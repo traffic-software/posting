@@ -1,4 +1,5 @@
 import re
+from sys import exit
 import chardet
 class ps_str:
 	str = "oknow im ready for work with you and your software"

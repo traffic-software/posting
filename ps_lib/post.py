@@ -1,5 +1,5 @@
 import sqlite3
-
+from sys import exit
 class post:
 	def __init__(self):
 		self.conn = sqlite3.connect('data/databases.db')
