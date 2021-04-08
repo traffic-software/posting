@@ -16,9 +16,10 @@ for uid, data in messages.items():
     data = data[b'RFC822']
     mailmessage = email.message_from_bytes(data)
     try:
+        print('conected')
         print(print(uid, mailmessage.get("From"), mailmessage.get("Subject")))
     except:
         print('problem')
     print('..........................................................')
 client.logout()
-client.shutdown()
+# client.shutdown()

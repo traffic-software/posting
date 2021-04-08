@@ -5,42 +5,130 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
+import json, requests
 import time
 from sys import exit
 import warnings
+import random
 class browser:
 	account_id=None
 
 
 	def __init__(self,pofileLocation):
 		self.account_id=pofileLocation
-
 		#warnings.filterwarnings('ignore')
-		self.service_args = [
-				'--proxy=http://127.0.0.1:23321',
-				#'--proxy-auth=USER:PWD',
-				'--proxy-type=socks5',
-				]
+		self.PROXY = str(self.proxy())
+		#......................Firefox..............................
+
+		
+		# firefox_capabilities = webdriver.DesiredCapabilities.FIREFOX
+		# firefox_capabilities['marionette'] = True
+		
+		# firefox_capabilities['proxy'] = {
+		# 	"proxyType": "MANUAL",
+		# 	"httpProxy": self.PROXY,
+		# 	# "ftpProxy": self.PROXY,
+		# 	"sslProxy": self.PROXY
+		# }
+		# self.driver = webdriver.Firefox(capabilities=firefox_capabilities)
+
+		#......................Chrome..............................
+
+
+		prox = Proxy()
+		prox.proxy_type = ProxyType.MANUAL
+		prox.http_proxy = self.PROXY
+		# # prox.socks_proxy = self.PROXY
+		prox.ssl_proxy = self.PROXY
+		Chrome_capabilities = webdriver.DesiredCapabilities.CHROME
+		prox.add_to_capabilities(Chrome_capabilities)
+
+
 		driverUrl = 'chromedriver.exe'
 		options = webdriver.ChromeOptions()
-		# chromeOptions.add_argument("--no-sandbox")
-		# chromeOptions.add_argument("--disable-setuid-sandbox")
+		# options.add_argument('--proxy-server=http://%s' %self.PROXY )
+		# options.add_argument("--no-sandbox")
+		# options.add_argument("--disable-setuid-sandbox")
 		# options.add_argument("--remote-debugging-port=9222")
-		# chromeOptions.add_argument("--disable-dev-shm-using")
-		# chromeOptions.add_argument("--disable-extensions")
-		# chromeOptions.add_argument("--disable-gpu")
-		# chromeOptions.add_argument("start-maximized")
-		# chromeOptions.add_argument("disable-infobars")
+		# options.add_argument("--disable-dev-shm-using")
+		# options.add_argument("--disable-extensions")
+		# options.add_argument("--disable-gpu")
+		# options.add_argument("start-maximized")
+		# options.add_argument("disable-infobars")
 		# options.add_argument("--headless")
 		# options.add_argument("--no-sandbox")
 		# options.add_argument("--disable-dev-shm-usage")
 		options.add_argument("user-data-dir=profiles\\"+pofileLocation)
-		self.driver = webdriver.Chrome(driverUrl,chrome_options=options)
+		self.driver = webdriver.Chrome(driverUrl,chrome_options=options,desired_capabilities=Chrome_capabilities)
+		
 		# self.driver = webdriver.PhantomJS(service_args=service_args)
 
 	def exit(self):
 		self.driver.quit()
+	def proxy(self):
+		while True:
+			try:
+				url = 'http://falcon.proxyrotator.com:51337'
+				# url = 'http://falcon.proxyrotator.com:51337'
+				# url = 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT'
+
+				params = dict(
+					apiKey='de2nf8XPYyUJscFmwj6Z9DoEBkNgQGKb',
+					userAgent='true',
+					country='IT',
+					get = 'true',
+					connectionType='Residential'
+				)
+				headers={
+					'X-Auth-ID':'107841',
+					'X-Auth-Key':'3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
+				}
+				# resp = requests.get(url, timeout=3)
+				resp = requests.post('https://rsocks.net/api/v1/file/get-proxy', params=params, headers=headers,timeout=1)
+				# data = resp.json
+				data = json.loads(resp.text)
+				data = data['packages']['257646']['ips']
+				print(data)
+				
+			except (requests.ConnectionError, requests.Timeout) as exception:
+				print('plz check your internet connection')
+				continue
+
+			
+			rendomip=random.choice(data)
+			print(rendomip)
+			if self.proxy_check(rendomip):
+				break
+			
+
+			
+		# return data['ipPort']
+		# return data['proxy']
+		return rendomip
+	def proxy_check(self,data):
+		
+		
+		try:
+			
+			proxies = {
+				
+				# "http": 'http://'+data['proxy'],
+				"http": 'http://'+data,
+				"https": 'http://'+data,
+				# "https": 'http://'+data['ipPort']
+				}
+				
+			url = "http://api.myip.com"
+			timeout = 10
+			request = requests.get(url, timeout=timeout,proxies=proxies)
+			print(request.text)
+			return True
+		except (requests.ConnectionError, requests.Timeout,) as exception:
+			print('proxy error' ,exception)
+			time.sleep(5)
+			return False
 
 	def select_element(self,selector):
 		co=0

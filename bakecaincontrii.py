@@ -13,7 +13,7 @@ from ps_lib.post import post
 from ps_lib.captcha import capcha
 from ps_lib.imap import imap
 import random
-from pynput.mouse import Button, Controller
+# from pynput.mouse import Button, Controller
 
 # mouse = Controller()
 # input('place Your mouse on the tuxler vpn IP change button then type any key in your keyboard')
@@ -47,6 +47,7 @@ def main(account_data,url,postinfo):
 
 	worker = psThread(account_id)
 	b = browser(account_id)
+	# time.sleep(500)
 	worker_acc=accounts()
 
 	b.get_url(url+'fe/main.php?page=post_insert')
@@ -55,6 +56,9 @@ def main(account_data,url,postinfo):
 	b.select_dropdown('[id = "categoria-ins"]',"31")
 	ps_data = account_data['data'].split(":")
 	email = ps_data[0]
+	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+	popmail.messages(email)
+	popmail.close()
 	ages = [21,22,23,24,25,26,27,28,29,30]
 	age = random.choice(ages)
 
@@ -86,6 +90,7 @@ def main(account_data,url,postinfo):
 	script = 'document.getElementById("g-recaptcha-response").innerHTML="{}";'.format(chacha_key)
 	b.script_run(script)
 	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'none';")
+	
 	b.select_element('[id="accept-gdpr"]').click()
 
 	set_submit = b.select_element('[id="submit-ins"]')
@@ -99,19 +104,26 @@ def main(account_data,url,postinfo):
 	published_btn.click()
 
 
-	popmail = imap('bonacatagreco100@gmail.com', "mdmdmdmd123", 'imap.gmail.com')
+	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+	
 
 	counter=0
 	postdone = False
 
 	while True:
+		time.sleep(10)
 		if postdone == True:
 			break
 			postdone = False
 
 		counter = counter+1
+		
 		popmail.messages(email)
 		links = popmail.get_link()
+		
+		print('links')
+		print(links)
+		
 		for link in links:
 
 			conf_link = 'window.location.href = "{};'.format(link)
@@ -121,15 +133,18 @@ def main(account_data,url,postinfo):
 			postdone = True
 
 
-
-		if counter > 3:
+		
+		if counter > 18:
 			worker_acc.account_ban(account_id)
-			time.sleep(60)
+			
 			print("link not recived")
 			break
 	print('browser close')
 
+	
+
 	b.exit()
+	popmail.close()
 	account_id = 'profiles/' + account_id
 	shutil.rmtree(account_id)
 

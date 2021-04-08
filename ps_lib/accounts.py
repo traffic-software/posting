@@ -110,9 +110,10 @@ class accounts:
                 ps_data = line.split(":")
                 print(ps_data)
                 username = ps_data[0]
-                password = ps_data[1].rstrip("\n")
+                password = ps_data[1]
+                host = ps_data[2].rstrip("\n")
                 now = datetime.now()+ timedelta(days= -2)
-                combos_tada = (username+":"+password, 1,now.strftime('%Y-%m-%d'))
+                combos_tada = (username+":"+password+":"+host, 1,now.strftime('%Y-%m-%d'))
                 list_data.append(combos_tada)
             except:
                 print('data format problem please check your data in account file')

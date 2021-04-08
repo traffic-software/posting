@@ -3,87 +3,110 @@ import imaplib
 import ssl
 import re
 from sys import exit
-from ps_str import ps_str
+import json, requests
+try:
+	from ps_lib.ps_str import ps_str
+	from ps_lib.accounts import accounts
+except:
+	from ps_str import ps_str
+	from accounts import accounts
 
+from imapclient import IMAPClient
 
 
 class imap:
 	i = False
 	ps_messges=None
+	
 
-	def __init__(self, username, password, host):
+	def __init__(self, username, password, hosturl):
 		self.username = username
 		self.password = password
-		self.host = host
+		self.hosturl = hosturl
+		self.i= IMAPClient(host=hosturl)
 		self.login()
+		
 
 	def login(self):
 		# connect to host using SSL
-		self.i = imaplib.IMAP4_SSL(self.host)
 		self.i.login(self.username, self.password)
-		self.i.select('Inbox')
+		self.i.select_folder('INBOX')
 
-	def messages(self,site_email):
-		tmp, data = self.i.search('utf8','(FROM no_reply@bakecaincontrii.com)')
-		# tmp, data = self.i.search('utf8', '(TO {})'.format(site_email))
-		messages = []
-		splitdata = data[0].split()
-
+	def messages(self,mail_from=None):
+		self.ps_messges = None
+		mailbodys = []
 		
-
-		for num in splitdata:
-			tmp, data = self.i.fetch(num, '(RFC822)')
-
-			# print('Message %s\n%s\n' % (num, data[0][1]))
-			raw_email_string = data[0][1].decode('utf-8')
-			psm = email.message_from_string(raw_email_string)
-			if psm:
-				messages.append(self.get_body(psm))
-
-
-			self.i.store(num,'+FLAGS', '\\Deleted')
-		self.ps_messges = messages
-		self.i.expunge()
-
-
+		messages = self.i.search('UNSEEN')
+		print('message search')
+		m = self.i.fetch(messages,'RFC822')
+		
+		
+		if len(m) <1:
+			print('message not fund')
+			return False
+		for uid, data in m.items():
+			data = data[b'RFC822']
+			mailmessage = email.message_from_bytes(data)
+			try:
+				
+				mailbodys.append(self.get_body(mailmessage))
+				# print(print(uid, mailmessage.get("From"), mailmessage.get("Subject")))
+			except:
+				print('problme in message')
+			
+			self.ps_messges = mailbodys
+			self.i.delete_messages(uid)
 		return messages
 	def get_body(self,e):
 		# Body details
+		
+		
 		for part in e.walk():
+			
 			if part.get_content_type() == "text/html":
 				body = part.get_payload(decode=True)
-				#body.decode('utf-8')
 				return body
 				break
 			else:
 				continue
 	def get_link(self):
 		urls=[]
-		for m in self.ps_messges:
-			st = ps_str(m)
-			#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
-			url = st.find_urls("main.php?page=post_publish&idp=")
-			if url!=None:
-				urls.append(url)
-				break
-
-
-
-
+		try:
+			for m in self.ps_messges:
+				
+				st = ps_str(m)
+				print('link search')
+				#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
+				url = st.find_urls("main.php?page=post_publish")
+				
+				if url!=None:
+					print('one link find')
+					urls.append(url)
+					
+		except:
+			print('link search problem')
 		self.ps_messges=None
+		print(urls)
 		return urls
 
 
 	def close(self):
-		self.i.close()
 		self.i.logout()
+		# self.i.shutdown()
 
-# popmail = imap('cindiapogfw@hotmail.com', "yn1dybq0dM5", 'outlook.office365.com')
-# popmail = imap('KaydeBoeve1990@yahoo.com', "XqQCYAY2q", 'imap.mail.yahoo.com')
-popmail = imap('KaydeBoeve1990@yahoo.com', "dvjzwhxcpvrgryld", 'imap.mail.yahoo.com')
-#imap.mail.yahoo.com
-#outlook.office365.com
-print(popmail.messages("KaydeBoeve1990@yahoo.com"))
+# while True:
+# 	acc = accounts()
+# 	one_account = acc.get_account()
+# 	ps_data = one_account['data'].split(":")
+# 	acc.account_ban(one_account['id'])
+
+# 	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+# 	popmail.messages()
+# 	popmail.get_link()
+# 	popmail.close()
+
+
+
 
 
 
