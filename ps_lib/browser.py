@@ -19,18 +19,22 @@ class browser:
 	account_id=None
 
 
-	def __init__(self,pofileLocation,packages_id,use_proxy=False):
+	def __init__(self,pofileLocation,packages_id,use_proxy=True):
 		
 		self.account_id=pofileLocation
 		warnings.filterwarnings('ignore')
 		#......................Chrome..............................
 		self.options = webdriver.ChromeOptions()
 		####################proxy user##############
-		if use_proxy:
+		self.use_proxy =use_proxy
+		if packages_id == 'no':
+			self.use_proxy =False
+		if self.use_proxy:
 			self.packages_id = packages_id
 			self.PROXY = str(self.proxy())
-			# self.PROXY = '95.179.245.213:37219'
+			# self.PROXY = '95.179.185.17:44763'
 			proxy = self.PROXY.split(":")
+			self.PROXY_TYPE = 'http'# rotating proxy or host
 			self.PROXY_HOST =  proxy[0]# rotating proxy or host
 			self.PROXY_PORT =  proxy[1] # port
 			self.PROXY_USER = 'malaknoyn100' # username
@@ -349,7 +353,7 @@ class browser:
 				mode: "fixed_servers",
 				rules: {
 				singleProxy: {
-					scheme: "http",
+					scheme: "%s",
 					host: "%s",
 					port: parseInt(%s)
 				},
@@ -373,7 +377,7 @@ class browser:
 					{urls: ["<all_urls>"]},
 					['blocking']
 		);
-		""" % (self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
+		""" % (self.PROXY_TYPE,self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
 		pluginfile = 'proxy_auth_plugin.zip'
 		zp=zipfile.ZipFile(pluginfile, 'w')
 		zp.writestr("manifest.json", manifest_json)

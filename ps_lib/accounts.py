@@ -52,12 +52,14 @@ class accounts:
 
     def get_account(self):
         c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -1)
+        now = datetime.now()+ timedelta(days= -0)
         
-        sql = "SELECT * FROM accounts WHERE runing = 1 AND used_at ={used} ORDER BY random() LIMIT 1".format(used=now.strftime('%Y-%m-%d'))
+        sql = "SELECT * FROM accounts WHERE runing = 1 AND used_at <= '{used}' ORDER BY random() LIMIT 1".format(used=now.strftime('%Y-%m-%d'))
         c.execute(sql)
         a = c.fetchone()
         a = self.get_formated_data(c.description,a)
+        
+        
         return a
 
     def get_formated_data(self, headers, data):
@@ -67,16 +69,15 @@ class accounts:
             data = None
         return data
 
-    def get_account_for_inactive(self):
-        file = open('active.txt', "r+")
-        lines = file.readlines()
-
-        file.truncate(0)
-        file.close()
-        for line in lines:
-            account_id = line.rstrip("\n")
-            self.account_inactive(account_id)
-            open('active.txt', "w+")
+    def account_Reactive(self):
+        c = self.conn.cursor()
+        now = datetime.now()+ timedelta(days= -2)
+        
+        
+        # c.execute("SELECT * FROM account WHERE runing = 0")
+        sql = "UPDATE accounts SET runing =1 WHERE used_at <= '{used}' AND  runing = 0".format(used=now.strftime('%Y-%m-%d'))
+        c.execute(sql)
+        self.conn.commit()
 
     def account_active(self,id):
         c = self.conn.cursor()
@@ -100,8 +101,8 @@ class accounts:
         self.conn.commit()
     def post_done(self,id):
         c = self.conn.cursor()
-        now = datetime.now()+ timedelta()
-        sql = "UPDATE accounts SET used_at ={used} WHERE id = {id}".format(used=now.strftime('%Y-%m-%d'),id=str(id)) 
+        now = datetime.now()+ timedelta(days= -1)
+        sql = "UPDATE accounts SET used_at < '{used}' WHERE id = {id}".format(used=now.strftime('%Y-%m-%d'),id=str(id)) 
         c.execute(sql)
         self.conn.commit()
     def save(self):
@@ -119,6 +120,7 @@ class accounts:
                 username = ps_data[0]
                 password = ps_data[1]
                 host = ps_data[2].rstrip("\n")
+                now = datetime.now()+ timedelta(days= -3)
                 
                 combos_tada = (username+":"+password+":"+host, 1,now.strftime('%Y-%m-%d'))
                 list_data.append(combos_tada)

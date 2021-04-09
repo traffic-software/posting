@@ -325,7 +325,10 @@ while True:
 		# mouse.release(Button.left)
 
 	acc.save()
+
+	acc.account_Reactive()
 	post.save()
+
 
 
 	if worker > threading.active_count():
@@ -334,6 +337,7 @@ while True:
 
 
 		url = random.choice(urls)
+
 		one_account = acc.get_account()
 		postinfo = post.get_post()
 		if one_account == None or postinfo == None:
@@ -346,6 +350,7 @@ while True:
 
 		t = threading.Thread(target=main, args=(one_account,url,postinfo,packages_id,))
 		acc.account_inactive(one_account['id'])
+		acc.post_done(one_account['id'])
 
 		threads.append(t)
 		t.setName(one_account['id'])
