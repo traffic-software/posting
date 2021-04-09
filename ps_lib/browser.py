@@ -8,60 +8,70 @@ from selenium import webdriver
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
 import json, requests
+# from fake_useragent import UserAgent
 import time
 from sys import exit
+import os
+import zipfile
 import warnings
 import random
 class browser:
 	account_id=None
 
 
-	def __init__(self,pofileLocation):
+	def __init__(self,pofileLocation,packages_id,use_proxy=False):
+		
 		self.account_id=pofileLocation
-		#warnings.filterwarnings('ignore')
-		self.PROXY = str(self.proxy())
-		#......................Firefox..............................
-
-		
-		# firefox_capabilities = webdriver.DesiredCapabilities.FIREFOX
-		# firefox_capabilities['marionette'] = True
-		
-		# firefox_capabilities['proxy'] = {
-		# 	"proxyType": "MANUAL",
-		# 	"httpProxy": self.PROXY,
-		# 	# "ftpProxy": self.PROXY,
-		# 	"sslProxy": self.PROXY
-		# }
-		# self.driver = webdriver.Firefox(capabilities=firefox_capabilities)
-
+		warnings.filterwarnings('ignore')
 		#......................Chrome..............................
+		self.options = webdriver.ChromeOptions()
+		####################proxy user##############
+		if use_proxy:
+			self.packages_id = packages_id
+			self.PROXY = str(self.proxy())
+			# self.PROXY = '95.179.245.213:37219'
+			proxy = self.PROXY.split(":")
+			self.PROXY_HOST =  proxy[0]# rotating proxy or host
+			self.PROXY_PORT =  proxy[1] # port
+			self.PROXY_USER = 'malaknoyn100' # username
+			self.PROXY_PASS = '51310fe4' # password
+			self.proxy_auth_plugin()
+
+		
+		
+		
+		###################normal proxy use#########
 
 
-		prox = Proxy()
-		prox.proxy_type = ProxyType.MANUAL
-		prox.http_proxy = self.PROXY
+		# prox = Proxy()
+		# prox.proxy_type = ProxyType.MANUAL
+		# prox.http_proxy = self.PROXY
 		# # prox.socks_proxy = self.PROXY
-		prox.ssl_proxy = self.PROXY
-		Chrome_capabilities = webdriver.DesiredCapabilities.CHROME
-		prox.add_to_capabilities(Chrome_capabilities)
+		# prox.ssl_proxy = self.PROXY
+		# Chrome_capabilities = webdriver.DesiredCapabilities.CHROME
+		# prox.add_to_capabilities(Chrome_capabilities)
 
 
 		driverUrl = 'chromedriver.exe'
-		options = webdriver.ChromeOptions()
-		# options.add_argument('--proxy-server=http://%s' %self.PROXY )
-		# options.add_argument("--no-sandbox")
-		# options.add_argument("--disable-setuid-sandbox")
-		# options.add_argument("--remote-debugging-port=9222")
-		# options.add_argument("--disable-dev-shm-using")
-		# options.add_argument("--disable-extensions")
-		# options.add_argument("--disable-gpu")
-		# options.add_argument("start-maximized")
-		# options.add_argument("disable-infobars")
-		# options.add_argument("--headless")
-		# options.add_argument("--no-sandbox")
-		# options.add_argument("--disable-dev-shm-usage")
-		options.add_argument("user-data-dir=profiles\\"+pofileLocation)
-		self.driver = webdriver.Chrome(driverUrl,chrome_options=options,desired_capabilities=Chrome_capabilities)
+		# ua = UserAgent(cache=False)
+		# a = ua.safari
+		
+		# self.options.add_argument(f'user-agent={a}')
+
+		# self.options.add_argument('--proxy-server=http://%s' %self.PROXY )
+		# self.options.add_argument("--no-sandbox")
+		# self.options.add_argument("--disable-setuid-sandbox")
+		# self.options.add_argument("--remote-debugging-port=9222")
+		# self.options.add_argument("--disable-dev-shm-using")
+		# self.options.add_argument("--disable-extensions")
+		# self.options.add_argument("--disable-gpu")
+		# self.options.add_argument("start-maximized")
+		# self.options.add_argument("disable-infobars")
+		# self.options.add_argument("--headless")
+		# self.options.add_argument("--no-sandbox")
+		# self.options.add_argument("--disable-dev-shm-usage")
+		self.options.add_argument("user-data-dir=profiles\\"+pofileLocation)
+		self.driver = webdriver.Chrome(driverUrl,chrome_options=self.options)
 		
 		# self.driver = webdriver.PhantomJS(service_args=service_args)
 
@@ -70,65 +80,92 @@ class browser:
 	def proxy(self):
 		while True:
 			try:
-				url = 'http://falcon.proxyrotator.com:51337'
-				# url = 'http://falcon.proxyrotator.com:51337'
-				# url = 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT'
-
-				params = dict(
-					apiKey='de2nf8XPYyUJscFmwj6Z9DoEBkNgQGKb',
-					userAgent='true',
-					country='IT',
-					get = 'true',
-					connectionType='Residential'
-				)
+				#............rsocks.net......................
+				
+				
 				headers={
 					'X-Auth-ID':'107841',
 					'X-Auth-Key':'3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
 				}
-				# resp = requests.get(url, timeout=3)
-				resp = requests.post('https://rsocks.net/api/v1/file/get-proxy', params=params, headers=headers,timeout=1)
-				# data = resp.json
+				resp = requests.post('https://rsocks.net/api/v1/file/get-proxy', headers=headers,timeout=1)
+				
 				data = json.loads(resp.text)
-				data = data['packages']['257646']['ips']
-				print(data)
+				# print(data['packages'])
+				# data = random.choice(data['packages'])
+				# proxy = rendomip=random.choice(data['ips'])
+				data = data['packages'][self.packages_id]['ips']
+				
+				proxy = rendomip=random.choice(data)
+
+
+
+				#.............proxyrotator.com................
+
+
+
+
+				# url = 'http://falcon.proxyrotator.com:51337'
+				# params = dict(
+				# 	apiKey='TX2DLoKZVd6peF8fuJ59wqsyQgc4CGnv',
+				# 	userAgent='true',
+				# 	country='IT',
+				# 	get = 'true',
+				# 	connectionType='Residential'
+				# )
+				# resp = requests.get(url,params=params, timeout=3)
+				
+				# data = json.loads(resp.text)
+				# proxy = data['proxy']
+
+
+
+				#.............pubproxy.com......................
+				# url = 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT'
 				
 			except (requests.ConnectionError, requests.Timeout) as exception:
 				print('plz check your internet connection')
 				continue
 
 			
-			rendomip=random.choice(data)
-			print(rendomip)
-			if self.proxy_check(rendomip):
+			print(proxy)
+			if self.proxy_check(proxy):
 				break
-			
-
-			
-		# return data['ipPort']
-		# return data['proxy']
-		return rendomip
+		return proxy
 	def proxy_check(self,data):
 		
 		
 		try:
 			
-			proxies = {
-				
-				# "http": 'http://'+data['proxy'],
-				"http": 'http://'+data,
-				"https": 'http://'+data,
-				# "https": 'http://'+data['ipPort']
-				}
+			proxies = {"http": 'http://'+data,"https": 'http://'+data}
 				
 			url = "http://api.myip.com"
 			timeout = 10
 			request = requests.get(url, timeout=timeout,proxies=proxies)
-			print(request.text)
-			return True
+			if self.proxy_save(data, json.loads(request.text)):
+				return True
+			else:
+				return False
 		except (requests.ConnectionError, requests.Timeout,) as exception:
 			print('proxy error' ,exception)
 			time.sleep(5)
 			return False
+	def proxy_save(self,px,p):
+		print(p)
+		try:
+			
+			ip =p['ip']
+			my_file = open('proxy.txt', 'a')
+			data = str(px)+':'+str(ip)+"\n"
+			my_file.write(data)
+			my_file.close()
+			return True
+		except :
+			print('proxy error')
+			
+			return False
+
+        
+        
 
 	def select_element(self,selector):
 		co=0
@@ -141,10 +178,10 @@ class browser:
 					break
 			except:
 				co = co+1
-				if co >100:
+				if co >10:
 					break
 				print("waiting for ",selector)
-				# self.driver.implicitly_wait(1)
+				self.driver.implicitly_wait(1)
 		if element == False:
 			print("element not find: ",selector)
 			account = accounts()
@@ -163,10 +200,10 @@ class browser:
 					break
 			except:
 				co = co + 1
-				if co > 60:
+				if co > 10:
 					break
 				print("waiting for ",selector)
-				time.sleep(1)
+				self.driver.implicitly_wait(1)
 		if element == False:
 			print("element not find: ",selector)
 			account = accounts()
@@ -282,3 +319,64 @@ class browser:
 	def link_save(self,link):
 		with open('links.txt', 'a') as file:
 			file.write(link+"\n")
+	#proxy plugin 
+	def proxy_auth_plugin(self):
+
+
+		manifest_json = """
+		{
+			"version": "1.0.0",
+			"manifest_version": 2,
+			"name": "Chrome Proxy",
+			"permissions": [
+				"proxy",
+				"tabs",
+				"unlimitedStorage",
+				"storage",
+				"<all_urls>",
+				"webRequest",
+				"webRequestBlocking"
+			],
+			"background": {
+				"scripts": ["background.js"]
+			},
+			"minimum_chrome_version":"22.0.0"
+		}
+		"""
+
+		background_js = """
+		var config = {
+				mode: "fixed_servers",
+				rules: {
+				singleProxy: {
+					scheme: "http",
+					host: "%s",
+					port: parseInt(%s)
+				},
+				bypassList: ["localhost"]
+				}
+			};
+
+		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
+
+		function callbackFn(details) {
+			return {
+				authCredentials: {
+					username: "%s",
+					password: "%s"
+				}
+			};
+		}
+
+		chrome.webRequest.onAuthRequired.addListener(
+					callbackFn,
+					{urls: ["<all_urls>"]},
+					['blocking']
+		);
+		""" % (self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
+		pluginfile = 'proxy_auth_plugin.zip'
+		zp=zipfile.ZipFile(pluginfile, 'w')
+		zp.writestr("manifest.json", manifest_json)
+		zp.writestr("background.js", background_js)
+		self.options.add_extension(pluginfile)
+	

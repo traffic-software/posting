@@ -52,9 +52,10 @@ class accounts:
 
     def get_account(self):
         c = self.conn.cursor()
-        # c.execute("SELECT * FROM accounts WHERE runing = 0")
-        #c.execute("SELECT * FROM accounts WHERE runing = 0 ORDER BY random() LIMIT 1")
-        c.execute("SELECT * FROM accounts WHERE runing = 1 ORDER BY random() LIMIT 1")
+        now = datetime.now()+ timedelta(days= -1)
+        
+        sql = "SELECT * FROM accounts WHERE runing = 1 AND used_at ={used} ORDER BY random() LIMIT 1".format(used=now.strftime('%Y-%m-%d'))
+        c.execute(sql)
         a = c.fetchone()
         a = self.get_formated_data(c.description,a)
         return a
@@ -91,10 +92,16 @@ class accounts:
         c.execute(sql)
         self.conn.commit()
 
-    def account_ban(self,id):
+    def ban(self,id):
         c = self.conn.cursor()
         # c.execute("SELECT * FROM account WHERE runing = 0")
         sql = "UPDATE accounts SET runing =2 WHERE id = " + str(id)
+        c.execute(sql)
+        self.conn.commit()
+    def post_done(self,id):
+        c = self.conn.cursor()
+        now = datetime.now()+ timedelta()
+        sql = "UPDATE accounts SET used_at ={used} WHERE id = {id}".format(used=now.strftime('%Y-%m-%d'),id=str(id)) 
         c.execute(sql)
         self.conn.commit()
     def save(self):
@@ -112,7 +119,7 @@ class accounts:
                 username = ps_data[0]
                 password = ps_data[1]
                 host = ps_data[2].rstrip("\n")
-                now = datetime.now()+ timedelta(days= -2)
+                
                 combos_tada = (username+":"+password+":"+host, 1,now.strftime('%Y-%m-%d'))
                 list_data.append(combos_tada)
             except:

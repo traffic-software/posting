@@ -1,5 +1,7 @@
 import sqlite3
 from sys import exit
+import requests
+import time
 class helper:
 
 	def __init__(self):
@@ -33,3 +35,15 @@ class helper:
 		sql = "UPDATE accounts SET runing =2 WHERE id = "+str(id)
 		c.execute(sql)
 		self.db.commit()
+	
+	def network_check(self):
+
+		while True:
+			try:
+				r = requests.get('https://api.myip.com', timeout=1)
+				break
+			except:
+				print('network_check : plz check your  network connection')
+				time.sleep(60)
+				continue
+			

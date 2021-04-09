@@ -38,7 +38,7 @@ import random
 # exit()
 
 
-def main(account_data,url,postinfo):
+def main(account_data,url,postinfo,packages_id):
 	#show work start time
 	print(datetime.now().strftime("%H:%M:%S"))
 	# thread name
@@ -46,14 +46,32 @@ def main(account_data,url,postinfo):
 
 
 	worker = psThread(account_id)
-	b = browser(account_id)
-	# time.sleep(500)
+	b = browser(account_id,packages_id)
+	# time.sleep(50)
 	worker_acc=accounts()
-
+	
 	b.get_url(url+'fe/main.php?page=post_insert')
-	accept2_button = b.select_element('[id="accetto"]')
-	accept2_button.click()
-	b.select_dropdown('[id = "categoria-ins"]',"31")
+	try:
+		b.script_run('return  accept_privacy_cookie()')
+	except:
+		print('accept_privacy_cookie error')
+	
+	try:
+		b.script_run('return  siaccetto18()')
+	except:
+		print('siaccetto18 error')
+
+	
+
+	# accept2_button = b.select_element('[id="accetto"]')
+	# accept2_button.click()
+
+	
+	try:
+		b.select_dropdown('[id = "categoria-ins"]',"31")
+	except:
+		print('categoria-ins error')
+	
 	ps_data = account_data['data'].split(":")
 	email = ps_data[0]
 	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
@@ -86,21 +104,29 @@ def main(account_data,url,postinfo):
 	chacha_key = chacha_worker.two_captcha('6LfWoxsTAAAAABGVn50YiJZfNmDDe-rD-59LAWh4', site_url)
 
 	chacha_respons = b.driver.find_element_by_id('g-recaptcha-response')
+	print('g-recaptcha-response')
 	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'block';")
+	print('g-recaptcha-response block')
 	script = 'document.getElementById("g-recaptcha-response").innerHTML="{}";'.format(chacha_key)
-	b.script_run(script)
-	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'none';")
 	
-	b.select_element('[id="accept-gdpr"]').click()
+	b.script_run(script)
+	print('g-recaptcha-response set data')
+	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'none';")
+	print('g-recaptcha-response none')
+	# submit1 =b.select_element('[id="accept-gdpr"]')
+	# submit1.click()
+	try:
+		b.script_run("return  dontShowMsgPromoVideoChiama('bakecaincontrii.com')")
+	except:
+		print('dontShowMsgPromoVideoChiama error')
+	
 
 	set_submit = b.select_element('[id="submit-ins"]')
 	b.scroll_element_into_view(set_submit)
 	set_submit.click()
-	promo_premium = b.select_element_xpath("//*[text()='Non mostrare più questo messaggio']")
-
-	promo_premium.click()
+	
 	published_btn = b.select_element('[id="pub-gratis"]')
-	# b.scroll_element_into_view(published_btn)
+	b.scroll_element_into_view(published_btn)
 	published_btn.click()
 
 
@@ -130,12 +156,14 @@ def main(account_data,url,postinfo):
 			b.script_run(conf_link)
 			postlink = b.select_element('#colonna-unica > div.ins-messaggio.pub > p:nth-child(2) > a')
 			b.link_save(postlink.get_attribute('href'))
+			worker_acc.post_done(account_id)
+			worker_acc.account_active(account_id)
 			postdone = True
 
 
 		
-		if counter > 18:
-			worker_acc.account_ban(account_id)
+		if counter > 6:
+			worker_acc.ban(account_id)
 			
 			print("link not recived")
 			break
@@ -159,6 +187,7 @@ def main(account_data,url,postinfo):
 setup = table()
 setup.license_verify()
 #w = int(input('how much worker you need? '))
+packages_id = input('proxy info by a line : ')
 # worker = w + 1
 worker = 2
 # ........................start worker....................
@@ -284,6 +313,7 @@ acc = accounts()
 post = post()
 co=0
 while True:
+	utility.network_check()
 	if co >3:
 		co=0
 		# mouse.position = (x, y)
@@ -308,23 +338,23 @@ while True:
 		postinfo = post.get_post()
 		if one_account == None or postinfo == None:
 			print('post or account not find for worker')
-			time.sleep(10)
+			time.sleep(60)
 			continue
 
 		if path.isdir('profiles/' +str(one_account['id'])) == True:
 			shutil.rmtree('profiles/' +str(one_account['id']))
 
-		t = threading.Thread(target=main, args=(one_account,url,postinfo,))
+		t = threading.Thread(target=main, args=(one_account,url,postinfo,packages_id,))
 		acc.account_inactive(one_account['id'])
 
 		threads.append(t)
 		t.setName(one_account['id'])
 		t.start()
-		time.sleep(50)
+		
 
 		co = co+1
 
 	else:
 
 		# print('..............active thread :' + str(threading.active_count()) + '...............')
-		time.sleep(2)
+		time.sleep(20)
