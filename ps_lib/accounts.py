@@ -101,8 +101,8 @@ class accounts:
         self.conn.commit()
     def post_done(self,id):
         c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -1)
-        sql = "UPDATE accounts SET used_at < '{used}' WHERE id = {id}".format(used=now.strftime('%Y-%m-%d'),id=str(id)) 
+        now = datetime.now()+ timedelta(days= -0)
+        sql = "UPDATE accounts SET used_at = '{used}' WHERE id = {id}".format(used=now.strftime('%Y-%m-%d'),id=str(id)) 
         c.execute(sql)
         self.conn.commit()
     def save(self):
