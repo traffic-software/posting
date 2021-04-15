@@ -47,7 +47,7 @@ def main(account_data,url,postinfo,packages_id):
 
 	worker = psThread(account_id)
 	b = browser(account_id,packages_id)
-	# time.sleep(50)
+	time.sleep(10)
 	worker_acc=accounts()
 	
 	b.get_url(url+'fe/main.php?page=post_insert')
