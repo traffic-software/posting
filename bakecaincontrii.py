@@ -173,8 +173,7 @@ def main(account_data,url,postinfo,packages_id):
 
 	b.exit()
 	popmail.close()
-	account_id = 'profiles/' + account_id
-	shutil.rmtree(account_id)
+	
 
 
 	print(datetime.now().strftime("%H:%M:%S"))
@@ -339,11 +338,13 @@ while True:
 		url = random.choice(urls)
 
 		one_account = acc.get_account()
+		print('account last use time is : ',one_account['used_at'])
 		postinfo = post.get_post()
 		if one_account == None or postinfo == None:
 			print('post or account not find for worker')
 			time.sleep(60)
 			continue
+		
 
 		if path.isdir('profiles/' +str(one_account['id'])) == True:
 			shutil.rmtree('profiles/' +str(one_account['id']))
