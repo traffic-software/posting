@@ -37,10 +37,7 @@ import random
 # b.get_url('http://httpbin.org/get')
 # exit()
 
-def resource_path(relative_path):
-	""" Get absolute path to resource, works for dev and for PyInstaller """
-	base_path = getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__)))
-	return path.join(base_path, relative_path)
+
 def main(account_data,url,postinfo,packages_id):
 	#show work start time
 	print(datetime.now().strftime("%H:%M:%S"))
@@ -53,7 +50,11 @@ def main(account_data,url,postinfo,packages_id):
 	time.sleep(10)
 	worker_acc=accounts()
 	
-	b.get_url(url+'fe/main.php?page=post_insert')
+	b.get_url('https://whatismyipaddress.com/')
+	# b.get_url(url+'fe/main.php?page=post_insert')
+	b.get_screenshot('varsion.png')
+	print('varsion.png')
+	exit()
 	try:
 		b.script_run('return  accept_privacy_cookie()')
 	except:

@@ -52,7 +52,7 @@ class accounts:
 
     def get_account(self):
         c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -2)
+        now = datetime.now()+ timedelta(days= -4)
         
         sql = "SELECT * FROM accounts WHERE runing = 1 AND used_at <= '{used}' ORDER BY random() LIMIT 1".format(used=now.strftime('%Y-%m-%d'))
         c.execute(sql)

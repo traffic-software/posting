@@ -56,7 +56,7 @@ class browser:
 		# prox.add_to_capabilities(Chrome_capabilities)
 
 
-		driverUrl = 'chromedriver.exe'
+		driverUrl = '/usr/bin/chromedriver'
 		# ua = UserAgent(cache=False)
 		# a = ua.safari
 		
@@ -211,29 +211,23 @@ class browser:
 		return element
 
 	def select_dropdown(self,parent,child):
-		co = 0
-		dropdown = False
 		while True:
 			try:
 				dropdown = Select(self.driver.find_element_by_css_selector(parent))
-				if dropdown.is_displayed() and dropdown.is_enabled():
-					dropdown.select_by_value(child)
-					print("element ", selector)
-					break
+
+
+
+				break
 			except:
-				co = co + 1
-				if co > 10:
-					break
-				print("waiting for ",selector)
-				self.driver.implicitly_wait(1)
-		
-		
+				time.sleep(1)
+				print("waiting for select_dropdown")
+		dropdown.select_by_value(child)
+		print("select_dropdown")
 		return True
 	def get_screenshot(self,filename):
 
 			try:
 				self.driver.save_screenshot(r''+filename)
-				print("get_screenshot done")
 
 			except:
 				time.sleep(1)

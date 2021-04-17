@@ -11,6 +11,14 @@ class post:
 		c.execute(sql)
 		post =c.fetchone()
 		return self.get_formated_data(c.description,post)
+	
+	def delete_all(self):
+
+		c = self.conn.cursor()
+		sql = "DELETE FROM posts"
+		c.execute(sql)
+		post =c.fetchone()
+		return self.get_formated_data(c.description,post)
 
 	def insert(self, combos):
 		c = self.conn.cursor()
@@ -23,6 +31,8 @@ class post:
 		my_file.truncate(0)
 		my_file.close()
 		list_data = []
+		if len(lines)>10:
+			self.delete_all()
 		for line in lines:
 
 
