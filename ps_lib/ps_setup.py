@@ -4,7 +4,7 @@ from sys import exit
 import random
 import string
 import requests
-import winreg
+# import winreg
 import time
 from datetime import datetime
 class table:
@@ -58,43 +58,44 @@ class table:
             self.conn.commit()
             return True
     def license_verify(self):
-        licens = self.license_get()
-        #{"success":true,"data":{"id":48,"orderId":279,"productId":277,"userId":1,"licenseKey":"workerBAZL9-09W3B-PHUZQ-0JZ8Z-7AFZJ","expiresAt":"2021-04-15 03:47:18","validFor":30,"source":1,"status":2,"timesActivated":null,"timesActivatedMax":1,"createdAt":"2021-03-16 03:47:18","createdBy":1,"updatedAt":"2021-03-16 03:47:18","updatedBy":1}}
+        # licens = self.license_get()
+        # #{"success":true,"data":{"id":48,"orderId":279,"productId":277,"userId":1,"licenseKey":"workerBAZL9-09W3B-PHUZQ-0JZ8Z-7AFZJ","expiresAt":"2021-04-15 03:47:18","validFor":30,"source":1,"status":2,"timesActivated":null,"timesActivatedMax":1,"createdAt":"2021-03-16 03:47:18","createdBy":1,"updatedAt":"2021-03-16 03:47:18","updatedBy":1}}
 
-        if licens== None:
-            self.License =  str(input("please enter your license key : "))
+        # if licens== None:
+        #     self.License =  str(input("please enter your license key : "))
 
-            self.license_active()
-            self.license_save()
-            self.set_reg("ps", self.License)
+        #     self.license_active()
+        #     self.license_save()
+        #     self.set_reg("ps", self.License)
 
 
-        else:
-            self.License = licens['value']
-        url = 'https://mailorigin.com/wp-json/lmfwc/v2/licenses/{license}?consumer_key={consumer_key}&consumer_secret={consumer_secret}'.format(license=self.License,consumer_key=self.consumer_key,consumer_secret=self.consumer_secret)
+        # else:
+        #     self.License = licens['value']
+        # url = 'https://mailorigin.com/wp-json/lmfwc/v2/licenses/{license}?consumer_key={consumer_key}&consumer_secret={consumer_secret}'.format(license=self.License,consumer_key=self.consumer_key,consumer_secret=self.consumer_secret)
 
-        r = requests.get(url)
-        if "code" in r.json():
-            time.sleep(60)
-            print("license key error")
-            exit()
-        else:
-            l=r.json()
+        # r = requests.get(url)
+        # if "code" in r.json():
+        #     time.sleep(60)
+        #     print("license key error")
+        #     exit()
+        # else:
+        #     l=r.json()
 
-            expiresAt =l['data']['expiresAt'][0:10]
-            now = datetime.now()
-            if self.time_diff(expiresAt,now.strftime('%Y-%m-%d'))<1:
-                print("you need buy new license")
-                time.sleep(60)
-                exit()
-            if self.get_reg('ps') == None:
-                print("license key error")
-                time.sleep(60)
-                exit()
-            if not (self.License == self.get_reg('ps')):
-                print("license key error")
-                time.sleep(60)
-                exit()
+        #     expiresAt =l['data']['expiresAt'][0:10]
+        #     now = datetime.now()
+        #     if self.time_diff(expiresAt,now.strftime('%Y-%m-%d'))<1:
+        #         print("you need buy new license")
+        #         time.sleep(60)
+        #         exit()
+        #     if self.get_reg('ps') == None:
+        #         print("license key error")
+        #         time.sleep(60)
+        #         exit()
+        #     if not (self.License == self.get_reg('ps')):
+        #         print("license key error")
+        #         time.sleep(60)
+        #         exit()
+        return True
 
 
 
@@ -142,27 +143,27 @@ class table:
 
         return ''.join(random.choice(letters) for i in range(stringLength))
 
-    def set_reg(self,name, value):
-        try:
-            winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.REG_PATH)
-            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.REG_PATH, 0,
-                                          winreg.KEY_WRITE)
-            winreg.SetValueEx(registry_key, name, 0, winreg.REG_SZ, value)
-            winreg.CloseKey(registry_key)
-            return True
-        except WindowsError:
-            return False
+    # def set_reg(self,name, value):
+    #     try:
+    #         winreg.CreateKey(winreg.HKEY_CURRENT_USER, self.REG_PATH)
+    #         registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.REG_PATH, 0,
+    #                                       winreg.KEY_WRITE)
+    #         winreg.SetValueEx(registry_key, name, 0, winreg.REG_SZ, value)
+    #         winreg.CloseKey(registry_key)
+    #         return True
+    #     except WindowsError:
+    #         return False
 
 
-    def get_reg(self,name):
-        try:
-            registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.REG_PATH, 0,
-                                          winreg.KEY_READ)
-            value, regtype = winreg.QueryValueEx(registry_key, name)
-            winreg.CloseKey(registry_key)
-            return value
-        except WindowsError:
-            return None
+    # def get_reg(self,name):
+    #     try:
+    #         registry_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, self.REG_PATH, 0,
+    #                                       winreg.KEY_READ)
+    #         value, regtype = winreg.QueryValueEx(registry_key, name)
+    #         winreg.CloseKey(registry_key)
+    #         return value
+    #     except WindowsError:
+    #         return None
 
 
 
