@@ -1,0 +1,2 @@
+[15532:6072:0421/113206.312:ERROR:device_event_log_impl.cc(214)] [11:32:06.313] Bluetooth: bluetooth_adapter_winrt.cc:1072 Getting Default Adapter failed.
+[15532:6072:0421/113529.514:WARNING:pref_notifier_impl.cc(40)] Pref observer for media_router.cast_allow_all_ips found at shutdown.

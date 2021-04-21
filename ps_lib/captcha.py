@@ -28,7 +28,7 @@ class capcha:
 		id=None
 
 		try:
-			data = requests.get("http://2captcha.com/in.php?lang=it&key={0}&method=userrecaptcha&googlekey={1}&pageurl={2}".format(self.tow_api, siteKe, pageUrl))
+			data = requests.get("http://2captcha.com/in.php?lang=es&key={0}&method=userrecaptcha&googlekey={1}&pageurl={2}".format(self.tow_api, siteKe, pageUrl))
 			data = data.text.split("|")
 			id = data[1]
 		except:

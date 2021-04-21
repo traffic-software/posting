@@ -1,3 +1,4 @@
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,13 +9,17 @@ from selenium import webdriver
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
 import json, requests
-# from fake_useragent import UserAgent
+from fake_useragent import UserAgent
 import time
 from sys import exit
 import os
 import zipfile
 import warnings
 import random
+#recaptcha libraries
+import speech_recognition as sr
+import urllib
+import pydub
 class browser:
 	account_id=None
 
@@ -57,18 +62,18 @@ class browser:
 
 
 		driverUrl = 'chromedriver.exe'
-		# ua = UserAgent(cache=False)
-		# a = ua.safari
+		ua = UserAgent(cache=False)
+		a = ua.random
 		
-		# self.options.add_argument(f'user-agent={a}')
+		self.options.add_argument(f'user-agent={a}')
 
 		# self.options.add_argument('--proxy-server=http://%s' %self.PROXY )
-		self.options.add_argument("--remote-debugging-port=9222")
-		self.options.add_argument("--disable-gpu")
-		self.options.add_argument("start-maximized")
+		# self.options.add_argument("--remote-debugging-port=9222")
+		# self.options.add_argument("--disable-gpu")
+		# self.options.add_argument("start-maximized")
 		# self.options.add_argument("--headless")
 		# self.options.add_argument("--use-temporary-user-data-dir")
-		self.options.add_argument("--use-temporary-user-data-dir=profiles\\"+pofileLocation)
+		self.options.add_argument("--user-data-dir={}".format(os.path.normpath(os.getcwd())+'\\profiles\\'+pofileLocation))
 		self.driver = webdriver.Chrome(driverUrl,chrome_options=self.options)
 		
 		# self.driver = webdriver.PhantomJS(service_args=service_args)
@@ -129,6 +134,79 @@ class browser:
 			if self.proxy_check(proxy):
 				break
 		return proxy
+	def delay(self,element_present):
+		# WebDriverWait(self.driver, 5).until(element_present)
+		pass
+
+	def captcha(self):
+		#switch to recaptcha frame
+		frames=self.driver.find_elements_by_tag_name("iframe")
+		self.driver.switch_to.frame(frames[0])
+		
+
+		#click on checkbox to activate recaptcha
+		self.driver.find_element_by_class_name("recaptcha-checkbox-border").click()
+
+		#switch to recaptcha audio control frame
+		self.driver.switch_to.default_content()
+		frames=self.driver.find_element_by_xpath("/html/body/div[2]/div[4]").find_elements_by_tag_name("iframe")
+		# frames =frames.find_elements_by_tag_name("iframe")
+		self.driver.switch_to.frame(frames[0])
+		# self.iframe(frames)
+		
+		
+		
+
+		#click on audio challenge
+		rcimageselect = self.FindElementById("rc-imageselect")
+		# self.delay(rcimageselect)
+		print(self.page_source())
+
+		time.sleep(2)
+		audiochallenge = self.select_element_xpath('//*[@id="recaptcha-audio-button"]')
+		
+		print(self.page_source())
+		audiochallenge.click()
+
+		#switch to recaptcha audio challenge frame
+		self.driver.switch_to.default_content()
+		frames= self.driver.find_elements_by_tag_name("iframe")
+		self.driver.switch_to.frame(frames[-1])
+		# self.delay()
+
+		#click on the play button
+		playbutton=self.select_element_xpath('//*[@id=":2"]')
+		playbutton.click()
+		
+		#get the mp3 audio file
+		src = self.driver.find_element_by_id("audio-source").get_attribute("src")
+		print("[INFO] Audio src: %s"%src)
+		#download the mp3 audio file from the source
+		urllib.request.urlretrieve(src, os.path.normpath(os.getcwd()+"\\sample.mp3"))
+		self.delay()
+		#load downloaded mp3 audio file as .wav
+		try:
+			sound = pydub.AudioSegment.from_mp3(os.path.normpath(os.getcwd()+"\\sample.mp3"))
+			sound.export(os.path.normpath(os.getcwd()+"\\sample.wav"), format="wav")
+			sample_audio = sr.AudioFile(os.path.normpath(os.getcwd()+"\\sample.wav"))
+		except:
+			print("[-] Please run program as administrator")
+			
+		r= sr.Recognizer()
+
+		with sample_audio as source:
+			audio = r.record(source)
+
+		#translate audio to text with google voice recognition
+		key=r.recognize_google(audio)
+		print("[INFO] Recaptcha Passcode: %s"%key)
+
+		#key in results and submit
+		self.driver.find_element_by_id("audio-response").send_keys(key.lower())
+		self.driver.find_element_by_id("audio-response").send_keys(Keys.ENTER)
+		self.driver.switch_to.default_content()
+
+	
 	def proxy_check(self,data):
 		
 		
@@ -187,6 +265,27 @@ class browser:
 			self.exit()
 			exit()
 		return element
+	def select_by_name(self,selector):
+		co=0
+		element=False
+		while True:
+			try:
+				element = self.driver.find_element_by_name(selector)
+				print("element ", selector)
+				break
+			except:
+				co = co+1
+				if co >10:
+					break
+				print("waiting for ",selector)
+				self.driver.implicitly_wait(1)
+		if element == False:
+			print("element not find: ",selector)
+			account = accounts()
+			account.account_inactive(self.account_id)
+			self.exit()
+			exit()
+		return element
 	def select_element_xpath(self,selector):
 		co = 0
 		element = False
@@ -216,10 +315,27 @@ class browser:
 		while True:
 			try:
 				dropdown = Select(self.driver.find_element_by_css_selector(parent))
-				if dropdown.is_displayed() and dropdown.is_enabled():
-					dropdown.select_by_value(child)
-					print("element ", selector)
+				dropdown.select_by_value(child)
+				print("element ", selector)
+				break
+			except:
+				co = co + 1
+				if co > 10:
 					break
+				print("waiting for ",selector)
+				self.driver.implicitly_wait(1)
+		
+		
+		return True
+	def select_dropdown_by_text(self,parent,child):
+		co = 0
+		dropdown = False
+		while True:
+			try:
+				dropdown = Select(self.driver.find_element_by_css_selector(parent))
+				dropdown.select_by_visible_text(child)
+				print("element ", selector)
+				break
 			except:
 				co = co + 1
 				if co > 10:
@@ -313,7 +429,7 @@ class browser:
 
 	def FindElementById(self,Element):
 		wait = WebDriverWait(self.driver, 10)
-		clickable = wait.until(EC.element_to_be_clickable((By.ID, Element)))
+		clickable = wait.until(EC.invisibility_of_element_located((By.ID, Element)))
 		return clickable
 
 	def current_url(self):
