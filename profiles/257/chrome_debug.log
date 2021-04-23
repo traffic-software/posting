@@ -1,1 +1,2 @@
-[16284:13868:0421/112331.161:ERROR:device_event_log_impl.cc(214)] [11:23:31.161] Bluetooth: bluetooth_adapter_winrt.cc:1072 Getting Default Adapter failed.
+[15204:9336:0421/125440.742:INFO:CONSOLE(0)] "Unchecked runtime.lastError: You need to request host permissions in the manifest file in order to be notified about requests from the webRequest API.", source: chrome-extension://oonlmjiekjojngfdhiikbhnboaldnmgf/_generated_background_page.html (0)
+[15204:9336:0421/125443.983:ERROR:device_event_log_impl.cc(214)] [12:54:43.983] Bluetooth: bluetooth_adapter_winrt.cc:1072 Getting Default Adapter failed.

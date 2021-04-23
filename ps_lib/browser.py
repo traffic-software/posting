@@ -66,6 +66,7 @@ class browser:
 		a = ua.random
 		
 		self.options.add_argument(f'user-agent={a}')
+		self.urlblock()
 
 		# self.options.add_argument('--proxy-server=http://%s' %self.PROXY )
 		# self.options.add_argument("--remote-debugging-port=9222")
@@ -495,6 +496,41 @@ class browser:
 		);
 		""" % (self.PROXY_TYPE,self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
 		pluginfile = 'proxy_auth_plugin.zip'
+		zp=zipfile.ZipFile(pluginfile, 'w')
+		zp.writestr("manifest.json", manifest_json)
+		zp.writestr("background.js", background_js)
+		self.options.add_extension(pluginfile)
+	
+	def urlblock(self):
+
+
+		manifest_json = """
+		{
+			"name": "Block Seen Typing",
+			"description": "Block Seen",
+			"version": "1.0",
+			"manifest_version": 2,
+			"background": {
+				"scripts": [
+					"background.js"
+				]
+			},
+			"permissions": [
+				"webRequest",
+				"webRequestBlocking",
+				"*://*.skokka.com/*"
+			]
+		}
+		"""
+
+		background_js = """
+		chrome.webRequest.onBeforeRequest.addListener(
+			function(d){return {cancel:true};},
+			{urls:["*://pe.skokka.com/static/js/*"]},
+			["blocking", 'responseHeaders']
+			);
+		"""
+		pluginfile = 'urlblock.zip'
 		zp=zipfile.ZipFile(pluginfile, 'w')
 		zp.writestr("manifest.json", manifest_json)
 		zp.writestr("background.js", background_js)

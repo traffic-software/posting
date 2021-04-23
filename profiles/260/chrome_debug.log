@@ -1,2 +1,4 @@
-[15532:6072:0421/113206.312:ERROR:device_event_log_impl.cc(214)] [11:32:06.313] Bluetooth: bluetooth_adapter_winrt.cc:1072 Getting Default Adapter failed.
-[15532:6072:0421/113529.514:WARNING:pref_notifier_impl.cc(40)] Pref observer for media_router.cast_allow_all_ips found at shutdown.
+[1964:11764:0421/131824.249:INFO:CONSOLE(0)] "Unchecked runtime.lastError: You need to request host permissions in the manifest file in order to be notified about requests from the webRequest API.", source: chrome-extension://aaenjaomhimdakhhefdkenpbkphijmpm/_generated_background_page.html (0)
+[1964:11764:0421/131828.919:ERROR:device_event_log_impl.cc(214)] [13:18:28.919] Bluetooth: bluetooth_adapter_winrt.cc:1072 Getting Default Adapter failed.
+[1964:11764:0421/131852.286:WARNING:CONSOLE(1)] "One or more elements in an active-descendant relationship are not yet attached to the DOM tree.", source: devtools://devtools/bundled/ui/ui.js (1)
+[1964:11764:0421/132131.909:WARNING:pref_notifier_impl.cc(40)] Pref observer for media_router.cast_allow_all_ips found at shutdown.

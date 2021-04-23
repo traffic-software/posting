@@ -1,2 +1,4 @@
-[12488:8628:0421/112655.523:ERROR:device_event_log_impl.cc(214)] [11:26:55.522] Bluetooth: bluetooth_adapter_winrt.cc:1072 Getting Default Adapter failed.
-[12488:8628:0421/113140.695:WARNING:pref_notifier_impl.cc(40)] Pref observer for media_router.cast_allow_all_ips found at shutdown.
+[9328:8244:0421/130309.100:INFO:CONSOLE(0)] "Unchecked runtime.lastError: You need to request host permissions in the manifest file in order to be notified about requests from the webRequest API.", source: chrome-extension://hpbeajfcjchjgpeacgmnckoacpdlodnb/_generated_background_page.html (0)
+[9328:8244:0421/130319.432:ERROR:device_event_log_impl.cc(214)] [13:03:19.432] Bluetooth: bluetooth_adapter_winrt.cc:1072 Getting Default Adapter failed.
+[9328:8244:0421/130325.117:ERROR:CONSOLE(1)] "Session is unregistering, can't dispatch pending call to Debugger.setBlackboxPatterns", source: devtools://devtools/bundled/sdk/sdk.js (1)
+[9328:8244:0421/130559.820:WARNING:pref_notifier_impl.cc(40)] Pref observer for media_router.cast_allow_all_ips found at shutdown.

@@ -50,6 +50,7 @@ class imap:
 			try:
 				
 				mailbodys.append(self.get_body(mailmessage))
+				print(print(uid, mailmessage.get("From"), mailmessage.get("Subject")))
 				# print(print(uid, mailmessage.get("From"), mailmessage.get("Subject")))
 			except:
 				print('problme in message')
@@ -78,6 +79,7 @@ class imap:
 				print('link search')
 				#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
 				url = st.find_urls("main.php?page=post_publish")
+				# url = st.find_urls("main.php?page=post_publish")
 				
 				if url!=None:
 					print('one link find')
@@ -94,16 +96,16 @@ class imap:
 		self.i.logout()
 		# self.i.shutdown()
 
-# while True:
-# 	acc = accounts()
-# 	one_account = acc.get_account()
-# 	ps_data = one_account['data'].split(":")
-# 	acc.account_ban(one_account['id'])
+while True:
+	acc = accounts()
+	one_account = acc.get_account()
+	ps_data = one_account['data'].split(":")
+	acc.ban(one_account['id'])
 
-# 	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
-# 	popmail.messages()
-# 	popmail.get_link()
-# 	popmail.close()
+	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+	popmail.messages()
+	popmail.get_link()
+	popmail.close()
 
 
 
