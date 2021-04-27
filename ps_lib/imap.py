@@ -96,16 +96,16 @@ class imap:
 		self.i.logout()
 		# self.i.shutdown()
 
-while True:
-	acc = accounts()
-	one_account = acc.get_account()
-	ps_data = one_account['data'].split(":")
-	acc.ban(one_account['id'])
+# while True:
+# 	acc = accounts()
+# 	one_account = acc.get_account()
+# 	ps_data = one_account['data'].split(":")
+# 	acc.ban(one_account['id'])
 
-	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
-	popmail.messages()
-	popmail.get_link()
-	popmail.close()
+# 	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+# 	popmail.messages()
+# 	popmail.get_link()
+# 	popmail.close()
 
 
 

@@ -52,7 +52,7 @@ class accounts:
 
     def get_account(self):
         c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -4)
+        now = datetime.now()+ timedelta(days= -2)
         
         sql = "SELECT * FROM accounts WHERE runing = 1 AND used_at <= '{used}' ORDER BY random() LIMIT 1".format(used=now.strftime('%Y-%m-%d'))
         c.execute(sql)
@@ -101,7 +101,7 @@ class accounts:
         self.conn.commit()
     def post_done(self,id):
         c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -3)
+        now = datetime.now()+ timedelta(days= -0)
         sql = "UPDATE accounts SET used_at = '{used}' WHERE id = {id}".format(used=now.strftime('%Y-%m-%d'),id=str(id)) 
         c.execute(sql)
         self.conn.commit()

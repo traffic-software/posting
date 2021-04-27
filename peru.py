@@ -107,7 +107,7 @@ def main(account_data,url,postinfo,packages_id):
 	
 	# .prop("checked", true) or .click() or .trigger("click")
 	b.script_run('return  $("#contact_method_only_email").trigger("click")')
-	checkbox2 = '''return  $('input[name="terms"]').click()'''
+	checkbox2 = '''return  $('input[name="terms"]').prop("checked", true)'''
 	b.script_run(checkbox2)
 	# b.captcha()
 	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da')
@@ -123,6 +123,7 @@ def main(account_data,url,postinfo,packages_id):
 	print('g-recaptcha-response')
 	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'block';")
 	print('g-recaptcha-response block')
+	print(chacha_key)
 	script = 'document.getElementById("g-recaptcha-response").innerHTML="{}";'.format(chacha_key)
 	
 	b.script_run(script)
@@ -140,11 +141,21 @@ def main(account_data,url,postinfo,packages_id):
 		print('dontShowMsgPromoVideoChiama error')
 	
 
-	set_submit = b.select_element_xpath('//*[@id="app"]/main/div/form/div/div[10]/div/button')
-	b.scroll_element_into_view(set_submit)
-	set_submit.click()
+	# set_submit = b.select_element_xpath('//*[@id="app"]/main/div/form/div/div[10]/div/button')
+	# b.scroll_element_into_view(set_submit)
+	# set_submit.click()
+	btn_remove = '''$("button.btn.btn-primary.waves-effect.btn-block").remove();'''
+	btn_add = '''$("form").append("<input type="submit" id="sub_btn" value="Continuar"/>");'''
+	btn_click = '''$("form").submit()'''
+	# try:
+	b.script_run(btn_remove)
+	# b.script_run(btn_add)
+	b.script_run(btn_click)
+	# except:
+	print('jury error')
 	
-	# published_btn = b.select_element('[id="pub-gratis"]')
+	
+	# published_btn = b.select_element('[id="sub_btn"]')
 	# b.scroll_element_into_view(published_btn)
 	# published_btn.click()
 
