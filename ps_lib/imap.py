@@ -34,29 +34,51 @@ class imap:
 
 	def messages(self,mail_from=None):
 		self.ps_messges = None
-		mailbodys = []
-		
-		messages = self.i.search('UNSEEN')
+
+		if mail_from == None:
+			messages = self.i.search('UNSEEN')
+		else:
+			messages = self.i.search('(FROM "{}" UNSEEN)'.format(mail_from))
+
+		del messages[4:]
+
 		print('message search')
-		m = self.i.fetch(messages,'RFC822')
-		
-		
-		if len(m) <1:
+		m = self.i.fetch(messages, 'RFC822')
+
+		if len(m) < 1:
 			print('message not fund')
 			return False
+		mes = []
 		for uid, data in m.items():
 			data = data[b'RFC822']
 			mailmessage = email.message_from_bytes(data)
 			try:
+				m = {}
+
+				m['body'] = self.get_body(mailmessage)
+				receiver_info = re.split(r'\s', mailmessage.get("from"))
+				receiver_name = receiver_info[0]+receiver_info[1]
+				receiver_email = receiver_info[2]
+				receiver_email = re.sub(r'\>', '', receiver_email)
+				receiver_email = re.sub(r'\<', '', receiver_email)
+				m['from_mail'] = receiver_email
+				m['from_fname'] = receiver_info[0]
+				m['from_lname'] = receiver_info[1]
+				m['from_fullname'] = receiver_name
+				m['sub'] = mailmessage.get("Subject")
+				m['Reply_To'] = mailmessage.get("Reply-To")
+				mes.append(m)
+				print(mes)
 				
-				mailbodys.append(self.get_body(mailmessage))
-				# print(print(uid, mailmessage.get("From"), mailmessage.get("Subject")))
+
+
+
 			except:
 				print('problme in message')
 			
-			self.ps_messges = mailbodys
-			self.i.delete_messages(uid)
-		return messages
+			self.ps_messges = mes
+			# self.i.delete_messages(uid)
+		return self.ps_messges
 	def get_body(self,e):
 		# Body details
 		

@@ -6,7 +6,12 @@ import random
 class ps_str:
 	str = "ok now im ready for work with you and your software"
 	def __init__(self,str):
-		self.str = self.text_decode(str)
+		try:
+			self.str = self.text_decode(str)
+		except:
+			self.str = str
+
+		
 
 
 

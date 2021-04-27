@@ -13,7 +13,7 @@ RUN python3 -m pip install imapclient
 RUN python3 -m pip install python_anticaptcha
 RUN python3 -m pip install chardet
 RUN python3 -m pip install PyEmailTools
-ADD data/ /mydir/
+ADD . /mydir/
 #whereis chromedriver
 
 # docker build . -t selenium-chrome && \

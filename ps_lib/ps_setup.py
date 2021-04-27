@@ -23,6 +23,7 @@ class table:
             self.account_tebl_create()
             self.post_tebl_create()
             self.settings_tebl_create()
+            self.reply_tebl_create()
             self.license_verify()
 
     def dbfile(self):

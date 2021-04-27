@@ -12,6 +12,7 @@ from ps_lib.ps_setup import table
 from ps_lib.post import post
 from ps_lib.captcha import capcha
 from ps_lib.imap import imap
+from ps_lib.smtp import reply_with_smtp
 import random
 # from pynput.mouse import Button, Controller
 
@@ -37,6 +38,18 @@ import random
 # b.get_url('http://httpbin.org/get')
 # exit()
 
+def reply_start():
+	ths = []
+	pid = threading.local()
+	try:
+		th = threading.Thread(target=reply_with_smtp)
+		ths.append(th)
+		th.setName('mail_pop')
+		th.start()
+	except:
+		print('reply start problelm')
+	return True
+time.sleep(50)
 
 def main(account_data,url,postinfo,packages_id):
 	#show work start time
@@ -79,7 +92,7 @@ def main(account_data,url,postinfo,packages_id):
 	ps_data = account_data['data'].split(":")
 	email = ps_data[0]
 	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
-	popmail.messages(email)
+	popmail.messages('no_reply@bakecaincontrii.com')
 	popmail.close()
 	ages = [21,22,23,24,25,26,27,28,29,30]
 	age = random.choice(ages)
@@ -189,8 +202,10 @@ def main(account_data,url,postinfo,packages_id):
 
 setup = table()
 setup.license_verify()
+
 #w = int(input('how much worker you need? '))
 packages_id = input('proxy info by a line : ')
+
 # worker = w + 1
 worker = 2
 # ........................start worker....................
