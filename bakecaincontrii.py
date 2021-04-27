@@ -14,6 +14,7 @@ from ps_lib.captcha import capcha
 from ps_lib.imap import imap
 from ps_lib.smtp import reply_with_smtp
 import random
+bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
 
 # mouse = Controller()
@@ -49,7 +50,11 @@ def reply_start():
 	except:
 		print('reply start problelm')
 	return True
-time.sleep(50)
+acc = accounts()
+post = post()
+acc.save()
+post.save()
+reply_start()
 
 def main(account_data,url,postinfo,packages_id):
 	#show work start time
@@ -63,11 +68,11 @@ def main(account_data,url,postinfo,packages_id):
 	time.sleep(10)
 	worker_acc=accounts()
 	
-	b.get_url('https://whatismyipaddress.com/')
-	# b.get_url(url+'fe/main.php?page=post_insert')
-	b.get_screenshot('varsion.png')
-	print('varsion.png')
-	exit()
+	# b.get_url('https://whatismyipaddress.com/')
+	b.get_url(url+'fe/main.php?page=post_insert')
+	# b.get_screenshot('varsion.png')
+	# print('varsion.png')
+	# exit()
 	try:
 		b.script_run('return  accept_privacy_cookie()')
 	except:
@@ -161,7 +166,7 @@ def main(account_data,url,postinfo,packages_id):
 
 		counter = counter+1
 		
-		popmail.messages(email)
+		popmail.messages('no_reply@bakecaincontrii.com')
 		links = popmail.get_link()
 		
 		print('links')
@@ -204,10 +209,11 @@ setup = table()
 setup.license_verify()
 
 #w = int(input('how much worker you need? '))
-packages_id = input('proxy info by a line : ')
+# packages_id = input('proxy info by a line : ')
+packages_id="no"
 
 # worker = w + 1
-worker = 2
+worker = 2+1
 # ........................start worker....................
 open('active.txt', "w+")
 utility = helper()
@@ -327,8 +333,7 @@ urls = [	'https://agrigento.bakecaincontrii.com/',
 			'https://alessandria.bakecaincontrii.com/'
 		]
 
-acc = accounts()
-post = post()
+
 co=0
 while True:
 	utility.network_check()
@@ -342,10 +347,10 @@ while True:
 		# mouse.press(Button.left)
 		# mouse.release(Button.left)
 
-	acc.save()
+	
 
 	acc.account_Reactive()
-	post.save()
+	
 
 
 
@@ -357,12 +362,13 @@ while True:
 		url = random.choice(urls)
 
 		one_account = acc.get_account()
-		print('account last use time is : ',one_account['used_at'])
+		
 		postinfo = post.get_post()
 		if one_account == None or postinfo == None:
 			print('post or account not find for worker')
 			time.sleep(60)
 			continue
+		print('account last use time is : ',one_account['used_at'])
 		
 
 		if path.isdir('profiles/' +str(one_account['id'])) == True:
@@ -381,5 +387,5 @@ while True:
 
 	else:
 
-		# print('..............active thread :' + str(threading.active_count()) + '...............')
+		print('..............active thread :' + str(threading.active_count()) + '...............')
 		time.sleep(20)

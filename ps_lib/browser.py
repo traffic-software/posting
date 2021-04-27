@@ -56,7 +56,8 @@ class browser:
 		# prox.add_to_capabilities(Chrome_capabilities)
 
 
-		driverUrl = '/usr/bin/chromedriver'
+		# driverUrl = '/usr/bin/chromedriver'
+		driverUrl = 'chromedriver.exe'
 		# ua = UserAgent(cache=False)
 		# a = ua.safari
 		

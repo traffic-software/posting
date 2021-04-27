@@ -96,14 +96,17 @@ class imap:
 		try:
 			for m in self.ps_messges:
 				
-				st = ps_str(m)
+				st = ps_str(m['body'])
 				print('link search')
 				#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
 				url = st.find_urls("main.php?page=post_publish")
 				
-				if url!=None:
-					print('one link find')
-					urls.append(url)
+				for data in url:
+					
+					if url!=None:
+						print('one link find')
+						urls.append(data)
+				
 					
 		except:
 			print('link search problem')

@@ -7,12 +7,11 @@ from PyEmailTools.Forger import Forger
 from PyEmailTools.SmtpClient import SmtpClient
 from getpass import getpass
 import re
-from os import path
-bundle_dir = path.abspath(path.dirname(__file__))
+
 def reply_with_smtp():
     acc = accounts()
     setup = table()
-    my_file = open(bundle_dir+'/reply_text.txt','r')
+    my_file = open('reply_text.txt','r')
     bot_body = my_file.read()
     my_file.close()
     text=ps_str(bot_body)
@@ -27,6 +26,7 @@ def reply_with_smtp():
         
         one_account = acc.get_account()
         ps_data = one_account['data'].split(":")
+        print(ps_data)
         
 
         popmail = imap(ps_data[0], ps_data[1], ps_data[2])
@@ -37,6 +37,7 @@ def reply_with_smtp():
             continue
         for m in popmail.ps_messges:
             bot_body =text.Spin()
+            print(m)
             
             bot_body = bot_body.replace('[name]', m['from_fullname'].replace('"',''))
            
