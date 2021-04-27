@@ -57,6 +57,45 @@ class table:
             c.execute("CREATE TABLE settings (name TEXT NOT NULL,value TEXT NOT NULL)")
             self.conn.commit()
             return True
+    def replyOn(self):
+        c = self.conn.cursor()
+        c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['reply',1])
+        self.conn.commit()
+
+    def replyOff(self):
+        c = self.conn.cursor()
+        c.execute("DELETE FROM settings WHERE name = 'reply'")
+        self.conn.commit()
+
+    def checkReplyOn(self):
+        c = self.conn.cursor()
+        sql = "SELECT * FROM settings WHERE name = '{}'".format('reply')
+        c.execute(sql)
+        post = c.fetchone()
+        data =self.get_formated_data(c.description, post)
+        return data
+        
+    def replySave(self,frommail,tomail):
+        c = self.conn.cursor()
+        c.execute("INSERT INTO reply (frommail,tomail) VALUES  (?,?)", [frommail,tomail])
+        self.conn.commit()
+
+   
+
+    def checkReply(self,tomail):
+        c = self.conn.cursor()
+        sql = "SELECT * FROM reply WHERE tomail = '{}'".format(tomail)
+        print(sql)
+        c.execute(sql)
+        post = c.fetchone()
+        data =self.get_formated_data(c.description, post)
+        print(data)
+        return data
+    def reply_tebl_create(self):
+            c = self.conn.cursor()
+            c.execute("CREATE TABLE reply (frommail TEXT NOT NULL,tomail TEXT NOT NULL)")
+            self.conn.commit()
+            return True
     def license_verify(self):
         # licens = self.license_get()
         # #{"success":true,"data":{"id":48,"orderId":279,"productId":277,"userId":1,"licenseKey":"workerBAZL9-09W3B-PHUZQ-0JZ8Z-7AFZJ","expiresAt":"2021-04-15 03:47:18","validFor":30,"source":1,"status":2,"timesActivated":null,"timesActivatedMax":1,"createdAt":"2021-03-16 03:47:18","createdBy":1,"updatedAt":"2021-03-16 03:47:18","updatedBy":1}}

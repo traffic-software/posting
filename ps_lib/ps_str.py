@@ -1,6 +1,8 @@
 import re
 from sys import exit
 import chardet
+import itertools
+import random
 class ps_str:
 	str = "ok now im ready for work with you and your software"
 	def __init__(self,str):
@@ -27,3 +29,25 @@ class ps_str:
 				url = d
 				break
 		return url
+	def options(self,s):
+		# If the chunk is not empty or the chunk start with the split parameter
+		# return the split by the variable | of the paramter
+		if len(s) > 0 and s[0] == '{':
+			return [opt for opt in s[1:-1].split('|')]
+		return [s] # return empty in list to keep a list of lists
+
+	
+	
+	def Spin(self):
+		texts=[]
+		
+		chunk = re.split('(\{[^\}]+\}|[^\{\}]*)',self.str)
+
+		# Return a list of lists of variations that can be combined
+		opt_lists = [self.options(frag) for frag in chunk]
+
+		for spec in itertools.product(*opt_lists):
+			texts.append(''.join(spec))
+		text=random.choice(texts)
+		return text
+

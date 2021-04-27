@@ -66,7 +66,7 @@ class imap:
 			if part.get_content_type() == "text/html":
 				body = part.get_payload(decode=True)
 				return body
-				break
+				
 			else:
 				continue
 	def get_link(self):
