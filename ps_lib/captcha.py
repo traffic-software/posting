@@ -6,10 +6,13 @@ class capcha:
 
 	anti_api='071a73b48a5ce1528a7f8f441ebee35a'
 	tow_api=None
+	type = None
 
-	def __init__(self,anti_api_key=None,tow_api_key=None):
+	def __init__(self,anti_api_key=None,tow_api_key=None,type=None):
 		self.anti_api = anti_api_key
 		self.tow_api = tow_api_key
+		self.type = type
+
 
 	def anticaptcha(self,siteKe,pageUrl):
 		client = AnticaptchaClient(self.anti_api)
@@ -28,7 +31,11 @@ class capcha:
 		id=None
 
 		try:
-			data = requests.get("http://2captcha.com/in.php?lang=it&key={0}&method=userrecaptcha&googlekey={1}&pageurl={2}".format(self.tow_api, siteKe, pageUrl))
+			if self.type == 1:
+				data = requests.get("http://2captcha.com/in.php?lang=it&key={0}&method=hcaptcha&sitekey={1}&pageurl={2}".format(self.tow_api, siteKe, pageUrl))
+			
+			else:
+				data = requests.get("http://2captcha.com/in.php?lang=it&key={0}&method=userrecaptcha&googlekey={1}&pageurl={2}".format(self.tow_api, siteKe, pageUrl))
 			data = data.text.split("|")
 			id = data[1]
 		except:

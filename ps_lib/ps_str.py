@@ -34,6 +34,10 @@ class ps_str:
 				url = d
 				break
 		return url
+	def find_email(self,expression):
+		arg = re.search(expression,self.str)
+		
+		return arg.group() if arg else "nomail@mail.com"
 	def options(self,s):
 		# If the chunk is not empty or the chunk start with the split parameter
 		# return the split by the variable | of the paramter

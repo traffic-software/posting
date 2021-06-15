@@ -242,8 +242,9 @@ class browser:
 		return self.driver.title
 	def page_source(self):
 		try:
-			return self.driver.page_source.encode('utf-8')
 			print('page_source')
+			return self.driver.page_source.encode('utf-8')
+			
 		except:
 			print('page_source')
 

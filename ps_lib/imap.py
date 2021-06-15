@@ -40,7 +40,7 @@ class imap:
 		else:
 			messages = self.i.search('(FROM "{}" UNSEEN)'.format(mail_from))
 
-		del messages[4:]
+		
 
 		print('message search')
 		m = self.i.fetch(messages, 'RFC822')
@@ -56,24 +56,19 @@ class imap:
 				m = {}
 
 				m['body'] = self.get_body(mailmessage)
-				receiver_info = re.split(r'\s', mailmessage.get("from"))
-				receiver_name = receiver_info[0]+receiver_info[1]
-				receiver_email = receiver_info[2]
-				receiver_email = re.sub(r'\>', '', receiver_email)
-				receiver_email = re.sub(r'\<', '', receiver_email)
-				m['from_mail'] = receiver_email
-				m['from_fname'] = receiver_info[0]
-				m['from_lname'] = receiver_info[1]
-				m['from_fullname'] = receiver_name
+				text= ps_str(mailmessage.get("from"))
+				
+				m['from_mail'] = text.find_email('([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)')
 				m['sub'] = mailmessage.get("Subject")
 				m['Reply_To'] = mailmessage.get("Reply-To")
 				mes.append(m)
 				print(mes)
 				
+				
 
 
 
-			except:
+			except :
 				print('problme in message')
 			
 			self.ps_messges = mes
@@ -91,7 +86,7 @@ class imap:
 				
 			else:
 				continue
-	def get_link(self):
+	def get_link(self,condition=None):
 		urls=[]
 		try:
 			for m in self.ps_messges:
@@ -99,13 +94,17 @@ class imap:
 				st = ps_str(m['body'])
 				print('link search')
 				#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
-				url = st.find_urls("main.php?page=post_publish")
+				if condition:
+					url = st.find_urls(condition)
+				else:
+					url = st.find_urls("main.php?page=post_publish")
+				if url!=None:
+					print('one link find')
+					urls.append(url)
 				
-				for data in url:
+				
 					
-					if url!=None:
-						print('one link find')
-						urls.append(data)
+					
 				
 					
 		except:

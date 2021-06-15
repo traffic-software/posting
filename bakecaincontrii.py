@@ -12,7 +12,6 @@ from ps_lib.ps_setup import table
 from ps_lib.post import post
 from ps_lib.captcha import capcha
 from ps_lib.imap import imap
-from ps_lib.smtp import reply_with_smtp
 import random
 bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
@@ -39,22 +38,9 @@ bundle_dir = path.abspath(path.dirname(__file__))
 # b.get_url('http://httpbin.org/get')
 # exit()
 
-def reply_start():
-	ths = []
-	pid = threading.local()
-	try:
-		th = threading.Thread(target=reply_with_smtp)
-		ths.append(th)
-		th.setName('mail_pop')
-		th.start()
-	except:
-		print('reply start problelm')
-	return True
-acc = accounts()
-post = post()
-acc.save()
-post.save()
-reply_start()
+
+
+
 
 def main(account_data,url,postinfo,packages_id):
 	#show work start time
@@ -213,7 +199,7 @@ setup.license_verify()
 packages_id="no"
 
 # worker = w + 1
-worker = 2+1
+worker = 2
 # ........................start worker....................
 open('active.txt', "w+")
 utility = helper()
@@ -332,6 +318,8 @@ urls = [	'https://agrigento.bakecaincontrii.com/',
 			'https://aosta.bakecaincontrii.com/',
 			'https://alessandria.bakecaincontrii.com/'
 		]
+acc = accounts()
+post = post()
 
 
 co=0
@@ -348,7 +336,8 @@ while True:
 		# mouse.release(Button.left)
 
 	
-
+	acc.save()
+	post.save()
 	acc.account_Reactive()
 	
 
