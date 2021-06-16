@@ -36,7 +36,7 @@ import sys
 # b = browser('545')
 #
 # b.get_url('http://httpbin.org/get')
-# exit()
+# exit() 
 
 def resource_path(relative_path):
 	""" Get absolute path to resource, works for dev and for PyInstaller """
