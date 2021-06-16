@@ -62,7 +62,7 @@ class imap:
 				m['sub'] = mailmessage.get("Subject")
 				m['Reply_To'] = mailmessage.get("Reply-To")
 				mes.append(m)
-				print(mes)
+				print('message finded')
 				
 				
 

@@ -74,14 +74,21 @@ def main(account_data,url,postinfo,packages_id):
 
 	time.sleep(2)
 	try:
-		b.select_dropdown_by_text('[name="category"]',"Escorts")
+		category= b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[2]/div/div[1]/select/option[2]')
+		category.click()
 		#5c8a2993c5591de8c6236nod4e
 	except:
 		print('category error')
 	try:
-		citys = ["Adelaide","Albury","Ballarat","Bendigo","Brisbane","Bunbury","Bundaberg","Cairns","Canberra","Coffs Harbour","Darwin","Geelong","Gladstone","Gold Coast","Ipswich","Mackay","Mandurah","Melbourne","Newcastle","Perth Western Australia","Port Macquarie","Rockhampton","Sunshine Coast","Sydney","Toowoomba","Townsville"]
-		city = random.choice(citys)
-		b.select_dropdown_by_text('[name="city"]',city)
+		# citys = ["Adelaide","Albury","Ballarat","Bendigo","Brisbane","Bunbury","Bundaberg","Cairns","Canberra","Coffs Harbour","Darwin","Geelong","Gladstone","Gold Coast","Ipswich","Mackay","Mandurah","Melbourne","Newcastle","Perth Western Australia","Port Macquarie","Rockhampton","Sunshine Coast","Sydney","Toowoomba","Townsville"]
+		# city = random.choice(citys)
+		indexs = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
+		index = '//*[@id="app"]/main/div[2]/form/div/div[2]/div/div[2]/select/option[{0}]'.format(random.choice(indexs))
+
+		city = b.select_element_xpath(index)
+		city.click()
+
+		# b.select_dropdown_by_text('[name="city"]',city)
 	except:
 		print('city error')
 	
