@@ -1,6 +1,5 @@
-FROM selenium/standalone-chrome
-
-
+# FROM selenium/standalone-chrome
+FROM debian:latest
 USER root
 RUN apt-get update -y
 RUN apt-get install sudo -y
@@ -16,3 +15,4 @@ RUN python3 -m pip install chardet
 
 # docker build . -t selenium-chrome && \
 # docker run -it selenium-chrome python3
+#https://tecadmin.net/setup-selenium-with-chromedriver-on-debian/
