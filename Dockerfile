@@ -11,8 +11,24 @@ RUN python3 -m pip install zipfile38
 RUN python3 -m pip install imapclient
 RUN python3 -m pip install python_anticaptcha
 RUN python3 -m pip install chardet
+
+RUN sudo apt-get install openssh-server -y
+RUN sudo systemctl enable ssh
+
+
+RUN useradd -rm -d /home -s /bin/bash -g root -G sudo -u 1000 test
+RUN  echo 'test:test' | chpasswd
+RUN sudo service ssh start
+EXPOSE 22
+CMD ["/usr/sbin/sshd","-D"]
 #whereis chromedriver
 
-# docker build . -t selenium-chrome && \
+# docker build . -t psdebian && \
 # docker run -it selenium-chrome python3
 #https://tecadmin.net/setup-selenium-with-chromedriver-on-debian/
+# docker run --rm -dit --network ps-macvlan-net -p 22:22 --ip=192.168.0.112 --name py-vlan1 psdebian
+
+
+
+#List: docker images -a
+#Remove: docker rmi $(docker images -a -q)
