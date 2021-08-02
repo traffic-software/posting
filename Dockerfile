@@ -11,7 +11,11 @@ RUN python3 -m pip install zipfile38
 RUN python3 -m pip install imapclient
 RUN python3 -m pip install python_anticaptcha
 RUN python3 -m pip install chardet
-
+RUN python3 -m pip install PyEmailTools
+RUN sudo apt-get install wget -y
+RUN sudo apt-get install unzip -y
+#https://dev.to/eugenedorfling/installing-the-firefox-web-driver-on-linux-for-selenium-d45
+ADD . /home/
 RUN sudo apt-get install openssh-server -y
 RUN sudo systemctl enable ssh
 
@@ -21,14 +25,17 @@ RUN  echo 'test:test' | chpasswd
 RUN sudo service ssh start
 EXPOSE 22
 CMD ["/usr/sbin/sshd","-D"]
+#whereis google-chrome-stable
+#whereis google-chrome
 #whereis chromedriver
 
 # docker build . -t psdebian && \
 # docker run -it selenium-chrome python3
 #https://tecadmin.net/setup-selenium-with-chromedriver-on-debian/
-# docker run --rm -dit --network ps-macvlan-net -p 22:22 --ip=192.168.0.112 --name py-vlan1 psdebian
+# docker run  -dit --network ps-macvlan-net -p 22:22 --ip=192.168.0.112 --name py-vlan1 psdebian
 
 
 
 #List: docker images -a
 #Remove: docker rmi $(docker images -a -q)
+#python3 bakecaincontrii.py
