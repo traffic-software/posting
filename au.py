@@ -75,7 +75,7 @@ def main(account_data,url,postinfo,packages_id):
 	
 	ps_data = account_data['data'].split(":")
 	email = ps_data[0]
-	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+	popmail = imap(account_data['id'],ps_data[0], ps_data[1], ps_data[2])
 	popmail.messages()
 	popmail.close()
 	ages = [21,22,23,24,25,26,27,28,29,30]
@@ -154,7 +154,7 @@ def main(account_data,url,postinfo,packages_id):
 	# exit()
 
 
-	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+	popmail = imap(account_data['id'],ps_data[0], ps_data[1], ps_data[2])
 	
 
 	counter=0
