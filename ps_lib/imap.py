@@ -24,7 +24,14 @@ class imap:
 		self.password = password
 		self.hosturl = hosturl
 		self.i= IMAPClient(host=hosturl)
-		self.login()
+		
+		try:
+			self.login()
+		except:
+			if account_id:
+				acc=accounts()
+				acc.ban_3(account_id)
+				
 		
 
 	def login(self):

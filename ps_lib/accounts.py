@@ -99,6 +99,12 @@ class accounts:
         sql = "UPDATE accounts SET runing =2 WHERE id = " + str(id)
         c.execute(sql)
         self.conn.commit()
+    def ban_3(self,id):
+        c = self.conn.cursor()
+        # c.execute("SELECT * FROM account WHERE runing = 0")
+        sql = "UPDATE accounts SET runing =3 WHERE id = " + str(id)
+        c.execute(sql)
+        self.conn.commit()
     def post_done(self,id):
         c = self.conn.cursor()
         now = datetime.now()+ timedelta(days= -3)
