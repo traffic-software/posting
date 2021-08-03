@@ -17,8 +17,6 @@ ADD . /mydir/
 
 RUN sudo apt-get install openssh-server -y
 RUN sudo systemctl enable ssh
-
-
 RUN useradd -rm -d /home -s /bin/bash -g root -G sudo -u 1000 test
 RUN  echo 'test:test' | chpasswd
 RUN sudo service ssh start
