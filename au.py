@@ -31,7 +31,7 @@ def main(account_data,url,postinfo,packages_id):
 
 
 	worker = psThread(account_id)
-	b = browser(account_id,packages_id)
+	b = browser(account_id,packages_id,proxy_company='proxyrotator',proxy_country="AU")
 	time.sleep(10)
 	worker_acc=accounts()
 	
@@ -211,7 +211,7 @@ setup = table()
 setup.license_verify()
 #w = int(input('how much worker you need? '))
 # packages_id = input('proxy info by a line : ')
-packages_id = 'no'
+packages_id = 52525
 # worker = w + 1
 worker = 2
 # ........................start worker....................

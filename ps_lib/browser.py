@@ -20,8 +20,10 @@ class browser:
 	account_id=None
 
 
-	def __init__(self,pofileLocation,packages_id,use_proxy=True):
+	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT"):
 		
+		self.proxy_country = proxy_country
+		self.proxy_company = proxy_company
 		self.account_id=pofileLocation
 		warnings.filterwarnings('ignore')
 		#......................Chrome..............................
@@ -90,41 +92,41 @@ class browser:
 		while True:
 			try:
 				#............rsocks.net......................
+				if self.proxy_company =="rsocks":
+					
 				
 				
-				headers={
-					'X-Auth-ID':'107841',
-					'X-Auth-Key':'3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
-				}
-				resp = requests.post('https://rsocks.net/api/v1/file/get-proxy', headers=headers,timeout=1)
-				
-				data = json.loads(resp.text)
-				# print(data['packages'])
-				# data = random.choice(data['packages'])
-				# proxy = rendomip=random.choice(data['ips'])
-				data = data['packages'][self.packages_id]['ips']
-				
-				proxy = rendomip=random.choice(data)
+					headers={
+						'X-Auth-ID':'107841',
+						'X-Auth-Key':'3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
+					}
+					resp = requests.post('https://rsocks.net/api/v1/file/get-proxy', headers=headers,timeout=1)
+					
+					data = json.loads(resp.text)
+					# print(data['packages'])
+					# data = random.choice(data['packages'])
+					# proxy = rendomip=random.choice(data['ips'])
+					data = data['packages'][self.packages_id]['ips']
+					
+					proxy = rendomip=random.choice(data)
 
 
 
 				#.............proxyrotator.com................
-
-
-
-
-				# url = 'http://falcon.proxyrotator.com:51337'
-				# params = dict(
-				# 	apiKey='TX2DLoKZVd6peF8fuJ59wqsyQgc4CGnv',
-				# 	userAgent='true',
-				# 	country='IT',
-				# 	get = 'true',
-				# 	connectionType='Residential'
-				# )
-				# resp = requests.get(url,params=params, timeout=3)
 				
-				# data = json.loads(resp.text)
-				# proxy = data['proxy']
+				if self.proxy_company =="proxyrotator": 
+					url = 'http://falcon.proxyrotator.com:51337'
+					params = dict(
+						apiKey='TX2DLoKZVd6peF8fuJ59wqsyQgc4CGnv',
+						userAgent='true',
+						country=self.proxy_country,
+						get = 'true',
+						connectionType='Residential'
+					)
+					resp = requests.get(url,params=params, timeout=3)
+					
+					data = json.loads(resp.text)
+					proxy = data['proxy']
 
 
 
