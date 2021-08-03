@@ -14,7 +14,7 @@ RUN python3 -m pip install chardet
 RUN python3 -m pip install PyEmailTools
 RUN sudo apt-get install wget -y
 RUN sudo apt-get install unzip -y
-#https://dev.to/eugenedorfling/installing-the-firefox-web-driver-on-linux-for-selenium-d45
+RUN apt-get install firefox-esr -y
 ADD . /home/
 RUN sudo apt-get install openssh-server -y
 RUN sudo systemctl enable ssh

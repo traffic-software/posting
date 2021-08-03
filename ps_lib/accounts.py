@@ -52,7 +52,7 @@ class accounts:
 
     def get_account(self):
         c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -4)
+        now = datetime.now()+ timedelta(days= -1)
         
         sql = "SELECT * FROM accounts WHERE runing = 1 AND used_at <= '{used}' ORDER BY random() LIMIT 1".format(used=now.strftime('%Y-%m-%d'))
         c.execute(sql)
@@ -71,11 +71,11 @@ class accounts:
 
     def account_Reactive(self):
         c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -2)
+        now = datetime.now()+ timedelta(days= -5)
         
         
         # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "UPDATE accounts SET runing =1 WHERE used_at <= '{used}' AND  runing = 0".format(used=now.strftime('%Y-%m-%d'))
+        sql = "UPDATE accounts SET runing =1 WHERE used_at <= '{used}' AND  runing = 0 OR runing = 2".format(used=now.strftime('%Y-%m-%d'))
         c.execute(sql)
         self.conn.commit()
 
@@ -97,6 +97,12 @@ class accounts:
         c = self.conn.cursor()
         # c.execute("SELECT * FROM account WHERE runing = 0")
         sql = "UPDATE accounts SET runing =2 WHERE id = " + str(id)
+        c.execute(sql)
+        self.conn.commit()
+    def ban_3(self,id):
+        c = self.conn.cursor()
+        # c.execute("SELECT * FROM account WHERE runing = 0")
+        sql = "UPDATE accounts SET runing =3 WHERE id = " + str(id)
         c.execute(sql)
         self.conn.commit()
     def post_done(self,id):

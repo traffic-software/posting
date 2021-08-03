@@ -154,3 +154,86 @@ JavaScript warning: https://js.datadome.co/tags.js, line 2: unreachable code aft
 ###!!! [Child][MessageChannel] Error: (msgtype=0x5B0009,name=PHttpChannel::Msg_DeletingChannel) Channel closing: too late to send/recv, messages will be lost
 
 1617788247407	Marionette	INFO	Stopped listening on port 62035
+1627991127328	geckodriver	INFO	Listening on 127.0.0.1:62949
+1627991130372	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--use-temporary-user-data-dir" "-foreground" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofilepIOFas"
+1627991131511	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofilepIOFas\\search.json.mozlz4", (void 0)))
+1627991136812	Marionette	INFO	Listening on port 62957
+1627991136969	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: https://assetscdn-wchat.freshchat.com/static/assets/vendor-7271dd2c6f5a2ec68e560546492f67ed.js, line 6968: unreachable code after return statement
+[Child 13304, MediaDecoderStateMachine #1] WARNING: 1abccccb740 Could not set cubeb stream name.: file /builds/worker/checkouts/gecko/dom/media/AudioStream.cpp:367
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x390079,name=PContent::Msg_DestroyBrowsingContextGroup) Closed channel: cannot send/recv
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Cha1627991287597	Marionette	INFO	Stopped listening on port 52404
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][MessageChannel] Error: (msgtype=0x23002E,name=PBrowser::Msg___delete__) Channel closing: too late to send/recv, messages will be lost
+
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+JavaScript error: , line 0: TypeError: NetworkError when attempting to fetch resource.
+1627991286770	Marionette	INFO	Stopped listening 1627991288957	Marionette	INFO	Stopped listening on port 52543
+7991194866	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--use-temporary-user-data-dir" "-foreground" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileuuJLcx"
+1627991196144	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileuuJLcx\\search.json.mozlz4", (void 0)))
+1627991202505	Marionette	INFO	Listening on port 52603
+1627991203160	Marionette	WARN	TLS certificate errors will be ignored for this session
+1627991290235	Marionette	INFO	Stopped listening on port 52603
+7991272886	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--use-temporary-user-data-dir" "-foreground" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileT1aL73"
+1627991274134	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileT1aL73\\search.json.mozlz4", (void 0)))
+1627991279445	Marionette	INFO	Listening on port 65477
+1627991279827	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript warning: https://assetscdn-wchat.freshchat.com/static/assets/vendor-7271dd2c6f5a2ec68e560546492f67ed.js, line 6968: unreachable code after return statement
+[Child 15124, MediaDecoderStateMachine #1] WARNING: 28d9a444ba0 Could not set cubeb stream name.: file /builds/worker/checkouts/gecko/dom/media/AudioStream.cpp:367
+console.error: services.settings: 
+  main/doh-providers Signature failed  InvalidSignatureError: Invalid content signature (main/doh-providers)
+console.error: services.settings: 
+  main/doh-providers local data was corrupted
+console.warn: services.settings: main/doh-providers Signature verified failed. Retry from scratch
+console.error: services.settings: 
+  main/doh-config Signature failed  InvalidSignatureError: Invalid content signature (main/doh-config)
+console.error: services.settings: 
+  main/doh-config local data was corrupted
+console.warn: services.settings: main/doh-config Signature verified failed. Retry console.error:console.log: WebExtensions: reset-default-search: starting.
+console.log: WebExtensions: reset-default-search: No addons in our list are installed.
+
+###!!! [Child][MessageChannel] Error: (msgtype=0x590008,name=PHttpChannel::Msg_DeletingChannel) Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][MessageChannel] Error: (msgtype=0x23002E,name=PBrowser::Msg___delete__) Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Parent][MessageChannel1627993500078	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--use-temporary-user-data-dir" "-foreground" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileW5tSVm"
+1627993501120	Marionette	INFO	Marionette enabled
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileW5tSVm\\search.json.mozlz4", (void 0)))
+1627993506999	Marionette	INFO	Listening on port 64932
+1627993507063	Marionette	WARN	TLS certificate errors will be ignored for this session
+console.error: services.settings: 
+  main/doh-providers Sig

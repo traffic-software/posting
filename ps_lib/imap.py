@@ -19,12 +19,18 @@ class imap:
 	ps_messges=None
 	
 
-	def __init__(self, username, password, hosturl):
+	def __init__(self, account_id=False,username=False, password=False, hosturl=False):
 		self.username = username
 		self.password = password
 		self.hosturl = hosturl
 		self.i= IMAPClient(host=hosturl)
-		self.login()
+		try:
+			self.login()
+		except:
+			if account_id:
+				acc=accounts()
+				acc.ban_3(account_id)
+
 		
 
 	def login(self):

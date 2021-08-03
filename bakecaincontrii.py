@@ -77,7 +77,7 @@ def main(account_data,url,postinfo,packages_id):
 	
 	ps_data = account_data['data'].split(":")
 	email = ps_data[0]
-	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+	popmail = imap(account_data['id'],ps_data[0], ps_data[1], ps_data[2])
 	popmail.messages(email)
 	popmail.close()
 	ages = [21,22,23,24,25,26,27,28,29,30]
@@ -189,7 +189,7 @@ def main(account_data,url,postinfo,packages_id):
 setup = table()
 setup.license_verify()
 #w = int(input('how much worker you need? '))
-packages_id = input('proxy info by a line : ')
+packages_id = 'no'#input('proxy info by a line : ')
 # worker = w + 1
 worker = 2
 # ........................start worker....................
