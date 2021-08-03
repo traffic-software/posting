@@ -5,16 +5,14 @@ RUN apt-get update -y
 RUN apt-get install sudo -y
 RUN apt-get install python3 -y
 RUN sudo apt install python3-pip -y
-RUN python3 -m pip install selenium
 RUN python3 -m pip install requests
 RUN python3 -m pip install zipfile38
 RUN python3 -m pip install imapclient
 RUN python3 -m pip install python_anticaptcha
 RUN python3 -m pip install chardet
-RUN python3 -m pip install PyEmailTools
+RUN python3 -m pip install PyEmailTools -y
 RUN sudo apt-get install wget -y
 RUN sudo apt-get install unzip -y
-RUN apt-get install firefox-esr -y
 ADD . /home/
 RUN sudo apt-get install openssh-server -y
 RUN sudo systemctl enable ssh

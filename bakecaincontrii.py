@@ -13,27 +13,7 @@ from ps_lib.post import post
 from ps_lib.captcha import capcha
 from ps_lib.imap import imap
 import random
-# from pynput.mouse import Button, Controller
 
-# mouse = Controller()
-# input('place Your mouse on the tuxler vpn IP change button then type any key in your keyboard')
-# # Read pointer position
-# x,y=mouse.position
-# # Set pointer position
-# mouse.position = (x,y)
-# mouse.move(1,1)
-# # Press and release
-# mouse.press(Button.left)
-# mouse.release(Button.left)
-
-# Double click; this is different from pressing and releasing
-# twice on macOS
-# mouse.click(Button.left, 2)
-
-# Scroll two steps down
-# mouse.scroll(0, 2)
-# b = browser('545')
-#
 # b.get_url('http://httpbin.org/get')
 # exit()
 
