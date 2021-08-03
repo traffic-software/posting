@@ -54,7 +54,3 @@ class capcha:
 			else:
 				print('CAPCHA_NOT_READY')
 		return text
-
-
-
-

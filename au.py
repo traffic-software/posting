@@ -14,25 +14,6 @@ from ps_lib.captcha import capcha
 from ps_lib.imap import imap
 import random
 import sys
-# from pynput.mouse import Button, Controller
-
-# mouse = Controller()
-# input('place Your mouse on the tuxler vpn IP change button then type any key in your keyboard')
-# # Read pointer position
-# x,y=mouse.position
-# # Set pointer position
-# mouse.position = (x,y)
-# mouse.move(1,1)
-# # Press and release
-# mouse.press(Button.left)
-# mouse.release(Button.left)
-
-# Double click; this is different from pressing and releasing
-# twice on macOS
-# mouse.click(Button.left, 2)
-
-# Scroll two steps down
-# mouse.scroll(0, 2)
 # b = browser('545')
 #
 # b.get_url('http://httpbin.org/get')
@@ -123,7 +104,7 @@ def main(account_data,url,postinfo,packages_id):
 
 	site_url = b.current_url()
 
-	chacha_key = chacha_worker.two_captcha('ced407c5-238b-4144-9b59-4dcd58092d36', site_url)
+	chacha_key = chacha_worker.two_captcha('dc111e73-c47b-417a-bb11-44ae4b3734aa', site_url)
 
 	chacha_respons = b.driver.find_element_by_name('h-captcha-response')
 	print('h-captcha-response')
