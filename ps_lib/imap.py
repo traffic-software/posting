@@ -19,7 +19,7 @@ class imap:
 	ps_messges=None
 	
 
-	def __init__(self, username, password, hosturl):
+	def __init__(self, account_id=False,username=False, password=False, hosturl=False):
 		self.username = username
 		self.password = password
 		self.hosturl = hosturl
