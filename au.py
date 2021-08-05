@@ -31,8 +31,8 @@ def main(account_data,url,postinfo,packages_id):
 
 
 	worker = psThread(account_id)
-	b = browser(account_id,packages_id,proxy_company='proxyrotator',proxy_country="AU")
-	time.sleep(10)
+	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="Australia")
+	time.sleep(5)
 	worker_acc=accounts()
 	# time.sleep(120)
 	b.get_url(url)
@@ -106,18 +106,22 @@ def main(account_data,url,postinfo,packages_id):
 	site_url = b.current_url()
 
 	chacha_key = chacha_worker.two_captcha('dc111e73-c47b-417a-bb11-44ae4b3734aa', site_url)
+	try:
 
-	chacha_respons = b.driver.find_element_by_name('h-captcha-response')
-	print('h-captcha-response')
-	b.script_run("document.getElementById('{0}').style.display = 'block';".format(chacha_respons.get_attribute('id')))
-	print('h-captcha-response block')
-	print(chacha_key)
-	script = 'document.getElementById("{0}").innerHTML="{1}";'.format(chacha_respons.get_attribute('id'),chacha_key)
-	
-	b.script_run(script)
-	print('g-recaptcha-response set data')
-	b.script_run("document.getElementById('{0}').style.display = 'none';".format(chacha_respons.get_attribute('id')))
-	print('g-recaptcha-response none')
+		chacha_respons = b.driver.find_element_by_name('h-captcha-response')
+		print('h-captcha-response')
+		b.script_run("document.getElementById('{0}').style.display = 'block';".format(chacha_respons.get_attribute('id')))
+		print('h-captcha-response block')
+		print(chacha_key)
+		script = 'document.getElementById("{0}").innerHTML="{1}";'.format(chacha_respons.get_attribute('id'),chacha_key)
+		
+		b.script_run(script)
+		print('h-captcha-response set data')
+		b.script_run("document.getElementById('{0}').style.display = 'none';".format(chacha_respons.get_attribute('id')))
+		print('h-captcha-response none')
+	except:
+		print('h-captcha error')
+		
 
 
 

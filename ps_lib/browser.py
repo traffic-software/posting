@@ -16,6 +16,7 @@ import sys
 import zipfile
 import warnings
 import random
+import string
 class browser:
 	account_id=None
 
@@ -34,14 +35,26 @@ class browser:
 			self.use_proxy =False
 		if self.use_proxy:
 			self.packages_id = packages_id
-			self.PROXY = str(self.proxy())
-			# self.PROXY = '95.179.185.17:44763'
-			proxy = self.PROXY.split(":")
-			self.PROXY_TYPE = 'http'# rotating proxy or host
-			self.PROXY_HOST =  proxy[0]# rotating proxy or host
-			self.PROXY_PORT =  proxy[1] # port
 			self.PROXY_USER = 'malaknoyn100' # username
 			self.PROXY_PASS = '51310fe4' # password
+			
+			#............packetstream.io......................
+			if self.proxy_company =="packetstream":
+				self.PROXY_TYPE = 'http'
+				self.PROXY_HOST = "proxy.packetstream.io"
+				self.PROXY_PORT = 31112
+				self.PROXY_USER = "malaknoyn"
+				self.PROXY_PASS = "4mdloQgXxS8lcB3J_country-%s_session-%s"% (self.proxy_country,''.join(random.choice(string.ascii_letters) for i in range(10)))
+			else:
+				#............Normal rotating proxy......................
+				self.PROXY = str(self.proxy())
+				proxy = self.PROXY.split(":")
+				self.PROXY_HOST =  proxy[0]
+				self.PROXY_PORT =  proxy[1]
+				self.PROXY_TYPE = 'http'
+			
+			
+			
 			self.proxy_auth_plugin()
 
 		
@@ -91,6 +104,7 @@ class browser:
 	def proxy(self):
 		while True:
 			try:
+				
 				#............rsocks.net......................
 				if self.proxy_company =="rsocks":
 					
@@ -127,6 +141,7 @@ class browser:
 					resp = requests.get(url,params=params, timeout=3)
 					
 					data = json.loads(resp.text)
+					proxy
 					proxy = data['proxy']
 
 
@@ -147,6 +162,8 @@ class browser:
 		
 		
 		try:
+			if self.proxy_company =="packetstream":
+				data  = self.PROXY_USER+":"+self.PROXY_PASS+"@"+data
 			
 			proxies = {"http": 'http://'+data,"https": 'http://'+data}
 				
