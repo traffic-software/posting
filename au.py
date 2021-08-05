@@ -11,6 +11,7 @@ from ps_lib.helper import helper
 from ps_lib.ps_setup import table
 from ps_lib.post import post
 from ps_lib.captcha import capcha
+from ps_lib.ps_str import ps_str
 from ps_lib.imap import imap
 import random
 import sys
@@ -23,7 +24,7 @@ def resource_path(relative_path):
 	""" Get absolute path to resource, works for dev and for PyInstaller """
 	base_path = getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__)))
 	return path.join(base_path, relative_path)
-def main(account_data,url,postinfo,packages_id):
+def main(account_data,url,postinfo,packages_id,body_mail):
 	#show work start time
 	print(datetime.now().strftime("%H:%M:%S"))
 	# thread name
@@ -82,12 +83,14 @@ def main(account_data,url,postinfo,packages_id):
 	ages = [21,22,23,24,25,26,27,28,29,30]
 	age = random.choice(ages)
 	b_sub = b.select_element('[name="title"]')
-	b_sub.send_keys(postinfo['subject'])
+	postsub = ps_str(postinfo['subject'])
+	b_sub.send_keys(postsub.Spin())
 	b.scroll_element_into_view(b_sub)
 	
 	b_body = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[3]/textarea')
 	b.scroll_element_into_view(b_body)
-	b_body.send_keys(postinfo['body'])
+	postbody = ps_str(postinfo['body'])
+	b_body.send_keys(postbody.with_email(body_mail))
 	b_age = b.select_element('[name="age"]')
 	b_age.send_keys(age)
 	b_email = b.select_element('[name="email"]')
@@ -121,7 +124,7 @@ def main(account_data,url,postinfo,packages_id):
 		print('h-captcha-response none')
 	except:
 		print('h-captcha error')
-		
+
 
 
 
@@ -260,6 +263,8 @@ while True:
 		one_account = acc.get_account()
 		
 		postinfo = post.get_post()
+		body_mail=post.get_body_mail()
+		
 		if one_account == None or postinfo == None:
 			print('post or account not find for worker')
 			time.sleep(60)
@@ -270,7 +275,7 @@ while True:
 		if path.isdir('profiles/' +str(one_account['id'])) == True:
 			shutil.rmtree('profiles/' +str(one_account['id']))
 
-		t = threading.Thread(target=main, args=(one_account,url,postinfo,packages_id,))
+		t = threading.Thread(target=main, args=(one_account,url,postinfo,packages_id,body_mail,))
 		acc.account_inactive(one_account['id'])
 		acc.post_done(one_account['id'])
 

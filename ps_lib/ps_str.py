@@ -58,5 +58,9 @@ class ps_str:
 		for spec in itertools.product(*opt_lists):
 			texts.append(''.join(spec))
 		text=random.choice(texts)
+		self.str = text
 		return text
+	def with_email(self,email):
+		self.Spin()
+		return self.str.replace("#email#", email)
 
