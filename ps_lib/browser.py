@@ -103,8 +103,9 @@ class browser:
 					resp = requests.post('https://rsocks.net/api/v1/file/get-proxy', headers=headers,timeout=1)
 					
 					data = json.loads(resp.text)
-					# print(data['packages'])
+					
 					# data = random.choice(data['packages'])
+					print(data['packages'])
 					# proxy = rendomip=random.choice(data['ips'])
 					data = data['packages'][self.packages_id]['ips']
 					
@@ -365,7 +366,7 @@ class browser:
 					host: "%s",
 					port: parseInt(%s)
 				},
-				bypassList: ["localhost"]
+				bypassList: ["localhost","whatismyipaddress.com","*nr-data.net","*cloudflare.com","*newrelic.com","*google-analytics.com","*googletagmanager.com"]
 				}
 			};
 
@@ -386,6 +387,65 @@ class browser:
 					['blocking']
 		);
 		""" % (self.PROXY_TYPE,self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
+		pluginfile = 'proxy_auth_plugin.zip'
+		zp=zipfile.ZipFile(pluginfile, 'w')
+		zp.writestr("manifest.json", manifest_json)
+		zp.writestr("background.js", background_js)
+		self.options.add_extension(pluginfile)
+	
+	def proxy_auth_plugin_pac_script(self):
+
+
+		manifest_json = """
+		{
+			"version": "1.0.0",
+			"manifest_version": 2,
+			"name": "Chrome Proxy",
+			"permissions": [
+				"proxy",
+				"tabs",
+				"unlimitedStorage",
+				"storage",
+				"<all_urls>",
+				"webRequest",
+				"webRequestBlocking"
+			],
+			"background": {
+				"scripts": ["background.js"]
+			},
+			"minimum_chrome_version":"22.0.0"
+		}
+		"""
+
+		background_js = """
+		var config = {
+		mode: "pac_script",
+		pacScript: {
+			data: "function FindProxyForURL(url, host) {\n" +
+				"  shExpMatch(url, "https://www.google.com/search/*"))\n" +
+				"    return 'PROXY %s:%s';\n" +
+				"  return 'DIRECT';\n" +
+				"}"
+		}
+		};
+
+		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
+
+		function callbackFn(details) {
+			return {
+				authCredentials: {
+					username: "%s",
+					password: "%s"
+				}
+			};
+		}
+
+		chrome.webRequest.onAuthRequired.addListener(
+					callbackFn,
+					{urls: ["<all_urls>"]},
+					['blocking']
+		);
+		""" % (self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
 		pluginfile = 'proxy_auth_plugin.zip'
 		zp=zipfile.ZipFile(pluginfile, 'w')
 		zp.writestr("manifest.json", manifest_json)
