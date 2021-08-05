@@ -36,6 +36,8 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 	time.sleep(5)
 	worker_acc=accounts()
 	# time.sleep(120)
+	b.get_url("https://api.myip.com")
+	print(b.page_source())
 	b.get_url(url)
 	
 	try:

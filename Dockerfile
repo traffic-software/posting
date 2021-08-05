@@ -1,4 +1,5 @@
-FROM selenium/standalone-chrome
+# FROM selenium/standalone-chrome
+FROM dorowu/ubuntu-desktop-lxde-vnc
 
 
 USER root
@@ -13,6 +14,8 @@ RUN python3 -m pip install imapclient
 RUN python3 -m pip install python_anticaptcha
 RUN python3 -m pip install chardet
 RUN python3 -m pip install PyEmailTools
+#export http_proxy="http://malaknoyn:4mdloQgXxS8lcB3J@proxy.packetstream.io:31112"
+#https://computingforgeeks.com/how-to-set-system-wide-proxy-on-ubuntu-debian/
 ADD . /mydir/
 
 RUN sudo apt-get install openssh-server -y

@@ -104,7 +104,14 @@ class browser:
 	def proxy(self):
 		while True:
 			try:
-				
+				#............packetstream.io......................
+				if self.proxy_company =="packetstream":
+					self.PROXY_HOST = "proxy.packetstream.io"
+					self.PROXY_PORT = 31112
+					self.PROXY_USER = "malaknoyn"
+					self.PROXY_PASS = "4mdloQgXxS8lcB3J_country-%s_session-%s"% (self.proxy_country,''.join(random.choice(string.ascii_letters) for i in range(10)))
+					proxy = 'proxy.packetstream.io:31112'
+					break
 				#............rsocks.net......................
 				if self.proxy_company =="rsocks":
 					
