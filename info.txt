@@ -1,3 +1,27 @@
 nano /etc/sysctl.conf
 net.ipv6.conf.all.disable_ipv6 = 1
 sysctl -p
+route -n
+
+#docker save -o au.tar au
+# docker load -i au.tar
+docker network create -d macvlan \
+  --subnet=192.168.0.0/24 \
+  --gateway=192.168.0.1 \
+  -o parent=enp0s25 router_net
+docker run  -d -it \
+ --network router_net -p 22:22 \
+ --add-host worker-3:192.168.0.198 \
+ --ip=192.168.0.198 --name worker-3 au
+
+docker ps 
+docker exec -it id /bin/bash
+
+sudo su 
+cd ../mydir/ && python3 au.py
+reboot
+shutdown -h 0
+
+docker container stop id
+docker container start id
+docker container rm id

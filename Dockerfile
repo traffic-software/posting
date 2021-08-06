@@ -15,7 +15,7 @@ RUN python3 -m pip install python_anticaptcha
 RUN python3 -m pip install chardet
 RUN python3 -m pip install PyEmailTools
 RUN python3 -m pip install pyvirtualdisplay
-
+RUN apt-get install -y net-tools
 ADD . /mydir/
 
 RUN sudo apt-get install openssh-server -y
