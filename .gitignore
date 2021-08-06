@@ -1,4 +1,7 @@
 dist
 build
 .vscode
+*.tar
+*.zip
+
 

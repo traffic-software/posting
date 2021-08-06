@@ -29,4 +29,6 @@ CMD ["/usr/sbin/sshd","-D"]
 
 # docker build . -t selenium-chrome && \
 # docker run -it selenium-chrome python3
+#docker save -o au.tar au
+# docker load -i au.tar
 #docker  run -e HTTP_PROXY=http://malaknoyn:4mdloQgXxS8lcB3J@proxy.packetstream.io:31112 -e HTTPS_PROXY=http://malaknoyn:4mdloQgXxS8lcB3J@proxy.packetstream.io:31112 au
