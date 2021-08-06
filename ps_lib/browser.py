@@ -58,21 +58,6 @@ class browser:
 			self.proxy_auth_plugin()
 
 		
-		
-		
-		###################normal proxy use#########
-
-
-		# prox = Proxy()
-		# prox.proxy_type = ProxyType.MANUAL
-		# prox.http_proxy = self.PROXY
-		# # prox.socks_proxy = self.PROXY
-		# prox.ssl_proxy = self.PROXY
-		# Chrome_capabilities = webdriver.DesiredCapabilities.CHROME
-		# prox.add_to_capabilities(Chrome_capabilities)
-
-
-		
 		if sys.platform in ['Windows', 'win32', 'cygwin']:
 			driverUrl = 'chromedriver.exe'
 		else:
@@ -83,18 +68,13 @@ class browser:
 		
 		# self.options.add_argument(f'user-agent={a}')
 
-		# self.options.add_argument('--proxy-server=http://%s' %self.PROXY )
-		# self.options.add_argument("--remote-debugging-port=9222")
 		
 		if sys.platform not in ['Windows', 'win32', 'cygwin']:
-			self.options.add_argument("--headless")
 			self.options.add_argument("--disable-gpu")
 			self.options.add_argument("start-maximized")
-			self.options.add_argument("--remote-debugging-port=9222")
 			
 		
-		self.options.add_argument("--use-temporary-user-data-dir")
-		# self.options.add_argument("--use-temporary-user-data-dir=profiles\\"+pofileLocation)
+		self.options.add_argument("--user-data-dir=profiles\\"+str(self.account_id))
 		self.driver = webdriver.Chrome(driverUrl,chrome_options=self.options)
 		
 		
@@ -104,14 +84,7 @@ class browser:
 	def proxy(self):
 		while True:
 			try:
-				#............packetstream.io......................
-				if self.proxy_company =="packetstream":
-					self.PROXY_HOST = "proxy.packetstream.io"
-					self.PROXY_PORT = 31112
-					self.PROXY_USER = "malaknoyn"
-					self.PROXY_PASS = "4mdloQgXxS8lcB3J_country-%s_session-%s"% (self.proxy_country,''.join(random.choice(string.ascii_letters) for i in range(10)))
-					proxy = 'proxy.packetstream.io:31112'
-					break
+				
 				#............rsocks.net......................
 				if self.proxy_company =="rsocks":
 					

@@ -1,4 +1,5 @@
 import threading
+from pyvirtualdisplay import Display
 from selenium.webdriver.common.keys import Keys
 import time
 import shutil
@@ -15,6 +16,7 @@ from ps_lib.ps_str import ps_str
 from ps_lib.imap import imap
 import random
 import sys
+
 # b = browser('545')
 #
 # b.get_url('http://httpbin.org/get')
@@ -26,18 +28,22 @@ def resource_path(relative_path):
 	return path.join(base_path, relative_path)
 def main(account_data,url,postinfo,packages_id,body_mail):
 	#show work start time
-	print(datetime.now().strftime("%H:%M:%S"))
+	starttime=datetime.now().strftime("%H:%M:%S")
 	# thread name
 	account_id = threading.currentThread().getName()
 
 
 	worker = psThread(account_id)
+	display = Display(visible=0, size=(1024, 768))
+	display.start()
 	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="Australia")
 	time.sleep(5)
 	worker_acc=accounts()
 	# time.sleep(120)
-	b.get_url("https://api.myip.com")
-	print(b.page_source())
+	# b.get_url("http://httpbin.org/get")
+	# b.get_url("https://api.myip.com")
+	
+	# print(b.page_source())
 	b.get_url(url)
 	
 	try:
@@ -207,10 +213,12 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 
 	b.exit()
 	popmail.close()
+	display.stop()
 	
 
 
-	print(datetime.now().strftime("%H:%M:%S"))
+	print('start :',starttime)
+	print('end :',datetime.now().strftime("%H:%M:%S"))
 
 
 

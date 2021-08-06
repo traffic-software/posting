@@ -71,7 +71,7 @@ class accounts:
 
     def account_Reactive(self):
         c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -2)
+        now = datetime.now()+ timedelta(days= -3)
         
         
         # c.execute("SELECT * FROM account WHERE runing = 0")

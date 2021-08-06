@@ -1,5 +1,5 @@
-# FROM selenium/standalone-chrome
-FROM dorowu/ubuntu-desktop-lxde-vnc
+FROM selenium/standalone-chrome
+# FROM dorowu/ubuntu-desktop-lxde-vnc
 
 
 USER root
@@ -14,8 +14,8 @@ RUN python3 -m pip install imapclient
 RUN python3 -m pip install python_anticaptcha
 RUN python3 -m pip install chardet
 RUN python3 -m pip install PyEmailTools
-#export http_proxy="http://malaknoyn:4mdloQgXxS8lcB3J@proxy.packetstream.io:31112"
-#https://computingforgeeks.com/how-to-set-system-wide-proxy-on-ubuntu-debian/
+RUN python3 -m pip install pyvirtualdisplay
+
 ADD . /mydir/
 
 RUN sudo apt-get install openssh-server -y
@@ -29,3 +29,4 @@ CMD ["/usr/sbin/sshd","-D"]
 
 # docker build . -t selenium-chrome && \
 # docker run -it selenium-chrome python3
+#docker  run -e HTTP_PROXY=http://malaknoyn:4mdloQgXxS8lcB3J@proxy.packetstream.io:31112 -e HTTPS_PROXY=http://malaknoyn:4mdloQgXxS8lcB3J@proxy.packetstream.io:31112 au
