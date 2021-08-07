@@ -8,7 +8,8 @@ from selenium import webdriver
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
 import json, requests
-# from fake_useragent import UserAgent
+import os, time
+from fake_useragent import UserAgent
 import time
 from sys import exit
 import os
@@ -63,10 +64,10 @@ class browser:
 		else:
 			driverUrl = '/usr/bin/chromedriver'
 
-		# ua = UserAgent(cache=False)
-		# a = ua.safari
+		ua = UserAgent(cache=False)
+		a = ua.safari
 		
-		# self.options.add_argument(f'user-agent={a}')
+		self.options.add_argument(f'user-agent={a}')
 
 		
 		if sys.platform not in ['Windows', 'win32', 'cygwin']:
@@ -74,12 +75,14 @@ class browser:
 			self.options.add_argument("start-maximized")
 			
 		
-		self.options.add_argument("--user-data-dir=profiles\\"+str(self.account_id))
+		self.options.add_argument("--use-temporary-user-data-dir")
+		# self.options.add_argument("--user-data-dir=profiles\\"+str(self.account_id))
 		self.driver = webdriver.Chrome(driverUrl,chrome_options=self.options)
 		
 		
 
 	def exit(self):
+
 		self.driver.quit()
 	def proxy(self):
 		while True:
@@ -363,7 +366,7 @@ class browser:
 					host: "%s",
 					port: parseInt(%s)
 				},
-				bypassList: ["localhost","whatismyipaddress.com","*nr-data.net","*cloudflare.com","*newrelic.com","*google-analytics.com","*googletagmanager.com"]
+				bypassList: ["localhost"]
 				}
 			};
 
