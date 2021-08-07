@@ -3,5 +3,6 @@ build
 .vscode
 *.tar
 *.zip
+*.bd
 
 

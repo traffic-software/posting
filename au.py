@@ -34,8 +34,7 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 
 
 	worker = psThread(account_id)
-	display = Display(visible=0, size=(1024, 768))
-	display.start()
+	
 	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="Australia")
 	time.sleep(5)
 	worker_acc=accounts()
@@ -130,8 +129,8 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 		print('h-captcha-response set data')
 		b.script_run("document.getElementById('{0}').style.display = 'none';".format(chacha_respons.get_attribute('id')))
 		print('h-captcha-response none')
-	except:
-		print('h-captcha error')
+	except Exception as e:
+		print('h-captcha error',e)
 
 
 
@@ -213,7 +212,7 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 
 	b.exit()
 	popmail.close()
-	display.stop()
+	
 	
 
 
@@ -244,6 +243,9 @@ urls = ['https://au.skokka.com/u/post-insert/']
 acc = accounts()
 post = post()
 co=0
+if sys.platform not in ['Windows', 'win32', 'cygwin']:
+	display = Display(visible=0, size=(1024, 768))
+	display.start()
 while True:
 	utility.network_check()
 	if co >3:
