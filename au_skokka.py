@@ -30,20 +30,12 @@ def resource_path(relative_path):
 def main(account_data,url,postinfo,packages_id,body_mail):
 	#show work start time
 	starttime=datetime.now().strftime("%H:%M:%S")
-	# thread name
-	account_id = threading.currentThread().getName()
-
-
-	worker = psThread(account_id)
+	
+	account_id = account_data['id']
 	p_pass= "4mdloQgXxS8lcB3J_country-Australia_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(10)))
 	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="Australia",proxy_user='malaknoyn',proxy_pass=p_pass)
 	time.sleep(5)
 	worker_acc=accounts()
-	# time.sleep(120)
-	# b.get_url("http://httpbin.org/get")
-	# b.get_url("https://api.myip.com")
-	
-	# print(b.page_source())
 	b.get_url(url)
 	
 	try:
@@ -85,7 +77,7 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 	
 	ps_data = account_data['data'].split(":")
 	email = ps_data[0]
-	popmail = imap(account_data['id'],ps_data[0], ps_data[1], ps_data[2])
+	popmail = imap(account_id,ps_data[0], ps_data[1], ps_data[2])
 	popmail.messages(mail_from='no_reply@skokka.com')
 	popmail.close()
 	ages = [21,22,23,24,25,26,27,28,29,30]
@@ -170,7 +162,7 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 	# exit()
 
 
-	popmail = imap(account_data['id'],ps_data[0], ps_data[1], ps_data[2])
+	popmail = imap(account_id,ps_data[0], ps_data[1], ps_data[2])
 	
 
 	counter=0
@@ -231,9 +223,8 @@ setup.license_verify()
 # packages_id = input('proxy info by a line : ')
 packages_id = '317345'
 # worker = w + 1
-worker = 2
+
 # ........................start worker....................
-open('active.txt', "w+")
 utility = helper()
 threads = []
 headers = {}
@@ -249,57 +240,26 @@ if sys.platform not in ['Windows', 'win32', 'cygwin']:
 	display.start()
 while True:
 	utility.network_check()
-	if co >3:
-		co=0
-		# mouse.position = (x, y)
-		# mouse.move(1, 1)
-		# # Press and release
-		# mouse.press(Button.left)
-		# mouse.release(Button.left)
-		# mouse.press(Button.left)
-		# mouse.release(Button.left)
 
 	acc.save()
 
 	acc.account_Reactive()
 	post.save()
-
-
-
-	if worker > threading.active_count():
-
-
-
-
-		url = random.choice(urls)
-
-		one_account = acc.get_account()
-		
-		postinfo = post.get_post()
-		body_mail=post.get_body_mail()
-		
-		if one_account == None or postinfo == None:
-			print('post or account not find for worker')
-			time.sleep(60)
-			continue
-		print('account last use time is : ',one_account['used_at'])
+	url = random.choice(urls)
+	one_account = acc.get_account()
+	postinfo = post.get_post()
+	body_mail=post.get_body_mail()
+	if one_account == None or postinfo == None:
+		print('post or account not find for worker')
+		time.sleep(60)
+		continue
+	print('account last use time is : ',one_account['used_at'])
 		
 
-		if path.isdir('profiles/' +str(one_account['id'])) == True:
-			shutil.rmtree('profiles/' +str(one_account['id']))
+	if path.isdir('profiles/' +str(one_account['id'])) == True:
+		shutil.rmtree('profiles/' +str(one_account['id']))
 
-		t = threading.Thread(target=main, args=(one_account,url,postinfo,packages_id,body_mail,))
-		acc.account_inactive(one_account['id'])
-		acc.post_done(one_account['id'])
+	main(one_account,url,postinfo,packages_id,body_mail)
+	acc.account_inactive(one_account['id'])
+	acc.post_done(one_account['id'])
 
-		threads.append(t)
-		t.setName(one_account['id'])
-		t.start()
-		
-
-		co = co+1
-
-	else:
-
-		# print('..............active thread :' + str(threading.active_count()) + '...............')
-		time.sleep(2)

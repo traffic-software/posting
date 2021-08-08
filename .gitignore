@@ -3,6 +3,7 @@ build
 .vscode
 *.tar
 *.zip
-*.bd
+*.db
+__pycache__
 
 

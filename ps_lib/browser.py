@@ -22,7 +22,7 @@ class browser:
 	account_id=None
 
 
-	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT"):
+	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT",proxy_user='malaknoyn100',proxy_pass="51310fe4"):
 		
 		self.proxy_country = proxy_country
 		self.proxy_company = proxy_company
@@ -36,23 +36,16 @@ class browser:
 			self.use_proxy =False
 		if self.use_proxy:
 			self.packages_id = packages_id
-			self.PROXY_USER = 'malaknoyn100' # username
-			self.PROXY_PASS = '51310fe4' # password
+			self.PROXY_USER = proxy_user # username
+			self.PROXY_PASS = proxy_pass # password
 			
-			#............packetstream.io......................
-			if self.proxy_company =="packetstream":
-				self.PROXY_TYPE = 'http'
-				self.PROXY_HOST = "proxy.packetstream.io"
-				self.PROXY_PORT = 31112
-				self.PROXY_USER = "malaknoyn"
-				self.PROXY_PASS = "4mdloQgXxS8lcB3J_country-%s_session-%s"% (self.proxy_country,''.join(random.choice(string.ascii_letters) for i in range(10)))
-			else:
-				#............Normal rotating proxy......................
-				self.PROXY = str(self.proxy())
-				proxy = self.PROXY.split(":")
-				self.PROXY_HOST =  proxy[0]
-				self.PROXY_PORT =  proxy[1]
-				self.PROXY_TYPE = 'http'
+			
+			#............Normal rotating proxy......................
+			self.PROXY = str(self.proxy())
+			proxy = self.PROXY.split(":")
+			self.PROXY_HOST =  proxy[0]
+			self.PROXY_PORT =  proxy[1]
+			self.PROXY_TYPE = 'http'
 			
 			
 			
@@ -87,7 +80,12 @@ class browser:
 	def proxy(self):
 		while True:
 			try:
-				
+				if self.proxy_company =="packetstream":
+					self.PROXY_HOST = "proxy.packetstream.io"
+					self.PROXY_PORT = 31112
+					# self.PROXY_USER = "malaknoyn"
+					# self.PROXY_PASS = "4mdloQgXxS8lcB3J_country-%s_session-%s"% (self.proxy_country,''.join(random.choice(string.ascii_letters) for i in range(10)))
+					proxy = "%s:%s"%(self.PROXY_HOST,self.PROXY_PORT)
 				#............rsocks.net......................
 				if self.proxy_company =="rsocks":
 					
@@ -124,7 +122,6 @@ class browser:
 					resp = requests.get(url,params=params, timeout=3)
 					
 					data = json.loads(resp.text)
-					proxy
 					proxy = data['proxy']
 
 
@@ -145,31 +142,40 @@ class browser:
 		
 		
 		try:
+			
 			if self.proxy_company =="packetstream":
 				data  = self.PROXY_USER+":"+self.PROXY_PASS+"@"+data
+			proxie = {"http": 'http://'+data,"https": 'http://'+data}
 			
-			proxies = {"http": 'http://'+data,"https": 'http://'+data}
+			
 				
-			url = "http://api.myip.com"
+			url = "http://ip-api.com/json"
 			timeout = 10
-			request = requests.get(url, timeout=timeout,proxies=proxies)
-			if self.proxy_save(data, json.loads(request.text)):
+			r = requests.get(url, timeout=timeout,proxies=proxie)
+			if self.proxy_save(data, json.loads(r.text)):
+				
 				return True
 			else:
 				return False
+		
 		except (requests.ConnectionError, requests.Timeout,) as exception:
 			print('proxy error' ,exception)
 			time.sleep(5)
 			return False
+
 	def proxy_save(self,px,p):
-		print(p)
+		
+		
 		try:
 			
-			ip =p['ip']
-			my_file = open('proxy.txt', 'a')
-			data = str(px)+':'+str(ip)+"\n"
-			my_file.write(data)
-			my_file.close()
+			ipinfo = {'status': 'success','timezone': 'Australia/Hobart', 'isp': 'Telstra Internet', 'org': '', 'as': 'AS1221 Telstra Corporation Ltd', 'query': '110.141.67.27'}
+			
+			if sys.platform not in ['Windows', 'win32', 'cygwin']:
+				time.strftime('%X %x %Z')
+				os.environ['TZ'] = p["timezone"]
+				time.tzset()
+				time.strftime('%X %x %Z')
+			
 			return True
 		except :
 			print('proxy error')
