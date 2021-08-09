@@ -8,10 +8,11 @@ class capcha:
 	tow_api=None
 	type = None
 
-	def __init__(self,anti_api_key=None,tow_api_key=None,type=None):
+	def __init__(self,anti_api_key=None,tow_api_key=None,type=None,lan='en'):
 		self.anti_api = anti_api_key
 		self.tow_api = tow_api_key
 		self.type = type
+		self.lan = lan 
 
 
 	def anticaptcha(self,siteKe,pageUrl):
@@ -32,10 +33,10 @@ class capcha:
 
 		try:
 			if self.type == 1:
-				data = requests.get("http://2captcha.com/in.php?lang=en&key={0}&method=hcaptcha&sitekey={1}&pageurl={2}".format(self.tow_api, siteKe, pageUrl))
+				data = requests.get("http://2captcha.com/in.php?lang={0}&key={1}&method=hcaptcha&sitekey={2}&pageurl={3}".format(self.lan,self.tow_api, siteKe, pageUrl))
 			
 			else:
-				data = requests.get("http://2captcha.com/in.php?lang=en&key={0}&method=userrecaptcha&googlekey={1}&pageurl={2}".format(self.tow_api, siteKe, pageUrl))
+				data = requests.get("http://2captcha.com/in.php?lang={0}&key={1}&method=userrecaptcha&googlekey={2}&pageurl={3}".format(self.lan,self.tow_api, siteKe, pageUrl))
 			data = data.text.split("|")
 			id = data[1]
 		except:

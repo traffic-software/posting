@@ -3,6 +3,7 @@ from pyvirtualdisplay import Display
 from selenium.webdriver.common.keys import Keys
 import time
 import shutil
+import fnmatch
 from os import path
 from datetime import datetime
 from ps_lib.browser import browser
@@ -58,20 +59,28 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 	time.sleep(2)
 	try:
 		category= b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[2]/div/div[1]/select/option[2]')
+		
 		category.click()
 		#5c8a2993c5591de8c6236nod4e
 	except:
 		print('category error')
 	try:
-		# citys = ["Adelaide","Albury","Ballarat","Bendigo","Brisbane","Bunbury","Bundaberg","Cairns","Canberra","Coffs Harbour","Darwin","Geelong","Gladstone","Gold Coast","Ipswich","Mackay","Mandurah","Melbourne","Newcastle","Perth Western Australia","Port Macquarie","Rockhampton","Sunshine Coast","Sydney","Toowoomba","Townsville"]
-		# city = random.choice(citys)
-		indexs = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
-		index = '//*[@id="app"]/main/div[2]/form/div/div[2]/div/div[2]/select/option[{0}]'.format(random.choice(indexs))
+		citys = ["Sydney","Melbourne","Brisbane","Perth Western Australia","Adelaide","Canberra","Gold Coast","Newcastle","Geelong"]
+		city = random.choice(citys)
+		if b.proxy_city is not None:
+			pattern = '*%s*'%(b.proxy_city)
+			citys = fnmatch.filter(citys, pattern)
+			if len(citys)>0:
+				city = citys[0]
+			
 
-		city = b.select_element_xpath(index)
-		city.click()
+			
 
-		# b.select_dropdown_by_text('[name="city"]',city)
+
+			
+		
+
+		b.select_dropdown_text('city',city)
 	except:
 		print('city error')
 	
@@ -101,7 +110,7 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 	checkbox2 = '''return  $('input[name="terms"]').prop("checked", true)'''
 	b.script_run(checkbox2)
 	# b.captcha()
-	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1)
+	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='en')
 
 
 
@@ -128,13 +137,6 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 
 
 
-	# submit1 =b.select_element('[id="accept-gdpr"]')
-	# submit1.click()
-	try:
-		# b.script_run("return  dontShowMsgPromoVideoChiama('bakecaincontrii.com')")
-		pass
-	except:
-		print('dontShowMsgPromoVideoChiama error')
 	
 
 	# set_submit = b.select_element_xpath('//*[@id="app"]/main/div/form/div/div[10]/div/button')
@@ -148,7 +150,6 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 	# b.script_run(btn_add)
 	b.script_run(btn_click)
 	# except:
-	print('jury error')
 	
 	
 	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button')
@@ -226,10 +227,8 @@ packages_id = '317345'
 
 # ........................start worker....................
 utility = helper()
-threads = []
 headers = {}
 profile_ids = {}
-pid = threading.local()
 urls = ['https://au.skokka.com/u/post-insert/']
 
 acc = accounts()

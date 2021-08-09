@@ -25,6 +25,13 @@ class browser:
 	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT",proxy_user='malaknoyn100',proxy_pass="51310fe4"):
 		
 		self.proxy_country = proxy_country
+		self.proxy_city = None
+		self.proxy_region = None
+		self.proxy_zip = None
+		self.proxy_timezone = None
+		self.proxy_latLon = None
+		self.proxy_isp = None
+		self.proxy_ip = None
 		self.proxy_company = proxy_company
 		self.account_id=pofileLocation
 		warnings.filterwarnings('ignore')
@@ -56,6 +63,7 @@ class browser:
 			driverUrl = 'chromedriver.exe'
 		else:
 			driverUrl = '/usr/bin/chromedriver'
+			
 
 		ua = UserAgent(cache=False)
 		a = ua.safari
@@ -166,12 +174,22 @@ class browser:
 	def proxy_save(self,px,p):
 		
 		
+
+		
 		try:
 			
-			ipinfo = {'status': 'success','timezone': 'Australia/Hobart', 'isp': 'Telstra Internet', 'org': '', 'as': 'AS1221 Telstra Corporation Ltd', 'query': '110.141.67.27'}
+			self.proxy_city = p["city"]
+			self.proxy_region = p['regionName']
+			self.proxy_zip = p['zip']
+			self.proxy_timezone = p['timezone']
+			self.proxy_latLon = str(p['lat'])+":"+str(p["lon"])
+			self.proxy_isp = p['isp']
+			self.proxy_ip = p['query']
 			
 			if sys.platform not in ['Windows', 'win32', 'cygwin']:
+				self.proxy_city = p["city"]
 				time.strftime('%X %x %Z')
+				
 				os.environ['TZ'] = p["timezone"]
 				time.tzset()
 				time.strftime('%X %x %Z')
@@ -207,29 +225,29 @@ class browser:
 			self.exit()
 			exit()
 		return element
-	def select_element_xpath(self,selector):
+	def select_element_xpath(self,selector,mesasage="genarl work"):
 		co = 0
 		element = False
 		while True:
 			try:
 				element = self.driver.find_element_by_xpath(selector)
 				if element.is_displayed() and element.is_enabled():
-					print("element ", selector)
+					print("done : ",mesasage)
 					break
 			except:
 				co = co + 1
 				if co > 10:
 					break
-				print("waiting for ",selector)
+				print("waiting for : ",mesasage)
 				self.driver.implicitly_wait(1)
 		if element == False:
-			print("element not find: ",selector)
+			print("element not find : ",mesasage)
 			account = accounts()
 			account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
-
+	
 	def select_dropdown(self,parent,child):
 		while True:
 			try:
@@ -242,6 +260,20 @@ class browser:
 				time.sleep(1)
 				print("waiting for select_dropdown")
 		dropdown.select_by_value(child)
+		print("select_dropdown")
+		return True
+	def select_dropdown_text(self,parent,child):
+		while True:
+			try:
+				dropdown = Select(self.driver.find_element_by_name(parent))
+
+
+
+				break
+			except:
+				time.sleep(1)
+				print("waiting for select_dropdown")
+		dropdown.select_by_visible_text(child)
 		print("select_dropdown")
 		return True
 	def get_screenshot(self,filename):

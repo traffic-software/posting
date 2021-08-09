@@ -1,8 +1,12 @@
 import threading
-from selenium.webdriver.common.keys import Keys
 import time
 import shutil
+import random
+import string
+import fnmatch
+import sys
 from os import path
+from pyvirtualdisplay import Display
 from datetime import datetime
 from ps_lib.browser import browser
 from ps_lib.accounts import accounts
@@ -11,54 +15,38 @@ from ps_lib.helper import helper
 from ps_lib.ps_setup import table
 from ps_lib.post import post
 from ps_lib.captcha import capcha
+from ps_lib.ps_str import ps_str
 from ps_lib.imap import imap
-import random
+from selenium.webdriver.common.keys import Keys
+
 bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
 
-# mouse = Controller()
-# input('place Your mouse on the tuxler vpn IP change button then type any key in your keyboard')
-# # Read pointer position
-# x,y=mouse.position
-# # Set pointer position
-# mouse.position = (x,y)
-# mouse.move(1,1)
-# # Press and release
-# mouse.press(Button.left)
-# mouse.release(Button.left)
-
-# Double click; this is different from pressing and releasing
-# twice on macOS
-# mouse.click(Button.left, 2)
-
-# Scroll two steps down
-# mouse.scroll(0, 2)
-# b = browser('545')
-#
-# b.get_url('http://httpbin.org/get')
-# exit()
 
 
 
 
+def main(account_data,postinfo,packages_id,body_mail):
+	#work start time
+	starttime=datetime.now().strftime("%H:%M:%S")
 
-def main(account_data,url,postinfo,packages_id):
-	#show work start time
 	print(datetime.now().strftime("%H:%M:%S"))
-	# thread name
-	account_id = threading.currentThread().getName()
-
-
-	worker = psThread(account_id)
-	b = browser(account_id,packages_id)
-	time.sleep(10)
-	worker_acc=accounts()
 	
-	# b.get_url('https://whatismyipaddress.com/')
-	b.get_url(url+'fe/main.php?page=post_insert')
-	# b.get_screenshot('varsion.png')
-	# print('varsion.png')
-	# exit()
+	account_id = account_data['id']
+
+
+	
+	p_pass= "4mdloQgXxS8lcB3J_country-Italy_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(10)))
+	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="Italy",proxy_user='malaknoyn',proxy_pass=p_pass)
+	time.sleep(10)
+	urls = ['brescia','cagliari','campobasso','caserta','catanzaro','cremona','cremona','cuneo','fermo','firenze','forli','genova','grosseto','isernia','laspezia','lecce','livorno','lucca','mantova','matera','messina','modena','napoli','nuoro','olbiatempio','padova','parma','perugia','piacenza','pistoia','potenza','ragusa','reggiocalabria','rieti','roma','salerno','savona','siracusa','taranto','terni','trapani','treviso','varese','verbania','verona','vicenza','viterbo','vibovalentia','vercelli','venezia','urbino','udine','trieste','trento','torino','teramo','sondrio','siena','sassari','rovigo','rimini','reggioemilia','ravenna','prato','pordenone','pisa','pescara','pavia','palermo','oristano','ogliastra','novara','monza','milano','mediocampidano','massacarrara','macerata','lodi','lecco','latina','laquila','imperia','gorizia','frosinone','foggia','ferrara','enna','crotone','cosenza','chieti','catania','carboniaiglesias','caltanissetta','brindisi','bolzano','biella','benevento','barletta','avellino','ascoli','aosta','alessandria']
+	url = random.choice(urls)
+	if b.proxy_city is not None:
+		pattern = '*%s*'%(b.proxy_city)
+		citys = fnmatch.filter(urls, pattern)
+		if len(citys)>0:
+			url = citys[0]
+	b.get_url('https://'+url+'.bakecaincontrii.com/fe/main.php?page=post_insert')
 	try:
 		b.script_run('return  accept_privacy_cookie()')
 	except:
@@ -68,82 +56,90 @@ def main(account_data,url,postinfo,packages_id):
 		b.script_run('return  siaccetto18()')
 	except:
 		print('siaccetto18 error')
-
 	
-
-	# accept2_button = b.select_element('[id="accetto"]')
-	# accept2_button.click()
+	accept1_button = b.select_element_xpath('//*[@id="lightbox-vm18"]/div/div/div[3]/button','accept1_button')
+	accept1_button.click()
+	accept2_button = b.select_element_xpath('//*[@id="app"]/div[3]/button[2]','accept2_button')
+	accept2_button.click()
 
 	
 	try:
-		b.select_dropdown('[id = "categoria-ins"]',"31")
+		# category= b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[2]/div/div[1]/select/option[1]')
+		b.select_dropdown_text('category','Donna Cerca Uomo')
+		
+		# category.click()
 	except:
-		print('categoria-ins error')
+		print('category error')
 	
 	ps_data = account_data['data'].split(":")
 	email = ps_data[0]
-	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+	popmail = imap(account_id,ps_data[0], ps_data[1], ps_data[2])
 	popmail.messages('no_reply@bakecaincontrii.com')
 	popmail.close()
-	ages = [21,22,23,24,25,26,27,28,29,30]
+	ages = [18,19,20,21,22,23,24,25,26,27,28,29,30]
 	age = random.choice(ages)
 
-	b_sub = b.select_element('[id="titolo-ins"]')
-	b_sub.send_keys(postinfo['subject'])
-	b_body = b.select_element('[id="testo-ins"]')
-	b_body.send_keys(postinfo['body'])
-	b_age = b.select_element('[id="eta-ins"]')
+	b_sub = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[2]/textarea','select subject')
+	postsub = ps_str(postinfo['subject'])
+	b_sub.send_keys(postsub.Spin())
+	b_body = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[3]/textarea','select body')
+	postbody = ps_str(postinfo['body'])
+	b_body.send_keys(postbody.with_email(body_mail))
+	b_age = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[1]/input','select age')
 	b_age.send_keys(age)
-	b_email = b.select_element('[name="email"]')
+	b_email = b.select_element_xpath('//*[@id="email_input"]','select email')
 	b_email.send_keys(email)
+	
+	b.script_run('return  $("#contact_method_only_email").trigger("click")')
+	checkbox2 = '''return  $('input[name="terms"]').prop("checked", true)'''
+	b.script_run(checkbox2)
 
-	b_checkbox1 = b.select_element_xpath('//input[@id="privacy-ins"]')
-
-
-	b.scroll_element_into_view(b_checkbox1)
-	b_checkbox1.click()
-	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da')
+	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='it')
 
 
 
 
 	site_url = b.current_url()
 
-	chacha_key = chacha_worker.two_captcha('6LfWoxsTAAAAABGVn50YiJZfNmDDe-rD-59LAWh4', site_url)
-
-	chacha_respons = b.driver.find_element_by_id('g-recaptcha-response')
-	print('g-recaptcha-response')
-	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'block';")
-	print('g-recaptcha-response block')
-	script = 'document.getElementById("g-recaptcha-response").innerHTML="{}";'.format(chacha_key)
-	
-	b.script_run(script)
-	print('g-recaptcha-response set data')
-	b.script_run("document.getElementById('g-recaptcha-response').style.display = 'none';")
-	print('g-recaptcha-response none')
-	# submit1 =b.select_element('[id="accept-gdpr"]')
-	# submit1.click()
+	chacha_key = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
 	try:
-		b.script_run("return  dontShowMsgPromoVideoChiama('bakecaincontrii.com')")
-	except:
-		print('dontShowMsgPromoVideoChiama error')
+
+		chacha_respons = b.driver.find_element_by_name('h-captcha-response')
+		print('h-captcha-response')
+		b.script_run("document.getElementById('{0}').style.display = 'block';".format(chacha_respons.get_attribute('id')))
+		print('h-captcha-response block')
+		print(chacha_key)
+		script = 'document.getElementById("{0}").innerHTML="{1}";'.format(chacha_respons.get_attribute('id'),chacha_key)
+		
+		b.script_run(script)
+		print('h-captcha-response set data')
+		b.script_run("document.getElementById('{0}').style.display = 'none';".format(chacha_respons.get_attribute('id')))
+		print('h-captcha-response none')
+	except Exception as e:
+		print('h-captcha error',e)
 	
 
-	set_submit = b.select_element('[id="submit-ins"]')
-	b.scroll_element_into_view(set_submit)
-	set_submit.click()
-	
-	published_btn = b.select_element('[id="pub-gratis"]')
-	b.scroll_element_into_view(published_btn)
-	published_btn.click()
+	btn_remove = '''$("button.btn.btn-primary.waves-effect.btn-block").remove();'''
+	btn_add = '''$("form").append("<input type="submit" id="sub_btn" value="Continuar"/>");'''
+	btn_click = '''$("form").submit()'''
+	# try:
+	b.script_run(btn_remove)
+	b.script_run(btn_click)
+	print('data submit')
+	# except:
+	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload')
+	b.scroll_element_into_view(img)
+	img.click()
+	Visibility = b.select_element_xpath('//*[@id="app"]/main/form/div[2]/div[2]/div[2]/div/div/div/button','Visibility')
+	b.scroll_element_into_view(Visibility)
+	Visibility.click()
 
-
-	popmail = imap(ps_data[0], ps_data[1], ps_data[2])
+	popmail = imap(account_id,ps_data[0], ps_data[1], ps_data[2])
 	
 
 	counter=0
 	postdone = False
-
+	worker_acc=accounts()
 	while True:
 		time.sleep(10)
 		if postdone == True:
@@ -153,16 +149,15 @@ def main(account_data,url,postinfo,packages_id):
 		counter = counter+1
 		
 		popmail.messages('no_reply@bakecaincontrii.com')
-		links = popmail.get_link()
+		links = popmail.get_link('post-publish')
 		
 		print('links')
-		print(links)
 		
 		for link in links:
 
 			conf_link = 'window.location.href = "{};'.format(link)
 			b.script_run(conf_link)
-			postlink = b.select_element('#colonna-unica > div.ins-messaggio.pub > p:nth-child(2) > a')
+			postlink = b.select_element_xpath('//*[@id="app"]/main/div/div[4]/div/div/a','post link copy')
 			b.link_save(postlink.get_attribute('href'))
 			worker_acc.post_done(account_id)
 			worker_acc.account_active(account_id)
@@ -184,7 +179,8 @@ def main(account_data,url,postinfo,packages_id):
 	
 
 
-	print(datetime.now().strftime("%H:%M:%S"))
+	print('start :',starttime)
+	print('end :',datetime.now().strftime("%H:%M:%S"))
 
 
 
@@ -196,185 +192,47 @@ setup.license_verify()
 
 #w = int(input('how much worker you need? '))
 # packages_id = input('proxy info by a line : ')
-packages_id="no"
+packages_id = '317345'
 
 # worker = w + 1
 worker = 2
 # ........................start worker....................
 open('active.txt', "w+")
 utility = helper()
-threads = []
 headers = {}
 profile_ids = {}
-pid = threading.local()
-urls = [	'https://agrigento.bakecaincontrii.com/',
-			'https://ancona.bakecaincontrii.com/',
-			'https://arezzo.bakecaincontrii.com/',
-			'https://asti.bakecaincontrii.com/',
-			'https://bari.bakecaincontrii.com/',
-			'https://belluno.bakecaincontrii.com/',
-			'https://bergamo.bakecaincontrii.com/',
-			'https://bologna.bakecaincontrii.com/',
-			'https://brescia.bakecaincontrii.com/',
-			'https://cagliari.bakecaincontrii.com/',
-			'https://campobasso.bakecaincontrii.com/',
-			'https://caserta.bakecaincontrii.com/',
-			'https://catanzaro.bakecaincontrii.com/',
-			'https://cremona.bakecaincontrii.com/',
-			'https://cremona.bakecaincontrii.com/',
-			'https://cuneo.bakecaincontrii.com/',
-			'https://fermo.bakecaincontrii.com/',
-			'https://firenze.bakecaincontrii.com/',
-			'https://forli.bakecaincontrii.com/',
-			'https://genova.bakecaincontrii.com/',
-			'https://grosseto.bakecaincontrii.com/',
-			'https://isernia.bakecaincontrii.com/',
-			'https://laspezia.bakecaincontrii.com/',
-			'https://lecce.bakecaincontrii.com/',
-			'https://livorno.bakecaincontrii.com/',
-			'https://lucca.bakecaincontrii.com/',
-			'https://mantova.bakecaincontrii.com/',
-			'https://matera.bakecaincontrii.com/',
-			'https://messina.bakecaincontrii.com/',
-			'https://modena.bakecaincontrii.com/',
-			'https://napoli.bakecaincontrii.com/',
-			'https://nuoro.bakecaincontrii.com/',
-			'https://olbiatempio.bakecaincontrii.com/',
-			'https://padova.bakecaincontrii.com/',
-			'https://parma.bakecaincontrii.com/',
-			'https://perugia.bakecaincontrii.com/',
-			'https://piacenza.bakecaincontrii.com/',
-			'https://pistoia.bakecaincontrii.com/',
-			'https://potenza.bakecaincontrii.com/',
-			'https://ragusa.bakecaincontrii.com/',
-			'https://reggiocalabria.bakecaincontrii.com/',
-			'https://rieti.bakecaincontrii.com/',
-			'https://roma.bakecaincontrii.com/',
-			'https://salerno.bakecaincontrii.com/',
-			'https://savona.bakecaincontrii.com/',
-			'https://siracusa.bakecaincontrii.com/',
-			'https://taranto.bakecaincontrii.com/',
-			'https://terni.bakecaincontrii.com/',
-			'https://trapani.bakecaincontrii.com/',
-			'https://treviso.bakecaincontrii.com/',
-			'https://varese.bakecaincontrii.com/',
-			'https://verbania.bakecaincontrii.com/',
-			'https://verona.bakecaincontrii.com/',
-			'https://vicenza.bakecaincontrii.com/',
-			'https://viterbo.bakecaincontrii.com/',
-			'https://vibovalentia.bakecaincontrii.com/',
-			'https://vercelli.bakecaincontrii.com/',
-			'https://venezia.bakecaincontrii.com/',
-			'https://urbino.bakecaincontrii.com/',
-			'https://udine.bakecaincontrii.com/',
-			'https://trieste.bakecaincontrii.com/',
-			'https://trento.bakecaincontrii.com/',
-			'https://torino.bakecaincontrii.com/',
-			'https://teramo.bakecaincontrii.com/',
-			'https://sondrio.bakecaincontrii.com/',
-			'https://siena.bakecaincontrii.com/',
-			'https://sassari.bakecaincontrii.com/',
-			'https://rovigo.bakecaincontrii.com/',
-			'https://rimini.bakecaincontrii.com/',
-			'https://reggioemilia.bakecaincontrii.com/',
-			'https://ravenna.bakecaincontrii.com/',
-			'https://prato.bakecaincontrii.com/',
-			'https://pordenone.bakecaincontrii.com/',
-			'https://pisa.bakecaincontrii.com/',
-			'https://pescara.bakecaincontrii.com/',
-			'https://pavia.bakecaincontrii.com/',
-			'https://palermo.bakecaincontrii.com/',
-			'https://oristano.bakecaincontrii.com/',
-			'https://ogliastra.bakecaincontrii.com/',
-			'https://novara.bakecaincontrii.com/',
-			'https://monza.bakecaincontrii.com/',
-			'https://milano.bakecaincontrii.com/',
-			'https://mediocampidano.bakecaincontrii.com/',
-			'https://massacarrara.bakecaincontrii.com/',
-			'https://macerata.bakecaincontrii.com/',
-			'https://lodi.bakecaincontrii.com/',
-			'https://lecco.bakecaincontrii.com/',
-			'https://latina.bakecaincontrii.com/',
-			'https://laquila.bakecaincontrii.com/',
-			'https://imperia.bakecaincontrii.com/',
-			'https://gorizia.bakecaincontrii.com/',
-			'https://frosinone.bakecaincontrii.com/',
-			'https://foggia.bakecaincontrii.com/',
-			'https://ferrara.bakecaincontrii.com/',
-			'https://enna.bakecaincontrii.com/',
-			'https://crotone.bakecaincontrii.com/',
-			'https://cosenza.bakecaincontrii.com/',
-			'https://chieti.bakecaincontrii.com/',
-			'https://catania.bakecaincontrii.com/',
-			'https://carboniaiglesias.bakecaincontrii.com/',
-			'https://caltanissetta.bakecaincontrii.com/',
-			'https://brindisi.bakecaincontrii.com/',
-			'https://bolzano.bakecaincontrii.com/',
-			'https://biella.bakecaincontrii.com/',
-			'https://benevento.bakecaincontrii.com/',
-			'https://barletta.bakecaincontrii.com/',
-			'https://avellino.bakecaincontrii.com/',
-			'https://ascoli.bakecaincontrii.com/',
-			'https://aosta.bakecaincontrii.com/',
-			'https://alessandria.bakecaincontrii.com/'
-		]
 acc = accounts()
 post = post()
+if sys.platform not in ['Windows', 'win32', 'cygwin']:
+	display = Display(visible=0, size=(1024, 768))
+	display.start()
 
-
-co=0
 while True:
 	utility.network_check()
-	if co >3:
-		co=0
-		# mouse.position = (x, y)
-		# mouse.move(1, 1)
-		# # Press and release
-		# mouse.press(Button.left)
-		# mouse.release(Button.left)
-		# mouse.press(Button.left)
-		# mouse.release(Button.left)
 
 	
 	acc.save()
 	post.save()
 	acc.account_Reactive()
+	one_account = acc.get_account()
+		
+	postinfo = post.get_post()
+	body_mail=post.get_body_mail()
+	if one_account == None or postinfo == None:
+		print('post or account not find for worker')
+		time.sleep(60)
+		continue
+	print('account last use time is : ',one_account['used_at'])
+		
+
+	if path.isdir('profiles/' +str(one_account['id'])) == True:
+		shutil.rmtree('profiles/' +str(one_account['id']))
+		
+	print('main')
+	main(one_account,postinfo,packages_id,body_mail)
+	acc.account_inactive(one_account['id'])
+	acc.post_done(one_account['id'])
+
+		
+
 	
-
-
-
-	if worker > threading.active_count():
-
-
-
-
-		url = random.choice(urls)
-
-		one_account = acc.get_account()
-		
-		postinfo = post.get_post()
-		if one_account == None or postinfo == None:
-			print('post or account not find for worker')
-			time.sleep(60)
-			continue
-		print('account last use time is : ',one_account['used_at'])
-		
-
-		if path.isdir('profiles/' +str(one_account['id'])) == True:
-			shutil.rmtree('profiles/' +str(one_account['id']))
-
-		t = threading.Thread(target=main, args=(one_account,url,postinfo,packages_id,))
-		acc.account_inactive(one_account['id'])
-		acc.post_done(one_account['id'])
-
-		threads.append(t)
-		t.setName(one_account['id'])
-		t.start()
-		
-
-		co = co+1
-
-	else:
-
-		print('..............active thread :' + str(threading.active_count()) + '...............')
-		time.sleep(20)
