@@ -37,6 +37,7 @@ class browser:
 		warnings.filterwarnings('ignore')
 		#......................Chrome..............................
 		self.options = webdriver.ChromeOptions()
+		#https://peter.sh/experiments/chromium-command-line-switches/
 		####################proxy user##############
 		self.use_proxy =use_proxy
 		if packages_id == 'no':
@@ -76,8 +77,9 @@ class browser:
 			self.options.add_argument("start-maximized")
 			
 		
+		self.options.add_argument("--lang=it-IT")
+		
 		self.options.add_argument("--use-temporary-user-data-dir")
-		# self.options.add_argument("--user-data-dir=profiles\\"+str(self.account_id))
 		self.driver = webdriver.Chrome(driverUrl,chrome_options=self.options)
 		
 		

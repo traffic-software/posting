@@ -14,14 +14,17 @@ class post:
 	
 	def get_body_mail(self):
 
-		c = self.conn.cursor()
-		# c.execute("SELECT * FROM account WHERE runing = 0")
-		sql = "SELECT * FROM settings  WHERE name = 'mail' ORDER BY random() LIMIT 1" 
-		c.execute(sql)
-		mail =c.fetchone()
-		
-		m= self.get_formated_data(c.description,mail)
-		return m['value']
+		try:
+			c = self.conn.cursor()
+			# c.execute("SELECT * FROM account WHERE runing = 0")
+			sql = "SELECT * FROM settings  WHERE name = 'mail' ORDER BY random() LIMIT 1" 
+			c.execute(sql)
+			mail =c.fetchone()
+			
+			m= self.get_formated_data(c.description,mail)
+			return m['value']
+		except:
+			return None
 	
 	def delete_all(self):
 

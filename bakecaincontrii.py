@@ -1,3 +1,4 @@
+from email.policy import SMTP
 import threading
 import time
 import shutil
@@ -8,6 +9,7 @@ import sys
 from os import path
 from pyvirtualdisplay import Display
 from datetime import datetime
+import smtp
 from ps_lib.browser import browser
 from ps_lib.accounts import accounts
 from ps_lib.psThread import psThread
@@ -63,6 +65,18 @@ def main(account_data,postinfo,packages_id,body_mail):
 	accept2_button.click()
 
 	
+	try:
+		citylist =["Agrigento","Alessandria","Ancona","Aosta","Arezzo","Ascoli","Asti","Avellino","Bari","Barletta","Belluno","Benevento","Bergamo","Biella","Bologna","Bolzano","Brescia","Brindisi","Cagliari","Caltanissetta","Campobasso","Carbonia Iglesias","Caserta","Catania","Catanzaro","Chieti","Como","Cosenza","Cremona","Crotone","Cuneo","Enna","Fermo","Ferrara","Firenze","L'Aquila","La Spezia","Latina","Lecce","Lecco","Livorno","Lodi","Lucca","Macerata","Mantova","Massa Carrara","Matera","Medio Campidano","Messina","Milano"," Modena","Monza","Napoli","Novara","Nuoro"," Ogliastra","Olbia Tempio","Oristano","Padova","Palermo","Parma","Pavia","Perugia","Pescara","Piacenza","Pisa","Pistoia","Pordenone","Potenza","Prato"," Ragusa","Ravenna","Reggio Calabria","R. Emilia","Rieti","Rimini","Roma","Rovigo","Salerno","Sassari","Savona","Siena","Siracusa","Sondrio","Taranto","Teramo","Terni"," Torino","Trapani","Trento","Treviso","Trieste","Udine","Urbino","Varese","Venezia","Verbania","Vercelli","Verona","Vibo Valentia","Vicenza","Viterbo"]
+		one_city = random.choice(citylist)
+		if b.proxy_city is not None:
+			pattern = '*%s*'%(b.proxy_city)
+			citylist = fnmatch.filter(citylist, pattern)
+			if len(citylist)>0:
+				one_city = citylist[0]
+			
+		b.select_dropdown_text('city',one_city)
+	except:
+		print('city error')
 	try:
 		# category= b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[2]/div/div[1]/select/option[1]')
 		b.select_dropdown_text('category','Donna Cerca Uomo')
@@ -206,7 +220,8 @@ post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
 	display = Display(visible=0, size=(1024, 768))
 	display.start()
-
+x = threading.Thread(target=smtp.reply_with_smtp, args=(1,), daemon=True)
+x.start()
 while True:
 	utility.network_check()
 

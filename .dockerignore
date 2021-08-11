@@ -2,3 +2,11 @@
 .vscode
 chromedriver.exe
 .gitignore
+__pycache__
+.db
+.html
+.spec
+.vscode
+*.tar
+*.zip
+

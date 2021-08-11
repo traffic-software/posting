@@ -61,6 +61,10 @@ class ps_str:
 		self.str = text
 		return text
 	def with_email(self,email):
-		self.Spin()
-		return self.str.replace("#email#", email)
+		if email is not None:
+
+			self.Spin()
+			return self.str.replace("#email#", email)
+		else:
+			return self.str
 

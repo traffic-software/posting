@@ -86,7 +86,7 @@ class table:
     def checkReply(self,tomail):
         c = self.conn.cursor()
         sql = "SELECT * FROM reply WHERE tomail = '{}'".format(tomail)
-        print(sql)
+        
         c.execute(sql)
         post = c.fetchone()
         data =self.get_formated_data(c.description, post)
