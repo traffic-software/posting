@@ -42,10 +42,15 @@ class imap:
 	def messages(self,mail_from=None):
 		self.ps_messges = None
 
-		if mail_from == None:
-			messages = self.i.search('UNSEEN')
-		else:
-			messages = self.i.search('(FROM "{}" UNSEEN)'.format(mail_from))
+		try:
+
+			if mail_from == None:
+				messages = self.i.search(['UNSEEN'])
+			else:
+				messages = self.i.search(['UNSEEN',['(FROM','{}'.format(mail_from)]])
+		except:
+			messages = None
+
 
 		
 
@@ -62,7 +67,7 @@ class imap:
 			try:
 				m = {}
 
-				m['body'] = self.get_body(mailmessage)
+				# m['body'] = self.get_body(mailmessage)
 				text= ps_str(mailmessage.get("from"))
 				
 				m['from_mail'] = text.find_email('([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)')

@@ -11,8 +11,8 @@ docker network create -d macvlan \
   -o parent=ens33 router_net
 docker run  -d -it --restart=always \
  --network router_net -p 22:22 \
- --hostname worker-5 \
- --ip=192.168.0.196 --name worker-5 ps_bakeca
+ --hostname worker-8 \
+ --ip=192.168.0.194 --name worker-7 ps_bakeca
 
 docker ps 
 docker exec -it db9af26578ee /bin/bash
@@ -27,12 +27,8 @@ docker container start id
 docker container rm id
 
 
-'from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':
-'pellel83@libero.it'}
-{'body': '', 'from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':
-'maxdiva23@gmail.com'}
-{'body': 'ok', 'from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':
-'marcoeros72@lubero.it'}
-{'body': 'ok','from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':
-'padux-91@outlook.it'}
+{'body': 'd','from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'pellel83@libero.it'}
+{'body': 's', 'from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'maxdiva23@gmail.com'}
+{'body': 'ok', 'from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'marcoeros72@lubero.it'}
+{'body': 'ok','from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'padux-91@outlook.it'}
 

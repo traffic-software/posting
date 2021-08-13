@@ -31,7 +31,7 @@ def reply_with_smtp(id=1):
         
         account = acc.get_account()
         data = account['data'].split(":")
-        print(data)
+       
         
 
         popmail = imap(account['id'],data[0], data[1], data[2])
@@ -49,26 +49,26 @@ def reply_with_smtp(id=1):
             if ("replyad" in m['from_mail']) and (setup.checkReply(m['Reply_To']) ==None):
                 password = data[1]  # ps_data[1] or  getpass('opnqvheifcpsxrel')
                 sender = data[0] #ps_data[0]
-                email = Forger(sender,titre=m['sub'])
-                email.add_recipient(m['Reply_To'])
+                # email = Forger(sender,titre=m['sub'])
+                # email.add_recipient(m['Reply_To'])
                 
-                email.add_part(bot_body, "plain")
-                email.make_email()  # Build the mail
+                # email.add_part(bot_body, "plain")
+                # email.make_email()  # Build the mail
                 setup.replySave(sender,m['Reply_To'])
-                if 'yahoo' in sender:
-                    smtp_host= 'smtp.mail.yahoo.com'
-                elif 'gmail' in sender:
-                    smtp_host = 'smtp.gmail.com'
-                elif 'hotmail' in sender:
-                    smtp_host = 'smtp.live.com'
-                elif 'outlook' in sender:
-                    smtp_host = 'smtp-mail.outlook.com'
+                # if 'yahoo' in sender:
+                #     smtp_host= 'smtp.mail.yahoo.com'
+                # elif 'gmail' in sender:
+                #     smtp_host = 'smtp.gmail.com'
+                # elif 'hotmail' in sender:
+                #     smtp_host = 'smtp.live.com'
+                # elif 'outlook' in sender:
+                #     smtp_host = 'smtp-mail.outlook.com'
                 
 
-                smtpclient = SmtpClient(smtp=smtp_host, port=587, username=sender, password=password)
-                smtpclient.send(email, sender, [m['Reply_To']])
+                # smtpclient = SmtpClient(smtp=smtp_host, port=587, username=sender, password=password)
+                # smtpclient.send(email, sender, [m['Reply_To']])
             else:
-                pass
+                print(data[0],m['from_mail'])
         popmail.close()
         
     return True
