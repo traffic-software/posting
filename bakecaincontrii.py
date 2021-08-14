@@ -202,7 +202,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 
 setup = table()
-setup.license_verify()
+setup.token_verify()
 
 #w = int(input('how much worker you need? '))
 # packages_id = input('proxy info by a line : ')

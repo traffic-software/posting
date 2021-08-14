@@ -9,11 +9,8 @@ docker network create -d macvlan \
   --subnet=192.168.0.0/24 \
   --gateway=192.168.0.1 \
   -o parent=ens33 router_net
-docker run  -d -it --restart=always \
- --network router_net -p 22:22 \
- --hostname worker-8 \
- --ip=192.168.0.194 --name worker-7 ps_bakeca
-
+docker run -e Ps_key="newtest" --hostname worker-7 --ip=192.168.0.194 --name worker-7 -d -it --restart=always --network router_net -p 22:22 ps_bakeca
+--mac-address="02:42:C0:A8:00:C5"
 docker ps 
 docker exec -it db9af26578ee /bin/bash
 
@@ -21,10 +18,11 @@ sudo su
 cd ../mydir/ && python3 bakecaincontrii.py ##au.py
 reboot
 shutdown -h 0
-
-docker container stop id
 docker container start id
+docker container stop id
 docker container rm id
+
+
 
 
 {'body': 'd','from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'pellel83@libero.it'}

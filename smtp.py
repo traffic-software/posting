@@ -4,16 +4,10 @@ from email.message import EmailMessage
 from email.utils import formataddr
 from smtplib import SMTP
 import ssl
-try:
-    from ps_lib.ps_str import ps_str
-    from ps_lib.accounts import accounts
-    from ps_lib.imap import imap
-    from ps_lib.ps_setup import table
-except:
-    from ps_str import ps_str
-    from accounts import accounts
-    from imap import imap
-    from ps_setup import table
+from ps_lib.ps_str import ps_str
+from ps_lib.accounts import accounts
+from ps_lib.imap import imap
+from ps_lib.ps_setup import table
 from PyEmailTools.Forger import Forger
 from PyEmailTools.SmtpClient import SmtpClient
 from getpass import getpass
@@ -114,7 +108,7 @@ def reply_test():
         finally:
             server.quit()
 
-reply_with_smtp()
+# reply_with_smtp()
 # reply_test()
 
 

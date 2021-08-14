@@ -15,7 +15,7 @@ class table:
     def __init__(self):
         if self.dbfile():
             self.conn = sqlite3.connect('data/databases.db')
-            self.license_verify()
+            self.token_verify()
 
         else:
             self.conn = sqlite3.connect('data/databases.db')
@@ -24,7 +24,7 @@ class table:
             self.post_tebl_create()
             self.settings_tebl_create()
             self.reply_tebl_create()
-            self.license_verify()
+            self.token_verify()
 
     def dbfile(self):
 
@@ -98,7 +98,7 @@ class table:
             self.conn.commit()
             return True
     def license_verify(self):
-        # licens = self.license_get()
+        licens = self.license_get()
         # #{"success":true,"data":{"id":48,"orderId":279,"productId":277,"userId":1,"licenseKey":"workerBAZL9-09W3B-PHUZQ-0JZ8Z-7AFZJ","expiresAt":"2021-04-15 03:47:18","validFor":30,"source":1,"status":2,"timesActivated":null,"timesActivatedMax":1,"createdAt":"2021-03-16 03:47:18","createdBy":1,"updatedAt":"2021-03-16 03:47:18","updatedBy":1}}
 
         # if licens== None:
@@ -139,6 +139,27 @@ class table:
 
 
 
+    def token_verify(self):
+        token = self.token_get()
+        if token== None:
+            self.token =  str(input("please enter your api_token : "))
+            self.token_save()
+
+
+        else:
+            self.token = token['value']
+        url = 'http://192.168.0.106/api/v1/post/info/{token}'.format(token=self.token)
+
+        r = requests.get(url)
+        if "error" in r.json():
+            print("token error")
+            exit()
+        
+            
+        return True
+
+
+
 
 
 
@@ -150,6 +171,10 @@ class table:
     def license_save(self):
         c = self.conn.cursor()
         c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['license',self.License])
+        self.conn.commit()
+    def token_save(self):
+        c = self.conn.cursor()
+        c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['token',self.token])
         self.conn.commit()
     def license_active(self):
         url = 'https://mailorigin.com/wp-json/lmfwc/v2/licenses/activate/{license}?consumer_key={consumer_key}&consumer_secret={consumer_secret}'.format(
@@ -165,6 +190,12 @@ class table:
 
 
 
+    def token_get(self):
+        c = self.conn.cursor()
+        sql = "SELECT * FROM settings WHERE name = '{}'".format('token')
+        c.execute(sql)
+        post = c.fetchone()
+        return self.get_formated_data(c.description, post)
     def license_get(self):
         c = self.conn.cursor()
         sql = "SELECT * FROM settings WHERE name = '{}'".format('license')
