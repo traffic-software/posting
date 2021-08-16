@@ -54,11 +54,11 @@ class imap:
 
 		
 
-		print('message search')
+		
 		m = self.i.fetch(messages, 'RFC822')
 
 		if len(m) < 1:
-			print('message not fund')
+			
 			return False
 		mes = []
 		for uid, data in m.items():

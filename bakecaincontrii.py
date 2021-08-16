@@ -48,16 +48,13 @@ def main(account_data,postinfo,packages_id,body_mail):
 		citys = fnmatch.filter(urls, pattern)
 		if len(citys)>0:
 			url = citys[0]
-	b.get_url('https://'+url+'.bakecaincontrii.com/fe/main.php?page=post_insert')
-	try:
-		b.script_run('return  accept_privacy_cookie()')
-	except:
-		print('accept_privacy_cookie error')
+	
+	
 	
 	try:
-		b.script_run('return  siaccetto18()')
+		b.get_url('https://'+url+'.bakecaincontrii.com/fe/main.php?page=post_insert')
 	except:
-		print('siaccetto18 error')
+		b.exit()
 	
 	accept1_button = b.select_element_xpath('//*[@id="lightbox-vm18"]/div/div/div[3]/button','accept1_button')
 	accept1_button.click()
@@ -104,43 +101,41 @@ def main(account_data,postinfo,packages_id,body_mail):
 	b_email = b.select_element_xpath('//*[@id="email_input"]','select email')
 	b_email.send_keys(email)
 	
-	b.script_run('return  $("#contact_method_only_email").trigger("click")')
+	b.script_run('return  $("#contact_method_only_email").trigger("click")','click contact method')
 	checkbox2 = '''return  $('input[name="terms"]').prop("checked", true)'''
-	b.script_run(checkbox2)
+	b.script_run(checkbox2,'accept terms')
 
-	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='it')
+	
 
 
 
 
 	site_url = b.current_url()
 
-	chacha_key = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
+	
 	try:
 
 		chacha_respons = b.driver.find_element_by_name('h-captcha-response')
-		print('h-captcha-response')
-		b.script_run("document.getElementById('{0}').style.display = 'block';".format(chacha_respons.get_attribute('id')))
-		print('h-captcha-response block')
-		print(chacha_key)
+		b.script_run("document.getElementById('{0}').style.display = 'block';".format(chacha_respons.get_attribute('id')),message='captcha work part 1')
+		
+		chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='it')
+		chacha_key = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
 		script = 'document.getElementById("{0}").innerHTML="{1}";'.format(chacha_respons.get_attribute('id'),chacha_key)
 		
-		b.script_run(script)
-		print('h-captcha-response set data')
-		b.script_run("document.getElementById('{0}').style.display = 'none';".format(chacha_respons.get_attribute('id')))
-		print('h-captcha-response none')
+		b.script_run(script,message='captcha work part 2')
+		b.script_run("document.getElementById('{0}').style.display = 'none';".format(chacha_respons.get_attribute('id')),message='captcha done')
+		
 	except Exception as e:
-		print('h-captcha error',e)
+		print('captcha error',e)
+		b.exit()
 	
 
 	btn_remove = '''$("button.btn.btn-primary.waves-effect.btn-block").remove();'''
 	btn_add = '''$("form").append("<input type="submit" id="sub_btn" value="Continuar"/>");'''
 	btn_click = '''$("form").submit()'''
-	# try:
-	b.script_run(btn_remove)
-	b.script_run(btn_click)
-	print('data submit')
-	# except:
+	b.script_run(btn_remove,"form sbumit button remove")
+	b.script_run(btn_click,"form sbumit")
+	
 	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload')
 	b.scroll_element_into_view(img)
 	img.click()
@@ -170,7 +165,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 		for link in links:
 
 			conf_link = 'window.location.href = "{};'.format(link)
-			b.script_run(conf_link)
+			b.script_run(conf_link,'link click to verify')
 			postlink = b.select_element_xpath('//*[@id="app"]/main/div/div[4]/div/div/a','post link copy')
 			b.link_save(postlink.get_attribute('href'))
 			worker_acc.post_done(account_id)

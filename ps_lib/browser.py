@@ -73,11 +73,14 @@ class browser:
 
 		
 		if sys.platform not in ['Windows', 'win32', 'cygwin']:
-			self.options.add_argument("--disable-gpu")
+			
 			self.options.add_argument("start-maximized")
+			self.options.add_argument("--disable-dev-shm-usage")
+		self.options.add_argument("--disable-infobars")
 			
 		
 		self.options.add_argument("--lang=it-IT")
+		self.options.add_argument("--no-sandbox")
 		
 		self.options.add_argument("--use-temporary-user-data-dir")
 		self.driver = webdriver.Chrome(driverUrl,chrome_options=self.options)
@@ -291,6 +294,7 @@ class browser:
 		try:
 			self.driver.get(url)
 		except:
+			self.exit()
 			print("get url", url)
 		return self.driver.title
 	def page_source(self):
@@ -305,6 +309,7 @@ class browser:
 		try:
 			self.driver.title
 		except:
+			self.exit()
 			print("get_title")
 
 
@@ -367,8 +372,16 @@ class browser:
 
 	def current_url(self):
 		return self.driver.current_url
-	def script_run(self,script):
-		return self.driver.execute_script(script)
+	def script_run(self,script,message='defult script'):
+		try:
+			
+			done= self.driver.execute_script(script)
+			print('done: ',message)
+		except:
+			self.exit()
+			print('error: ',message)
+		return done
+		
 	def link_save(self,link):
 		with open('links.txt', 'a') as file:
 			file.write(link+"\n")
