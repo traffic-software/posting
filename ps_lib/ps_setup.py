@@ -13,9 +13,11 @@ class table:
     consumer_secret = 'cs_f828c575f480a0a1be5f80f6661ef2957bec9c80'
     License = None
     def __init__(self):
+        
         if self.dbfile():
             self.conn = sqlite3.connect('data/databases.db')
             self.token_verify()
+            self.host_verify()
 
         else:
             self.conn = sqlite3.connect('data/databases.db')
@@ -25,6 +27,7 @@ class table:
             self.settings_tebl_create()
             self.reply_tebl_create()
             self.token_verify()
+            self.host_verify()
 
     def dbfile(self):
 
@@ -157,12 +160,13 @@ class table:
         
             
         return True
-
-
-
-
-
-
+    def host_verify(self):
+        host = self.host_get()
+        if host== None:
+            self.host =  '192.168.0.106'#str(input("please enter your api_token : "))
+            self.host_save()
+        return host
+    
     def time_diff(self,start,end):
 
         FMT = '%Y-%m-%d'
@@ -175,6 +179,10 @@ class table:
     def token_save(self):
         c = self.conn.cursor()
         c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['token',self.token])
+        self.conn.commit()
+    def host_save(self):
+        c = self.conn.cursor()
+        c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['host',self.host])
         self.conn.commit()
     def license_active(self):
         url = 'https://mailorigin.com/wp-json/lmfwc/v2/licenses/activate/{license}?consumer_key={consumer_key}&consumer_secret={consumer_secret}'.format(
@@ -196,6 +204,22 @@ class table:
         c.execute(sql)
         post = c.fetchone()
         return self.get_formated_data(c.description, post)
+    def host_get(self):
+        c = self.conn.cursor()
+        sql = "SELECT * FROM settings WHERE name = '{}'".format('host')
+        c.execute(sql)
+        post = c.fetchone()
+        data = self.get_formated_data(c.description, post)
+        if data== None:
+            return data
+        return data['value']
+    def software_token(self):
+        c = self.conn.cursor()
+        sql = "SELECT * FROM settings WHERE name = '{}'".format('token')
+        c.execute(sql)
+        post = c.fetchone()
+        data = self.get_formated_data(c.description, post)
+        return data['value']
     def license_get(self):
         c = self.conn.cursor()
         sql = "SELECT * FROM settings WHERE name = '{}'".format('license')

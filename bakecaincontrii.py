@@ -82,24 +82,22 @@ def main(account_data,postinfo,packages_id,body_mail):
 	except:
 		print('category error')
 	
-	ps_data = account_data['data'].split(":")
-	email = ps_data[0]
-	popmail = imap(account_id,ps_data[0], ps_data[1], ps_data[2])
+	popmail = imap(account_id,account_data['email'],account_data['password'])
 	popmail.messages('no_reply@bakecaincontrii.com')
 	popmail.close()
 	ages = [18,19,20,21,22,23,24,25,26,27,28,29,30]
 	age = random.choice(ages)
 
 	b_sub = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[2]/textarea','select subject')
-	postsub = ps_str(postinfo['subject'])
+	postsub = ps_str(postinfo['data1'])
 	b_sub.send_keys(postsub.Spin())
 	b_body = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[3]/textarea','select body')
-	postbody = ps_str(postinfo['body'])
+	postbody = ps_str(postinfo['data4'])
 	b_body.send_keys(postbody.with_email(body_mail))
 	b_age = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[1]/input','select age')
 	b_age.send_keys(age)
 	b_email = b.select_element_xpath('//*[@id="email_input"]','select email')
-	b_email.send_keys(email)
+	b_email.send_keys(account_data['email'])
 	
 	b.script_run('return  $("#contact_method_only_email").trigger("click")','click contact method')
 	checkbox2 = '''return  $('input[name="terms"]').prop("checked", true)'''
@@ -143,7 +141,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	b.scroll_element_into_view(Visibility)
 	Visibility.click()
 
-	popmail = imap(account_id,ps_data[0], ps_data[1], ps_data[2])
+	popmail = imap(account_id,account_data['email'],account_data['password'])
 	
 
 	counter=0
@@ -219,11 +217,6 @@ x = threading.Thread(target=smtp.reply_with_smtp, args=(1,), daemon=True)
 x.start()
 while True:
 	utility.network_check()
-
-	
-	acc.save()
-	post.save()
-	acc.account_Reactive()
 	one_account = acc.get_account()
 		
 	postinfo = post.get_post()
@@ -232,7 +225,7 @@ while True:
 		print('post or account not find for worker')
 		time.sleep(60)
 		continue
-	print('account last use time is : ',one_account['used_at'])
+	print('account last use time is : ',one_account['last_updates'])
 		
 
 	if path.isdir('profiles/' +str(one_account['id'])) == True:

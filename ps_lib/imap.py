@@ -23,7 +23,18 @@ class imap:
 		self.username = username
 		self.password = password
 		self.hosturl = hosturl
-		self.i= IMAPClient(host=hosturl)
+		if hosturl == False:
+			if 'yahoo' in self.username:
+				self.hosturl= 'imap.mail.yahoo.com'
+			elif 'gmail' in self.username:
+				self.hosturl = 'imap.gmail.com'
+			elif 'hotmail' in self.username:
+				self.hosturl = 'imap-mail.outlook.com'
+			elif 'outlook' in self.username:
+				self.hosturl = 'imap-mail.outlook.com'
+
+		
+		self.i= IMAPClient(host=self.hosturl)
 		
 		try:
 			self.login()
@@ -100,7 +111,22 @@ class imap:
 				continue
 	def get_link(self,condition=None):
 		urls=[]
+		if None == self.ps_messges:
+			print('no massage')
+			return urls
+		for m in self.ps_messges:
+			st = ps_str(m['body'])
+			print('link search')
+			#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
+			if condition:
+				url = st.find_urls(condition)
+			else:
+				url = st.find_urls("main.php?page=post_publish")
+			if url!=None:
+				print('one link find')
+				urls.append(url)
 		try:
+			
 			for m in self.ps_messges:
 				
 				st = ps_str(m['body'])

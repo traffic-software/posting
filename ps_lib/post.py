@@ -1,16 +1,19 @@
 import sqlite3
 from sys import exit
+import requests
+from ps_lib.ps_setup import table
 class post:
 	def __init__(self):
+		self.software = table()
+
 		self.conn = sqlite3.connect('data/databases.db')
 	def get_post(self):
-
-		c = self.conn.cursor()
-		# c.execute("SELECT * FROM account WHERE runing = 0")
-		sql = "SELECT * FROM posts  ORDER BY random() LIMIT " + str(1)
-		c.execute(sql)
-		post =c.fetchone()
-		return self.get_formated_data(c.description,post)
+		url = 'http://{host}/api/v1/post/new/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
+		r = requests.get(url)
+		if "error" in r.json():
+			print("error",r.json()['message'])
+			exit()
+		return r.json()["data"]
 	
 	def get_body_mail(self):
 

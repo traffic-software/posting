@@ -66,5 +66,6 @@ class ps_str:
 			self.Spin()
 			return self.str.replace("#email#", email)
 		else:
+			self.Spin()
 			return self.str
 

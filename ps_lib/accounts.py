@@ -1,12 +1,15 @@
 import sqlite3
 import os
+import requests
 from sys import exit
+from ps_lib.ps_setup import table
 from datetime import datetime
 from datetime import timedelta
 class accounts:
 
     def __init__(self):
         self.conn = sqlite3.connect('data/databases.db')
+        self.software = table()
 
 
     def ps_proxys_insert(self, proxys):
@@ -51,16 +54,14 @@ class accounts:
         return account
 
     def get_account(self):
-        c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -3)
+        url = 'http://{host}/api/v1/post/account/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
+
+        r = requests.get(url)
+        if "error" in r.json():
+            print("error",r.json()['message'])
+            exit()
+        return r.json()["data"]
         
-        sql = "SELECT * FROM accounts WHERE runing = 1 AND used_at <= '{used}' ORDER BY random() LIMIT 1".format(used=now.strftime('%Y-%m-%d'))
-        c.execute(sql)
-        a = c.fetchone()
-        a = self.get_formated_data(c.description,a)
-        
-        
-        return a
 
     def get_formated_data(self, headers, data):
         try:

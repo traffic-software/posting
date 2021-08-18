@@ -35,6 +35,8 @@ class browser:
 		self.proxy_company = proxy_company
 		self.account_id=pofileLocation
 		warnings.filterwarnings('ignore')
+		#................account.....................................
+		self.account = accounts()
 		#......................Chrome..............................
 		self.options = webdriver.ChromeOptions()
 		#https://peter.sh/experiments/chromium-command-line-switches/
@@ -225,8 +227,8 @@ class browser:
 				self.driver.implicitly_wait(1)
 		if element == False:
 			print("element not find: ",selector)
-			account = accounts()
-			account.account_inactive(self.account_id)
+			
+			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
@@ -247,8 +249,7 @@ class browser:
 				self.driver.implicitly_wait(1)
 		if element == False:
 			print("element not find : ",mesasage)
-			account = accounts()
-			account.account_inactive(self.account_id)
+			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
