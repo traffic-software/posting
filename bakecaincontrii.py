@@ -164,17 +164,17 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 			conf_link = 'window.location.href = "{};'.format(link)
 			b.script_run(conf_link,'link click to verify')
+			
 			postlink = b.select_element_xpath('//*[@id="app"]/main/div/div[4]/div/div/a','post link copy')
+			time.sleep(60)
 			b.link_save(postlink.get_attribute('href'))
 			worker_acc.post_done(account_id)
-			worker_acc.account_active(account_id)
+			
 			postdone = True
 
 
 		
 		if counter > 6:
-			worker_acc.ban(account_id)
-			
 			print("link not recived")
 			break
 	print('browser close')
@@ -233,8 +233,6 @@ while True:
 		
 	print('main')
 	main(one_account,postinfo,packages_id,body_mail)
-	acc.account_inactive(one_account['id'])
-	acc.post_done(one_account['id'])
 
 		
 

@@ -56,9 +56,9 @@ class imap:
 		try:
 
 			if mail_from == None:
-				messages = self.i.search(['UNSEEN'])
+				messages = self.i.search('UNSEEN')
 			else:
-				messages = self.i.search(['UNSEEN',['(FROM','{}'.format(mail_from)]])
+				messages = self.i.search('(FROM "{}" UNSEEN)'.format(mail_from))
 		except:
 			messages = None
 
@@ -78,7 +78,7 @@ class imap:
 			try:
 				m = {}
 
-				# m['body'] = self.get_body(mailmessage)
+				m['body'] = self.get_body(mailmessage)
 				text= ps_str(mailmessage.get("from"))
 				
 				m['from_mail'] = text.find_email('([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)')
@@ -112,9 +112,9 @@ class imap:
 	def get_link(self,condition=None):
 		urls=[]
 		if None == self.ps_messges:
-			print('no massage')
 			return urls
 		for m in self.ps_messges:
+			
 			st = ps_str(m['body'])
 			print('link search')
 			#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a

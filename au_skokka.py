@@ -196,7 +196,6 @@ def main(account_data,url,postinfo,packages_id,body_mail):
 
 		
 		if counter > 6:
-			worker_acc.ban(account_id)
 			
 			print("link not recived")
 			break
@@ -242,7 +241,6 @@ while True:
 
 	acc.save()
 
-	acc.account_Reactive()
 	post.save()
 	url = random.choice(urls)
 	one_account = acc.get_account()

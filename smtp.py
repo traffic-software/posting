@@ -8,8 +8,8 @@ from ps_lib.ps_str import ps_str
 from ps_lib.accounts import accounts
 from ps_lib.imap import imap
 from ps_lib.ps_setup import table
-from PyEmailTools.Forger import Forger
-from PyEmailTools.SmtpClient import SmtpClient
+# from PyEmailTools.Forger import Forger
+# from PyEmailTools.SmtpClient import SmtpClient
 from getpass import getpass
 import re
 
@@ -23,14 +23,14 @@ def reply_with_smtp(id=1):
     while True:
         
         
-        account = acc.get_account()
-        data = account['data'].split(":")
+        ac = acc.get_account_for_lead_find()
+        
        
         
 
-        popmail = imap(account['id'],data[0], data[1], data[2])
-        # popmail.messages('replyad@bakecaincontrii.com')
-        popmail.messages()
+        popmail = imap(ac['id'],ac['email'],ac['password'])
+        popmail.messages('replyad@bakecaincontrii.com')
+        # popmail.messages()
         # popmail.messages()
         if popmail.ps_messges == None:
             continue
@@ -41,8 +41,8 @@ def reply_with_smtp(id=1):
             bot_body = bot_body.replace('[name]', '')
            
             if ("replyad" in m['from_mail']) and (setup.checkReply(m['Reply_To']) ==None):
-                password = data[1]  # ps_data[1] or  getpass('opnqvheifcpsxrel')
-                sender = data[0] #ps_data[0]
+                password = ac['password']  # ps_data[1] or  getpass('opnqvheifcpsxrel')
+                sender = ac['email'] #ps_data[0]
                 # email = Forger(sender,titre=m['sub'])
                 # email.add_recipient(m['Reply_To'])
                 
@@ -62,7 +62,7 @@ def reply_with_smtp(id=1):
                 # smtpclient = SmtpClient(smtp=smtp_host, port=587, username=sender, password=password)
                 # smtpclient.send(email, sender, [m['Reply_To']])
             else:
-                print(data[0],m['from_mail'])
+                print(ac['email'],m['from_mail'])
         popmail.close()
         
     return True
@@ -108,7 +108,7 @@ def reply_test():
         finally:
             server.quit()
 
-# reply_with_smtp()
+reply_with_smtp()
 # reply_test()
 
 

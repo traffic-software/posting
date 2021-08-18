@@ -69,6 +69,7 @@ class browser:
 			
 
 		ua = UserAgent(cache=False)
+		ua.update()
 		a = ua.safari
 		
 		self.options.add_argument(f'user-agent={a}')

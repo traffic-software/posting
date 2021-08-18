@@ -41,20 +41,17 @@ class accounts:
         self.conn.commit()
 
 
-    def get_accounts(self,limit):
-        c = self.conn.cursor()
-        # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "SELECT * FROM accounts WHERE runing = 1 ORDER BY random() LIMIT " + str(limit)
-        c.execute(sql)
-        account = c.fetchall()
-        # c.fetchall()
-        # c.fetchmany()
-        # c.fetchone()
-        self.conn.commit()
-        return account
-
     def get_account(self):
         url = 'http://{host}/api/v1/post/account/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
+
+        r = requests.get(url)
+        if "error" in r.json():
+            print("error",r.json()['message'])
+            exit()
+        return r.json()["data"]
+        
+    def get_account_for_lead_find(self):
+        url = 'http://{host}/api/v1/post/account/rendom/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
 
         r = requests.get(url)
         if "error" in r.json():
@@ -101,17 +98,21 @@ class accounts:
         c.execute(sql)
         self.conn.commit()
     def ban_3(self,id):
-        c = self.conn.cursor()
-        # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "UPDATE accounts SET runing =3 WHERE id = " + str(id)
-        c.execute(sql)
-        self.conn.commit()
+        url = 'http://{host}/api/v1/post/account/ban/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
+
+        r = requests.get(url)
+        if "error" in r.json():
+            print("error",r.json()['message'])
+            exit()
+        return r.json()
     def post_done(self,id):
-        c = self.conn.cursor()
-        now = datetime.now()+ timedelta(days= -3)
-        sql = "UPDATE accounts SET used_at = '{used}' WHERE id = {id}".format(used=now.strftime('%Y-%m-%d'),id=str(id)) 
-        c.execute(sql)
-        self.conn.commit()
+        url = 'http://{host}/api/v1/post/account/postdone/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
+
+        r = requests.get(url)
+        if "error" in r.json():
+            print("error",r.json()['message'])
+            exit()
+        return r.json()
     def save(self):
 
         my_file = open('account.txt', 'r+', encoding="utf8")
