@@ -165,9 +165,9 @@ def main(account_data,postinfo,packages_id,body_mail):
 			conf_link = 'window.location.href = "{};'.format(link)
 			b.script_run(conf_link,'link click to verify')
 			
-			postlink = b.select_element_xpath('//*[@id="app"]/main/div/div[4]/div/div/a','post link copy')
-			time.sleep(60)
-			b.link_save(postlink.get_attribute('href'))
+			# postlink = b.select_element_xpath('//*[@id="app"]/main/div/div[4]/div/div/div/div/div[1]/a','post link copy')
+			
+			post.link_save(b.current_url())
 			worker_acc.post_done(account_id)
 			
 			postdone = True
@@ -213,7 +213,7 @@ post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
 	display = Display(visible=0, size=(1024, 768))
 	display.start()
-x = threading.Thread(target=smtp.reply_with_smtp, args=(1,), daemon=True)
+x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
 x.start()
 while True:
 	utility.network_check()
@@ -233,6 +233,7 @@ while True:
 		
 	print('main')
 	main(one_account,postinfo,packages_id,body_mail)
+	time.sleep(60)
 
 		
 

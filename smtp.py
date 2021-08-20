@@ -13,7 +13,7 @@ from ps_lib.ps_setup import table
 from getpass import getpass
 import re
 
-def reply_with_smtp(id=1):
+def reply_check(id=1):
     acc = accounts()
     setup = table()
     my_file = open('reply_text.txt','r')
@@ -24,6 +24,7 @@ def reply_with_smtp(id=1):
         
         
         ac = acc.get_account_for_lead_find()
+        print('reply chcking : ',ac['email'])
         
        
         
@@ -42,25 +43,9 @@ def reply_with_smtp(id=1):
            
             if ("replyad" in m['from_mail']) and (setup.checkReply(m['Reply_To']) ==None):
                 password = ac['password']  # ps_data[1] or  getpass('opnqvheifcpsxrel')
-                sender = ac['email'] #ps_data[0]
-                # email = Forger(sender,titre=m['sub'])
-                # email.add_recipient(m['Reply_To'])
-                
-                # email.add_part(bot_body, "plain")
-                # email.make_email()  # Build the mail
+                sender = ac['email']
                 setup.replySave(sender,m['Reply_To'])
-                # if 'yahoo' in sender:
-                #     smtp_host= 'smtp.mail.yahoo.com'
-                # elif 'gmail' in sender:
-                #     smtp_host = 'smtp.gmail.com'
-                # elif 'hotmail' in sender:
-                #     smtp_host = 'smtp.live.com'
-                # elif 'outlook' in sender:
-                #     smtp_host = 'smtp-mail.outlook.com'
-                
-
-                # smtpclient = SmtpClient(smtp=smtp_host, port=587, username=sender, password=password)
-                # smtpclient.send(email, sender, [m['Reply_To']])
+                print("reply find")
             else:
                 print(ac['email'],m['from_mail'])
         popmail.close()
@@ -71,7 +56,7 @@ def reply_start():
 	ths = []
 	pid = threading.local()
 	try:
-		th = threading.Thread(target=reply_with_smtp)
+		th = threading.Thread(target=reply_check)
 		ths.append(th)
 		th.setName('mail_pop')
 		th.start()
@@ -108,7 +93,6 @@ def reply_test():
         finally:
             server.quit()
 
-reply_with_smtp()
-# reply_test()
+
 
 

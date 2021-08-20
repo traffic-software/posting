@@ -71,6 +71,7 @@ class browser:
 		ua = UserAgent(cache=False)
 		ua.update()
 		a = ua.safari
+		print(a)
 		
 		self.options.add_argument(f'user-agent={a}')
 
@@ -384,9 +385,7 @@ class browser:
 			print('error: ',message)
 		return done
 		
-	def link_save(self,link):
-		with open('links.txt', 'a') as file:
-			file.write(link+"\n")
+	
 	#proxy plugin 
 	def proxy_auth_plugin(self):
 

@@ -80,9 +80,17 @@ class table:
         return data
         
     def replySave(self,frommail,tomail):
-        c = self.conn.cursor()
-        c.execute("INSERT INTO reply (frommail,tomail) VALUES  (?,?)", [frommail,tomail])
-        self.conn.commit()
+        
+        url = 'http://{host}/api/v1/post/account/lead/{token}/{frommail}'.format(host=self.host_get(),token=self.token,frommail=frommail)
+        params = {'email': tomail}
+
+        r = requests.get(url,params=params)
+        if "error" in r.json():
+            print("token error")
+            exit()
+        
+            
+        return True
 
    
 
@@ -151,11 +159,13 @@ class table:
 
         else:
             self.token = token['value']
+            self.host_get()
         url = 'http://192.168.0.106/api/v1/post/info/{token}'.format(token=self.token)
 
         r = requests.get(url)
         if "error" in r.json():
-            print("token error")
+
+            print(r.json()['message'])
             exit()
         
             

@@ -65,5 +65,8 @@ class post:
 		except:
 			data = None
 		return data
+	def link_save(self,link):
+		with open('links.txt', 'a') as file:
+			file.write(link+"\n")
 
 
