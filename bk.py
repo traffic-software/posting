@@ -167,7 +167,8 @@ def main(account_data,postinfo,packages_id,body_mail):
 			
 			# postlink = b.select_element_xpath('//*[@id="app"]/main/div/div[4]/div/div/div/div/div[1]/a','post link copy')
 			
-			post.link_save(b.current_url())
+			
+			b.link_save(b.current_url())
 			worker_acc.post_done(account_id)
 			
 			postdone = True
@@ -233,7 +234,7 @@ while True:
 		
 	print('main')
 	main(one_account,postinfo,packages_id,body_mail)
-	time.sleep(60)
+	time.sleep(10)
 
 		
 

@@ -3,8 +3,8 @@ net.ipv6.conf.all.disable_ipv6 = 1
 sysctl -p
 route -n
 
-# docker save -o ps_bakeca.tar ps_bakeca
-# docker load -i ps_bakeca.tar
+# docker save -o bk.tar ps_bakeca
+# docker load -i bk.tar
 docker network create -d macvlan \
   --subnet=192.168.0.0/24 \
   --gateway=192.168.0.1 \
@@ -12,8 +12,8 @@ docker network create -d macvlan \
 
 docker run  -d -it --restart=always \
  --network router_net -p 22:22 \
- --hostname worker-7 \
- --ip=192.168.0.194 --name worker-7 ps_bakeca
+ --hostname worker-4 \
+ --ip=192.168.0.197 --name worker-4 ps_bk
 
 docker ps 
 docker exec -it db9af26578ee /bin/bash
@@ -23,8 +23,8 @@ cd ../mydir/ && python3 bakecaincontrii.py ##au.py
 reboot
 shutdown -h 0
 docker container start id
-docker container stop id
-docker container rm id
+docker container stop worker-4
+docker container rm worker-4
 
 
 

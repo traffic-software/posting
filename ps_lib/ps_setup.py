@@ -79,10 +79,10 @@ class table:
         data =self.get_formated_data(c.description, post)
         return data
         
-    def replySave(self,frommail,tomail):
+    def replySave(self,acc_mail,lead_mail):
         
-        url = 'http://{host}/api/v1/post/account/lead/{token}/{frommail}'.format(host=self.host_get(),token=self.token,frommail=frommail)
-        params = {'email': tomail}
+        url = 'http://{host}/api/v1/post/account/lead/{token}'.format(host=self.host_get(),token=self.token)
+        params = {'lead_mail': lead_mail,"acc_mail":acc_mail}
 
         r = requests.get(url,params=params)
         if "error" in r.json():

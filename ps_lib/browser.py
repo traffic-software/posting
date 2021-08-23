@@ -71,7 +71,6 @@ class browser:
 		ua = UserAgent(cache=False)
 		ua.update()
 		a = ua.safari
-		print(a)
 		
 		self.options.add_argument(f'user-agent={a}')
 
@@ -197,11 +196,12 @@ class browser:
 			
 			if sys.platform not in ['Windows', 'win32', 'cygwin']:
 				self.proxy_city = p["city"]
-				time.strftime('%X %x %Z')
+				oldTime = time.strftime('%X %x %Z')
 				
 				os.environ['TZ'] = p["timezone"]
 				time.tzset()
-				time.strftime('%X %x %Z')
+				newTime = time.strftime('%X %x %Z')
+				print('old time: ',oldTime,"new time: ",newTime,'timezone: ',p["timezone"])
 			
 			return True
 		except :
@@ -375,6 +375,9 @@ class browser:
 
 	def current_url(self):
 		return self.driver.current_url
+	def link_save(self,link):
+		with open('links.txt', 'a') as file:
+			file.write(link+"\n")
 	def script_run(self,script,message='defult script'):
 		try:
 			
@@ -383,7 +386,7 @@ class browser:
 		except:
 			self.exit()
 			print('error: ',message)
-		return done
+		
 		
 	
 	#proxy plugin 
