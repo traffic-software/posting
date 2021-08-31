@@ -172,10 +172,12 @@ def main(account_data,postinfo,packages_id,body_mail):
 			worker_acc.post_done(account_id)
 			
 			postdone = True
+			break
 
 
 		
 		if counter > 6:
+			worker_acc.post_error(account_id)
 			print("link not recived")
 			break
 	print('browser close')
@@ -218,6 +220,10 @@ x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
 x.start()
 while True:
 	utility.network_check()
+	if setup.token_off():
+		print('software off now but reply checking runing')
+		time.sleep(60)
+		continue
 	one_account = acc.get_account()
 		
 	postinfo = post.get_post()

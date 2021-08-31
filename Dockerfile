@@ -1,7 +1,5 @@
 FROM selenium/standalone-chrome
 # FROM dorowu/ubuntu-desktop-lxde-vnc
-
-
 USER root
 RUN apt-get update -y
 RUN apt-get install sudo -y
@@ -29,8 +27,10 @@ RUN sudo systemctl enable ssh
 RUN useradd -rm -d /home -s /bin/bash -g root -G sudo -u 1000 test
 RUN  echo 'test:test' | chpasswd
 RUN sudo service ssh start
+# RUN sudo service supervisor start
 EXPOSE 22
-CMD ["/usr/bin/supervisord"]
+# RUN /bin/sh -c '/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf'
+# CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
 #whereis python 
 #{ crontab -l; echo "* * * * * /usr/bin/python3 /mydir/smtp.py"; } | crontab -
 # docker build . -t selenium-chrome && \

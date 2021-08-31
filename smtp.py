@@ -16,6 +16,7 @@ import re
 def reply_check(id=1):
     acc = accounts()
     setup = table()
+    
     my_file = open('reply_text.txt','r')
     bot_body = my_file.read()
     my_file.close()
@@ -24,7 +25,7 @@ def reply_check(id=1):
         
         
         ac = acc.get_account_for_lead_find()
-        print('reply chcking : ',ac['email'])
+        # print('reply chcking : ',ac['email'])
         
        
         
@@ -44,7 +45,7 @@ def reply_check(id=1):
             if ("replyad" in m['from_mail']) and (setup.checkReply(m['Reply_To']) ==None):
                 password = ac['password']  # ps_data[1] or  getpass('opnqvheifcpsxrel')
                 sender = ac['email']
-                setup.replySave(sender,m['Reply_To'])
+                setup.replySave(sender,m['Reply_To'],m['sub'])
                 print("reply find")
             else:
                 print(ac['email'],m['from_mail'])
@@ -92,6 +93,7 @@ def reply_test():
             print(e)
         finally:
             server.quit()
+
 
 
 

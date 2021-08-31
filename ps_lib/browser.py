@@ -251,6 +251,7 @@ class browser:
 				self.driver.implicitly_wait(1)
 		if element == False:
 			print("element not find : ",mesasage)
+			self.account.post_error(self.account_id,message=mesasage)
 			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()

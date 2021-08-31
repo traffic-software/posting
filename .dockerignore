@@ -9,4 +9,7 @@ __pycache__
 .vscode
 *.tar
 *.zip
+*/profile/*
+*/data/*.db
+
 

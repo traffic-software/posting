@@ -16,8 +16,9 @@ class table:
         
         if self.dbfile():
             self.conn = sqlite3.connect('data/databases.db')
-            self.token_verify()
             self.host_verify()
+            self.token_verify()
+            
 
         else:
             self.conn = sqlite3.connect('data/databases.db')
@@ -26,8 +27,9 @@ class table:
             self.post_tebl_create()
             self.settings_tebl_create()
             self.reply_tebl_create()
-            self.token_verify()
             self.host_verify()
+            self.token_verify()
+            
 
     def dbfile(self):
 
@@ -79,10 +81,10 @@ class table:
         data =self.get_formated_data(c.description, post)
         return data
         
-    def replySave(self,acc_mail,lead_mail):
+    def replySave(self,acc_mail,lead_mail,sub):
         
         url = 'http://{host}/api/v1/post/account/lead/{token}'.format(host=self.host_get(),token=self.token)
-        params = {'lead_mail': lead_mail,"acc_mail":acc_mail}
+        params = {'lead_mail': lead_mail,"acc_mail":acc_mail,'sub':sub}
 
         r = requests.get(url,params=params)
         if "error" in r.json():
@@ -159,8 +161,7 @@ class table:
 
         else:
             self.token = token['value']
-            self.host_get()
-        url = 'http://192.168.0.106/api/v1/post/info/{token}'.format(token=self.token)
+        url = 'http://{host}/api/v1/post/info/{token}'.format(host=self.host_get(),token=self.token)
 
         r = requests.get(url)
         if "error" in r.json():
@@ -170,6 +171,23 @@ class table:
         
             
         return True
+    def token_off(self):
+        token = self.token_get()
+        self.token = token['value']
+            
+        url = 'http://{host}/api/v1/post/off/{token}'.format(host=self.host_get(),token=self.token)
+
+        r = requests.get(url)
+        
+        if "off" in r.json():
+            return True
+        else:
+            return False
+
+            
+        
+            
+        
     def host_verify(self):
         host = self.host_get()
         if host== None:
