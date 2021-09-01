@@ -424,7 +424,7 @@ class browser:
 					host: "%s",
 					port: parseInt(%s)
 				},
-				bypassList: ["localhost"]
+				bypassList: ["localhost","*cloudflare.com","*google-analytics.com","*googletagmanager.com","*newrelic.com",]
 				}
 			};
 

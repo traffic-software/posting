@@ -21,11 +21,11 @@ def reply_check(id=1):
     bot_body = my_file.read()
     my_file.close()
     text=ps_str(bot_body)
-    while True:
+    for x in range(3):
         
         
         ac = acc.get_account_for_lead_find()
-        # print('reply chcking : ',ac['email'])
+        print('reply chcking : ',ac['email'])
         
        
         

@@ -2,7 +2,8 @@ nano /etc/sysctl.conf
 net.ipv6.conf.all.disable_ipv6 = 1
 sysctl -p
 route -n
-
+# docker system prune
+# docker build . -t ps_bk
 # docker save -o bk.tar ps_bk
 # docker load -i bk.tar
 docker network create -d macvlan \
@@ -16,7 +17,7 @@ docker run  -d -it --restart=always \
  --ip=192.168.0.196 --name worker-5 ps_bk
 
 docker ps 
-docker exec -it db9af26578ee /bin/bash
+docker exec -it 3adc95ddec45 /bin/bash
 
 sudo su 
 cd ../mydir/
