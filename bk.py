@@ -169,7 +169,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 			
 			
 			b.link_save(b.current_url())
-			worker_acc.post_done(account_id)
+			worker_acc.post_done(account_id,link)
 			
 			postdone = True
 			break
@@ -177,7 +177,8 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 		
 		if counter > 6:
-			worker_acc.post_error(account_id)
+			worker_acc.post_error(account_id,'verify link not recived')
+			worker_acc.ban_3(account_id,status=2)
 			print("link not recived")
 			break
 	print('browser close')

@@ -250,6 +250,7 @@ class browser:
 				print("waiting for : ",mesasage)
 				self.driver.implicitly_wait(1)
 		if element == False:
+			
 			print("element not find : ",mesasage)
 			self.account.post_error(self.account_id,message=mesasage)
 			self.account.account_inactive(self.account_id)
@@ -385,6 +386,7 @@ class browser:
 			done= self.driver.execute_script(script)
 			print('done: ',message)
 		except:
+			self.account.post_error(self.account_id,message=message)
 			self.exit()
 			print('error: ',message)
 		

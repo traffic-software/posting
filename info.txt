@@ -13,8 +13,8 @@ docker network create -d macvlan \
 
 docker run  -d -it --restart=always \
  --network router_net -p 22:22 \
- --hostname worker-9 \
- --ip=192.168.0.192 --name worker-9 ps_bk
+ --hostname worker-4 \
+ --ip=192.168.0.197 --name worker-4 ps_bk
  docker exec -it 3adc95ddec45 /bin/bash
  cd ../mydir/
 python3 bk.py

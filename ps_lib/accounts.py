@@ -97,18 +97,20 @@ class accounts:
         sql = "UPDATE accounts SET runing =2 WHERE id = " + str(id)
         c.execute(sql)
         self.conn.commit()
-    def ban_3(self,id):
+    def ban_3(self,id,status=1):
         url = 'http://{host}/api/v1/post/account/ban/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
 
-        r = requests.get(url)
+        params = {'status': status}
+        r = requests.get(url,params=params)
         if "error" in r.json():
             print("error",r.json()['message'])
             exit()
         return r.json()
-    def post_done(self,id):
+    def post_done(self,id,messasge='post done'):
         url = 'http://{host}/api/v1/post/account/postdone/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
 
-        r = requests.get(url)
+        params = {'data': messasge}
+        r = requests.get(url,params=params)
         if "error" in r.json():
             print("error",r.json()['message'])
             exit()
