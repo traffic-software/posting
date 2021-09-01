@@ -13,22 +13,25 @@ docker network create -d macvlan \
 
 docker run  -d -it --restart=always \
  --network router_net -p 22:22 \
- --hostname worker-5 \
- --ip=192.168.0.196 --name worker-5 ps_bk
+ --hostname worker-9 \
+ --ip=192.168.0.192 --name worker-9 ps_bk
+ docker exec -it 3adc95ddec45 /bin/bash
+ cd ../mydir/
+python3 bk.py
 
 docker ps 
-docker exec -it 3adc95ddec45 /bin/bash
+
 
 sudo su 
 cd ../mydir/
-sudo rm data/databases.db
 python3 bk.py
 reboot
 shutdown -h 0
 docker container start id
 docker container stop worker-4
 docker container rm worker-4
-docker rm -f $(docker ps -a -q)
+docker container rm -f $(docker ps -a -q)
+docker image rm -f $(docker images -a -q)
 
 
 

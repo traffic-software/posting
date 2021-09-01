@@ -7,7 +7,7 @@ RUN apt-get install sudo -y
 RUN apt-get -y install cron
 RUN touch /var/log/cron.log
 RUN (crontab -l ; echo "* * * * * cd ~ && cd /mydir && /usr/bin/python3 reply.py >> /var/log/cron.log") | crontab
-RUN sudo service cron restart
+RUN service cron restart
 
 
 # ssh server setup 
@@ -16,10 +16,10 @@ RUN sudo systemctl enable ssh
 RUN useradd -rm -d /home -s /bin/bash -g root -G sudo -u 1000 test
 RUN  echo 'test:test' | chpasswd
 EXPOSE 22
-RUN sudo service ssh start
+RUN service ssh start
 #install text editor
 RUN apt-get install nano -y
-#install python and oython module
+#install python and python module
 RUN apt-get install python3 -y
 RUN sudo apt install python3-pip -y
 RUN python3 -m pip install selenium
@@ -37,8 +37,8 @@ ADD . /mydir/
 # prossess meneger
 RUN sudo apt-get install -y supervisor
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-CMD ["/usr/bin/supervisord"]
 
+CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
 
 
 
