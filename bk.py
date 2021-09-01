@@ -35,6 +35,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	print(datetime.now().strftime("%H:%M:%S"))
 	
 	account_id = account_data['id']
+	worker_acc=accounts()
 
 
 	
@@ -102,6 +103,8 @@ def main(account_data,postinfo,packages_id,body_mail):
 	b.script_run('return  $("#contact_method_only_email").trigger("click")','click contact method')
 	checkbox2 = '''return  $('input[name="terms"]').prop("checked", true)'''
 	b.script_run(checkbox2,'accept terms')
+	btn_remove = '''$("button.btn.btn-primary.waves-effect.btn-block").remove();'''
+	b.script_run(btn_remove,"form sbumit button remove")
 
 	
 
@@ -124,14 +127,13 @@ def main(account_data,postinfo,packages_id,body_mail):
 		b.script_run("document.getElementById('{0}').style.display = 'none';".format(chacha_respons.get_attribute('id')),message='captcha done')
 		
 	except Exception as e:
+		worker_acc.post_error(account_id,'captcha error')
 		print('captcha error',e)
 		b.exit()
 	
 
-	btn_remove = '''$("button.btn.btn-primary.waves-effect.btn-block").remove();'''
-	btn_add = '''$("form").append("<input type="submit" id="sub_btn" value="Continuar"/>");'''
+	
 	btn_click = '''$("form").submit()'''
-	b.script_run(btn_remove,"form sbumit button remove")
 	b.script_run(btn_click,"form sbumit")
 	
 	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload')
@@ -146,7 +148,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 	counter=0
 	postdone = False
-	worker_acc=accounts()
+	
 	while True:
 		time.sleep(10)
 		if postdone == True:
