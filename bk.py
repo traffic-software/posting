@@ -116,20 +116,22 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 	try:
 
-		chacha_respons = b.driver.find_element_by_name('h-captcha-response')
-		b.script_run("document.getElementById('{0}').style.display = 'block';".format(chacha_respons.get_attribute('id')),message='captcha work part 1')
-		
-		chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='it')
-		chacha_key = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
-		script = 'document.getElementById("{0}").innerHTML="{1}";'.format(chacha_respons.get_attribute('id'),chacha_key)
-		
-		b.script_run(script,message='captcha work part 2')
-		b.script_run("document.getElementById('{0}').style.display = 'none';".format(chacha_respons.get_attribute('id')),message='captcha done')
-		
+		captcha = b.driver.find_element_by_name('h-captcha-response')
 	except Exception as e:
-		worker_acc.post_error(account_id,'captcha error')
-		print('captcha error',e)
+		worker_acc.post_error(account_id,'captcha not load')
+		print('captcha not load',e)
 		b.exit()
+		exit()
+	b.script_run("document.getElementById('{0}').style.display = 'block';".format(captcha.get_attribute('id')),message='captcha display block')
+		
+	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='it')
+	chacha_key = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
+	script = 'document.getElementById("{0}").innerHTML="{1}";'.format(captcha.get_attribute('id'),chacha_key)
+		
+	b.script_run(script,message='captcha key add')
+	b.script_run("document.getElementById('{0}').style.display = 'none';".format(captcha.get_attribute('id')),message='captcha done')
+		
+	
 	
 
 	
@@ -167,10 +169,6 @@ def main(account_data,postinfo,packages_id,body_mail):
 			conf_link = 'window.location.href = "{};'.format(link)
 			b.script_run(conf_link,'link click to verify')
 			
-			# postlink = b.select_element_xpath('//*[@id="app"]/main/div/div[4]/div/div/div/div/div[1]/a','post link copy')
-			
-			
-			b.link_save(b.current_url())
 			worker_acc.post_done(account_id,link)
 			
 			postdone = True

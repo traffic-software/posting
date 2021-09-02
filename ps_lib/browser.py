@@ -389,6 +389,7 @@ class browser:
 			self.account.post_error(self.account_id,message=message)
 			self.exit()
 			print('error: ',message)
+			exit()
 		
 		
 	
