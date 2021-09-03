@@ -41,7 +41,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 	p_pass= "4mdloQgXxS8lcB3J_country-Italy_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(10)))
 	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="Italy",proxy_user='malaknoyn',proxy_pass=p_pass)
-	time.sleep(10)
+	time.sleep(5)
 	urls = ['brescia','cagliari','campobasso','caserta','catanzaro','cremona','cremona','cuneo','fermo','firenze','forli','genova','grosseto','isernia','laspezia','lecce','livorno','lucca','mantova','matera','messina','modena','napoli','nuoro','olbiatempio','padova','parma','perugia','piacenza','pistoia','potenza','ragusa','reggiocalabria','rieti','roma','salerno','savona','siracusa','taranto','terni','trapani','treviso','varese','verbania','verona','vicenza','viterbo','vibovalentia','vercelli','venezia','urbino','udine','trieste','trento','torino','teramo','sondrio','siena','sassari','rovigo','rimini','reggioemilia','ravenna','prato','pordenone','pisa','pescara','pavia','palermo','oristano','ogliastra','novara','monza','milano','mediocampidano','massacarrara','macerata','lodi','lecco','latina','laquila','imperia','gorizia','frosinone','foggia','ferrara','enna','crotone','cosenza','chieti','catania','carboniaiglesias','caltanissetta','brindisi','bolzano','biella','benevento','barletta','avellino','ascoli','aosta','alessandria']
 	url = random.choice(urls)
 	if b.proxy_city is not None:
@@ -51,7 +51,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 			url = citys[0]
 	
 	
-	
+		
 	try:
 		b.get_url('https://'+url+'.bakecaincontrii.com/fe/main.php?page=post_insert')
 	except:

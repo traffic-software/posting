@@ -59,7 +59,8 @@ class browser:
 			
 			
 			
-			self.proxy_auth_plugin()
+			# self.proxy_auth_plugin()
+			self.proxy_auth_plugin_pac_script()
 
 		
 		if sys.platform in ['Windows', 'win32', 'cygwin']:
@@ -68,11 +69,11 @@ class browser:
 			driverUrl = '/usr/bin/chromedriver'
 			
 
-		ua = UserAgent(cache=False)
-		ua.update()
-		a = ua.safari
+		# ua = UserAgent(cache=False)
+		# ua.update()
+		# a = ua.safari
 		
-		self.options.add_argument(f'user-agent={a}')
+		# self.options.add_argument(f'user-agent={a}')
 
 		
 		if sys.platform not in ['Windows', 'win32', 'cygwin']:
@@ -483,15 +484,23 @@ class browser:
 		"""
 
 		background_js = """
+		function FindProxyForURL(url, host) {
+			if (url.search("static")>"1" || 
+			url.search("cloudflare")>"1" || 
+			url.search("GTM")>"1" ||
+			url.search("hsw.js")>"1") {
+				return 'DIRECT';
+				
+			}
+			
+			return "PROXY %s:%s";
+			}
 		var config = {
 		mode: "pac_script",
 		pacScript: {
-			data: "function FindProxyForURL(url, host) {\n" +
-				"  shExpMatch(url, "https://www.google.com/search/*"))\n" +
-				"    return 'PROXY %s:%s';\n" +
-				"  return 'DIRECT';\n" +
-				"}"
-		}
+			data:FindProxyForURL.toString(),
+    		mandatory: true
+			}
 		};
 
 		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
