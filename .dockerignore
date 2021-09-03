@@ -6,7 +6,6 @@ __pycache__
 .db
 .html
 .spec
-.vscode
 *.tar
 *.zip
 data/*.db

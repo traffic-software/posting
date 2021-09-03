@@ -119,7 +119,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 		captcha = b.driver.find_element_by_name('h-captcha-response')
 	except Exception as e:
 		worker_acc.post_error(account_id,'captcha not load')
-		print('captcha not load',e)
+		print('captcha not load')
 		b.exit()
 		exit()
 	b.script_run("document.getElementById('{0}').style.display = 'block';".format(captcha.get_attribute('id')),message='captcha display block')

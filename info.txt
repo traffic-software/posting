@@ -16,7 +16,7 @@ docker run  -d -it --restart=always \
  --hostname worker-4 \
  --ip=192.168.0.197 --name worker-4 ps_bk
  docker exec -it 3adc95ddec45 /bin/bash
- cd ../mydir/
+cd ../mydir/
 python3 bk.py
 
 docker ps 

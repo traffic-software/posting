@@ -252,6 +252,8 @@ class browser:
 		if element == False:
 			
 			print("element not find : ",mesasage)
+			if "Check your proxy" in str(self.page_source()):
+				mesasage = mesasage + " proxy error"
 			self.account.post_error(self.account_id,message=mesasage)
 			self.account.account_inactive(self.account_id)
 			self.exit()
@@ -386,6 +388,8 @@ class browser:
 			done= self.driver.execute_script(script)
 			print('done: ',message)
 		except:
+			if "page" in message:
+				message = message + str(self.page_source())
 			self.account.post_error(self.account_id,message=message)
 			self.exit()
 			print('error: ',message)
