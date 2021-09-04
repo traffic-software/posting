@@ -217,8 +217,8 @@ post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
 	display = Display(visible=0, size=(1024, 768))
 	display.start()
-# x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
-# x.start()
+x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
+x.start()
 while True:
 	utility.network_check()
 	if setup.token_off():

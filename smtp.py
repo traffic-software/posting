@@ -25,7 +25,7 @@ def reply_check(id=1):
         
         
         ac = acc.get_account_for_lead_find()
-        print('reply chcking : ',ac['email'])
+        # print('reply chcking : ',ac['email'])
         
        
         
