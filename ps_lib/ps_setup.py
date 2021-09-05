@@ -16,7 +16,7 @@ class table:
     def __init__(self):
         abspath = os.path.abspath(__file__)
         self.dname = os.path.dirname(abspath)
-        print(self.dname)
+        
         self.databasesfile=self.dname+'/databases.db'
         
         if self.dbfile():

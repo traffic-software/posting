@@ -9,7 +9,7 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
 import json, requests
 import os, time
-from fake_useragent import UserAgent
+from ps_lib.userAgent import l
 import time
 from sys import exit
 import os
@@ -69,11 +69,11 @@ class browser:
 			driverUrl = '/usr/bin/chromedriver'
 			
 
-		# ua = UserAgent(cache=False)
-		# ua.update()
-		# a = ua.safari
 		
-		# self.options.add_argument(f'user-agent={a}')
+		a = random.choice(l)
+		
+		
+		self.options.add_argument(f'user-agent={a}')
 
 		
 		if sys.platform not in ['Windows', 'win32', 'cygwin']:
@@ -235,7 +235,7 @@ class browser:
 			self.exit()
 			exit()
 		return element
-	def select_element_xpath(self,selector,mesasage="genarl work"):
+	def select_element_xpath(self,selector,mesasage="genarl work",type=1):
 		co = 0
 		element = False
 		while True:
@@ -253,14 +253,26 @@ class browser:
 		if element == False:
 			
 			print("element not find : ",mesasage)
-			if "Check your proxy" in str(self.page_source()):
-				mesasage = mesasage + " proxy error"
+			if type ==2:
+				mesasage = mesasage + self.check_error()
 			self.account.post_error(self.account_id,message=mesasage)
 			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
 	
+	def check_error(self):
+		m="not"
+		try:
+			c = self.driver.find_element_by_name('h-captcha-response')
+			m = "captcha key error and you need to report"
+			
+		except Exception as e:
+			proxydata= self.PROXY_HOST+':'+self.PROXY_PORT
+			if self.proxy_check(proxydata) == False:
+				m = "proxy error"
+
+		return m
 	def select_dropdown(self,parent,child):
 		while True:
 			try:

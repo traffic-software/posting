@@ -12,6 +12,7 @@ from ps_lib.ps_setup import table
 # from PyEmailTools.SmtpClient import SmtpClient
 from getpass import getpass
 import re
+import os
 
 def reply_check(id=1):
     acc = accounts()
@@ -21,7 +22,7 @@ def reply_check(id=1):
     bot_body = my_file.read()
     my_file.close()
     text=ps_str(bot_body)
-    for x in range(3):
+    while True:
         
         
         ac = acc.get_account_for_lead_find()

@@ -20,7 +20,11 @@ from ps_lib.captcha import capcha
 from ps_lib.ps_str import ps_str
 from ps_lib.imap import imap
 from selenium.webdriver.common.keys import Keys
+import os
 
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
 bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
 
@@ -138,7 +142,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	btn_click = '''$("form").submit()'''
 	b.script_run(btn_click,"form sbumit")
 	
-	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload')
+	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload',type=2)
 	b.scroll_element_into_view(img)
 	img.click()
 	Visibility = b.select_element_xpath('//*[@id="app"]/main/form/div[2]/div[2]/div[2]/div/div/div/button','Visibility')
@@ -217,8 +221,8 @@ post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
 	display = Display(visible=0, size=(1024, 768))
 	display.start()
-x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
-x.start()
+# x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
+# x.start()
 while True:
 	utility.network_check()
 	if setup.token_off():
