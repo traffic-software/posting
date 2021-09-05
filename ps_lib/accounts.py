@@ -8,8 +8,9 @@ from datetime import timedelta
 class accounts:
 
     def __init__(self):
-        self.conn = sqlite3.connect('data/databases.db')
+        
         self.software = table()
+        self.conn = sqlite3.connect(self.software.databasesfile)
 
 
     def ps_proxys_insert(self, proxys):

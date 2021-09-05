@@ -5,6 +5,7 @@ import random
 import string
 import requests
 # import winreg
+import os
 import time
 from datetime import datetime
 class table:
@@ -13,15 +14,19 @@ class table:
     consumer_secret = 'cs_f828c575f480a0a1be5f80f6661ef2957bec9c80'
     License = None
     def __init__(self):
+        abspath = os.path.abspath(__file__)
+        self.dname = os.path.dirname(abspath)
+        print(self.dname)
+        self.databasesfile=self.dname+'/databases.db'
         
         if self.dbfile():
-            self.conn = sqlite3.connect('data/databases.db')
+            self.conn = sqlite3.connect(self.databasesfile)
             self.host_verify()
             self.token_verify()
             
 
         else:
-            self.conn = sqlite3.connect('data/databases.db')
+            self.conn = sqlite3.connect(self.databasesfile)
             self.proxys_tebl_create()
             self.account_tebl_create()
             self.post_tebl_create()
@@ -33,11 +38,11 @@ class table:
 
     def dbfile(self):
 
-        if path.exists('data/databases.db'):
+        if path.exists(self.databasesfile):
             return True
 
         else:
-            open('data/databases.db', "w+")
+            open(self.databasesfile, "w+")
             return False
 
     def proxys_tebl_create(self):

@@ -6,7 +6,7 @@ class post:
 	def __init__(self):
 		self.software = table()
 
-		self.conn = sqlite3.connect('data/databases.db')
+		self.conn = sqlite3.connect(self.software.databasesfile)
 	def get_post(self):
 		url = 'http://{host}/api/v1/post/new/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
 		r = requests.get(url)

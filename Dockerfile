@@ -4,10 +4,10 @@ USER root
 RUN apt-get update -y
 RUN apt-get install sudo -y
 #crontab install
-RUN apt-get -y install cron
-RUN touch /var/log/cron.log
-RUN (crontab -l ; echo "* * * * * cd ~ && cd /mydir && /usr/bin/python3 reply.py >> /var/log/cron.log") | crontab
-RUN service cron restart
+# RUN apt-get -y install cron
+# RUN touch /var/log/cron.log
+# RUN (crontab -l ; echo "* * * * * cd ~ && cd /mydir && /usr/bin/python3 reply.py >> /var/log/cron.log") | crontab
+# RUN service cron restart
 
 
 # ssh server setup 
@@ -35,7 +35,9 @@ RUN python3 -m pip install fake-useragent
 RUN apt-get install -y net-tools 
 ADD . /mydir/
 # prossess meneger
+
 RUN sudo apt-get install -y supervisor
+RUN touch /mydir/worker.log
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]

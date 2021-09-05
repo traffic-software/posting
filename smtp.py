@@ -17,7 +17,7 @@ def reply_check(id=1):
     acc = accounts()
     setup = table()
     
-    my_file = open('reply_text.txt','r')
+    my_file = open(setup.dname+'/..'+'/reply_text.txt','r')
     bot_body = my_file.read()
     my_file.close()
     text=ps_str(bot_body)

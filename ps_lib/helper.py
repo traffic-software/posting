@@ -1,11 +1,13 @@
 import sqlite3
 from sys import exit
+from ps_lib.ps_setup import table
 import requests
 import time
 class helper:
 
 	def __init__(self):
-		self.db = sqlite3.connect("data/databases.db")
+		self.software = table()
+		self.db = sqlite3.connect(self.software.databasesfile)
 
 	def all_account_active(self):
 		c = self.db.cursor()

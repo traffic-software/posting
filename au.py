@@ -233,7 +233,6 @@ packages_id = '317345'
 # worker = w + 1
 worker = 2
 # ........................start worker....................
-open('active.txt', "w+")
 utility = helper()
 threads = []
 headers = {}
