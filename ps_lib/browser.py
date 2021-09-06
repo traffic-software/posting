@@ -235,7 +235,8 @@ class browser:
 			self.exit()
 			exit()
 		return element
-	def select_element_xpath(self,selector,mesasage="genarl work",type=1):
+	def select_element_xpath(self,selector,mesasage="genarl work",type=1,valu=None):
+		# print(self.current_url())
 		co = 0
 		element = False
 		while True:
@@ -249,23 +250,27 @@ class browser:
 				if co > 10:
 					break
 				print("waiting for : ",mesasage)
+				if type == 2:
+					self.refresh()
+
 				self.driver.implicitly_wait(1)
 		if element == False:
 			
 			print("element not find : ",mesasage)
 			if type ==2:
-				mesasage = mesasage + self.check_error()
+				mesasage = mesasage + self.check_error(valu)
 			self.account.post_error(self.account_id,message=mesasage)
 			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
 	
-	def check_error(self):
+	def check_error(self,valu):
 		m="not"
 		try:
-			c = self.driver.find_element_by_name('h-captcha-response')
-			m = "captcha key error and you need to report"
+			if "post-insert-images" not in self.current_url():
+				m = "captcha key error and you need to report"
+
 			
 		except Exception as e:
 			proxydata= self.PROXY_HOST+':'+self.PROXY_PORT

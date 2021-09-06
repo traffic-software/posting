@@ -26,7 +26,7 @@ class capcha:
 			id = self.two_start(siteKe,pageUrl)
 			response =self.two_respond(id)
 			print('task done')
-			return response
+			return {"id":id,"key":response}
 
 	def two_start(self,siteKe,pageUrl):
 		id=None

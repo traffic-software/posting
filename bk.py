@@ -129,8 +129,8 @@ def main(account_data,postinfo,packages_id,body_mail):
 	b.script_run("document.getElementById('{0}').style.display = 'block';".format(captcha.get_attribute('id')),message='captcha display block')
 		
 	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='it')
-	chacha_key = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
-	script = 'document.getElementById("{0}").innerHTML="{1}";'.format(captcha.get_attribute('id'),chacha_key)
+	c_info = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
+	script = 'document.getElementById("{0}").innerHTML="{1}";'.format(captcha.get_attribute('id'),c_info["key"])
 		
 	b.script_run(script,message='captcha key add')
 	b.script_run("document.getElementById('{0}').style.display = 'none';".format(captcha.get_attribute('id')),message='captcha done')
@@ -142,7 +142,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	btn_click = '''$("form").submit()'''
 	b.script_run(btn_click,"form sbumit")
 	
-	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload',type=2)
+	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload',type=2,valu=c_info["id"])
 	b.scroll_element_into_view(img)
 	img.click()
 	Visibility = b.select_element_xpath('//*[@id="app"]/main/form/div[2]/div[2]/div[2]/div/div/div/button','Visibility')
