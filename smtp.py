@@ -43,7 +43,7 @@ def reply_check(id=1):
             
             bot_body = bot_body.replace('[name]', '')
            
-            if ("replyad" in m['from_mail']) and (setup.checkReply(m['Reply_To']) ==None):
+            if ("replyad" in m['from_mail']):
                 password = ac['password']  # ps_data[1] or  getpass('opnqvheifcpsxrel')
                 sender = ac['email']
                 setup.replySave(sender,m['Reply_To'],m['sub'])

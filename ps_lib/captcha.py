@@ -53,5 +53,5 @@ class capcha:
 				text=data[1]
 				break
 			else:
-				print('CAPCHA_NOT_READY')
+				print('CAPCHA_NOT_READY') 
 		return text

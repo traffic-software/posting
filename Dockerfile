@@ -37,10 +37,10 @@ ADD . /mydir/
 # prossess meneger
 
 RUN sudo apt-get install -y supervisor
-RUN touch /mydir/worker.log
+# RUN touch /mydir/worker.log
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN /bin/sh -c '/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf'
+CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
 
 
 

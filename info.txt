@@ -32,6 +32,7 @@ docker container stop worker-4
 docker container rm worker-4
 docker container rm -f $(docker ps -a -q)
 docker image rm -f $(docker images -a -q)
+docker load -i bk.tar
 
 
 

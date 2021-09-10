@@ -56,11 +56,10 @@ class browser:
 			self.PROXY_HOST =  proxy[0]
 			self.PROXY_PORT =  proxy[1]
 			self.PROXY_TYPE = 'http'
-			
-			
-			
+			print("done: proxy set")
 			# self.proxy_auth_plugin()
 			self.proxy_auth_plugin_pac_script()
+			
 
 		
 		if sys.platform in ['Windows', 'win32', 'cygwin']:
@@ -74,6 +73,7 @@ class browser:
 		
 		
 		self.options.add_argument(f'user-agent={a}')
+		print('user set')
 
 		
 		if sys.platform not in ['Windows', 'win32', 'cygwin']:
@@ -92,8 +92,10 @@ class browser:
 		
 
 	def exit(self):
-
-		self.driver.quit()
+		try:
+			self.driver.quit()
+		except:
+			print("browser close")
 	def proxy(self):
 		while True:
 			try:
@@ -181,10 +183,6 @@ class browser:
 			return False
 
 	def proxy_save(self,px,p):
-		
-		
-
-		
 		try:
 			
 			self.proxy_city = p["city"]
@@ -244,13 +242,16 @@ class browser:
 				element = self.driver.find_element_by_xpath(selector)
 				if element.is_displayed() and element.is_enabled():
 					print("done : ",mesasage)
+					if type ==2:
+						self.captcha_good(valu)
 					break
+
 			except:
 				co = co + 1
 				if co > 10:
 					break
 				print("waiting for : ",mesasage)
-				if type == 2:
+				if type == 2 and co ==1:
 					self.refresh()
 
 				self.driver.implicitly_wait(1)
@@ -268,14 +269,19 @@ class browser:
 	def check_error(self,valu):
 		m="not"
 		try:
+			#check image upload page
 			if "post-insert-images" not in self.current_url():
 				m = "captcha key error and you need to report"
-
-			
-		except Exception as e:
+				self.captcha_bad(valu)
+			#check proxy good or not
 			proxydata= self.PROXY_HOST+':'+self.PROXY_PORT
 			if self.proxy_check(proxydata) == False:
 				m = "proxy error"
+				self.captcha_good(valu)
+
+			
+		except Exception as e:
+			pass
 
 		return m
 	def select_dropdown(self,parent,child):
@@ -314,7 +320,16 @@ class browser:
 			except:
 				time.sleep(1)
 				print("get_screenshot")
-
+	def captcha_bad(self,id):
+			try:
+				data = requests.get("http://2captcha.com/res.php?key=4191a9a8a00ad6ce300a49d8d36935da&action=reportbad&id={1}".format(id))
+			except:
+				pass
+	def captcha_good(self,id):
+			try:
+				data = requests.get("http://2captcha.com/res.php?key=4191a9a8a00ad6ce300a49d8d36935da&action=reportgood&id={1}".format(id))
+			except:
+				pass
 	def get_url(self,url):
 		try:
 			self.driver.get(url)
@@ -502,10 +517,10 @@ class browser:
 
 		background_js = """
 		function FindProxyForURL(url, host) {
-			if (url.search("static")>"1" || 
+			if (url.search("/static/")>"1" || 
 			url.search("cloudflare")>"1" || 
-			url.search("GTM")>"1" ||
-			url.search("hsw.js")>"1") {
+			url.search("google")>"1" || 
+			url.search("GTM")>"1") {
 				return 'DIRECT';
 				
 			}
