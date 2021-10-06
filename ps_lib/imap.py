@@ -31,7 +31,7 @@ class imap:
 			elif 'hotmail' in self.username:
 				self.hosturl = 'imap-mail.outlook.com'
 			elif 'outlook' in self.username:
-				self.hosturl = 'imap-mail.outlook.com'
+				self.hosturl = 'outlook.office365.com'
 
 		
 		self.i= IMAPClient(host=self.hosturl)
