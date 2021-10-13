@@ -83,7 +83,7 @@ class browser:
 		self.options.add_argument("--disable-infobars")
 			
 		
-		self.options.add_argument("--lang=it-IT")
+		# self.options.add_argument("--lang=it-IT")
 		self.options.add_argument("--no-sandbox")
 		
 		self.options.add_argument("--use-temporary-user-data-dir")
@@ -102,8 +102,11 @@ class browser:
 				if self.proxy_company =="packetstream":
 					self.PROXY_HOST = "proxy.packetstream.io"
 					self.PROXY_PORT = 31112
-					# self.PROXY_USER = "malaknoyn"
-					# self.PROXY_PASS = "4mdloQgXxS8lcB3J_country-%s_session-%s"% (self.proxy_country,''.join(random.choice(string.ascii_letters) for i in range(10)))
+					proxy = "%s:%s"%(self.PROXY_HOST,self.PROXY_PORT)
+				#............https://dashboard.soax.com/......................
+				if self.proxy_company =="soax":
+					self.PROXY_HOST = "proxy.soax.com"
+					self.PROXY_PORT = 9000
 					proxy = "%s:%s"%(self.PROXY_HOST,self.PROXY_PORT)
 				#............rsocks.net......................
 				if self.proxy_company =="rsocks":
@@ -166,11 +169,17 @@ class browser:
 				data  = self.PROXY_USER+":"+self.PROXY_PASS+"@"+data
 			proxie = {"http": 'http://'+data,"https": 'http://'+data}
 			
+			if self.proxy_company =="soax":
+				data  = self.PROXY_USER+":"+self.PROXY_PASS+"@"+data
+			proxie = {"http": "http://"+data,"https": "http://"+data}
+			print(proxie)
+			
 			
 				
 			url = "http://ip-api.com/json"
 			timeout = 10
 			r = requests.get(url, timeout=timeout,proxies=proxie)
+			print(r.text)
 			if self.proxy_save(data, json.loads(r.text)):
 				
 				return True
@@ -233,6 +242,11 @@ class browser:
 			self.exit()
 			exit()
 		return element
+	def select_elements(self,selector):
+		
+		return self.driver.find_elements_by_css_selector(selector)
+		
+		
 	def select_element_xpath(self,selector,mesasage="genarl work",type=1,valu=None):
 		# print(self.current_url())
 		co = 0
@@ -264,6 +278,18 @@ class browser:
 			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()
+		return element
+	
+	
+	def try_xpath(self,selector,mesasage="genarl work"):
+		try:
+			element = self.driver.find_element_by_xpath(selector)
+			if element.is_displayed() and element.is_enabled():
+				element = True
+
+		except:
+			element = False
+		
 		return element
 	
 	def check_error(self,valu):

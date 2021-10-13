@@ -1,4 +1,5 @@
 from email.policy import SMTP
+from re import sub
 import threading
 import time
 import shutil
@@ -43,28 +44,43 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 
 	
-	p_pass= "4mdloQgXxS8lcB3J_country-Italy_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(10)))
-	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="Italy",proxy_user='malaknoyn',proxy_pass=p_pass)
+	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
+	p_pass= "wifi;us;;;los{}angeles;".format("+")
+	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates"
+	b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
 	time.sleep(5)
-	urls = ['brescia','cagliari','campobasso','caserta','catanzaro','cremona','cremona','cuneo','fermo','firenze','forli','genova','grosseto','isernia','laspezia','lecce','livorno','lucca','mantova','matera','messina','modena','napoli','nuoro','olbiatempio','padova','parma','perugia','piacenza','pistoia','potenza','ragusa','reggiocalabria','rieti','roma','salerno','savona','siracusa','taranto','terni','trapani','treviso','varese','verbania','verona','vicenza','viterbo','vibovalentia','vercelli','venezia','urbino','udine','trieste','trento','torino','teramo','sondrio','siena','sassari','rovigo','rimini','reggioemilia','ravenna','prato','pordenone','pisa','pescara','pavia','palermo','oristano','ogliastra','novara','monza','milano','mediocampidano','massacarrara','macerata','lodi','lecco','latina','laquila','imperia','gorizia','frosinone','foggia','ferrara','enna','crotone','cosenza','chieti','catania','carboniaiglesias','caltanissetta','brindisi','bolzano','biella','benevento','barletta','avellino','ascoli','aosta','alessandria']
-	url = random.choice(urls)
-	if b.proxy_city is not None:
-		pattern = '*%s*'%(b.proxy_city)
-		citys = fnmatch.filter(urls, pattern)
-		if len(citys)>0:
-			url = citys[0]
+	# urls = ['brescia','cagliari','campobasso','caserta','catanzaro','cremona','cremona','cuneo','fermo','firenze','forli','genova','grosseto','isernia','laspezia','lecce','livorno','lucca','mantova','matera','messina','modena','napoli','nuoro','olbiatempio','padova','parma','perugia','piacenza','pistoia','potenza','ragusa','reggiocalabria','rieti','roma','salerno','savona','siracusa','taranto','terni','trapani','treviso','varese','verbania','verona','vicenza','viterbo','vibovalentia','vercelli','venezia','urbino','udine','trieste','trento','torino','teramo','sondrio','siena','sassari','rovigo','rimini','reggioemilia','ravenna','prato','pordenone','pisa','pescara','pavia','palermo','oristano','ogliastra','novara','monza','milano','mediocampidano','massacarrara','macerata','lodi','lecco','latina','laquila','imperia','gorizia','frosinone','foggia','ferrara','enna','crotone','cosenza','chieti','catania','carboniaiglesias','caltanissetta','brindisi','bolzano','biella','benevento','barletta','avellino','ascoli','aosta','alessandria']
+	# url = random.choice(urls)
+	# if b.proxy_city is not None:
+	# 	pattern = '*%s*'%(b.proxy_city)
+	# 	citys = fnmatch.filter(urls, pattern)
+	# 	if len(citys)>0:
+	# 		url = citys[0]
 	
 	
 		
 	try:
-		b.get_url('https://'+url+'.bakecaincontrii.com/fe/main.php?page=post_insert')
+		b.get_url('https://craigslist.org')
 	except:
 		b.exit()
 	
-	accept1_button = b.select_element_xpath('//*[@id="lightbox-vm18"]/div/div/div[3]/button','accept1_button')
-	accept1_button.click()
-	accept2_button = b.select_element_xpath('//*[@id="app"]/div[3]/button[2]','accept2_button')
-	accept2_button.click()
+	
+	button = b.select_element_xpath('//*[@id="post"]','click new post')
+	button.click()
+	location = b.try_xpath('/html/body/article/section/p[contains(text(),"choose the location that fits best:")]')
+	if location:
+		sub_aria = b.select_elements('input[type=radio]','get all sub aria')
+		sub_aria =random.choice(sub_aria)
+		print(sub_aria)
+		sub_aria.click()
+	button = b.select_element_xpath('/html/body/article/section/form/ul/li[4]','click on housing offered')
+	button.click()
+	button = b.select_element_xpath('//*[@id="new-edit"]/div/label/label[2]/div/span[1]','click on apartments / housing for rent')
+	button.click()
+	
+	
+	
+	time.sleep(111111)
 
 	
 	try:
@@ -221,8 +237,8 @@ post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
 	display = Display(visible=0, size=(1024, 768))
 	display.start()
-x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
-x.start()
+# x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
+# x.start()
 while True:
 	utility.network_check()
 	if setup.token_off():
@@ -232,7 +248,7 @@ while True:
 	one_account = acc.get_account()
 		
 	postinfo = post.get_post()
-	body_mail=post.get_body_mail()
+	body_mail=None
 	if one_account == None or postinfo == None:
 		print('post or account not find for worker')
 		time.sleep(60)
