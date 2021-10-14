@@ -41,21 +41,19 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 	account_id = account_data['id']
 	worker_acc=accounts()
+	popmail = imap(account_id,account_data['email'],account_data['password'])
+	popmail.messages('robot@craigslist.org')
+	popmail.close()
+	
 
 
 	
-	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
-	p_pass= "wifi;us;;;los{}angeles;".format("+")
+	p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
+	# p_pass= "wifi;us;;;los{}angeles;".format("+")
 	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates"
-	b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
+	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
 	time.sleep(5)
-	# urls = ['brescia','cagliari','campobasso','caserta','catanzaro','cremona','cremona','cuneo','fermo','firenze','forli','genova','grosseto','isernia','laspezia','lecce','livorno','lucca','mantova','matera','messina','modena','napoli','nuoro','olbiatempio','padova','parma','perugia','piacenza','pistoia','potenza','ragusa','reggiocalabria','rieti','roma','salerno','savona','siracusa','taranto','terni','trapani','treviso','varese','verbania','verona','vicenza','viterbo','vibovalentia','vercelli','venezia','urbino','udine','trieste','trento','torino','teramo','sondrio','siena','sassari','rovigo','rimini','reggioemilia','ravenna','prato','pordenone','pisa','pescara','pavia','palermo','oristano','ogliastra','novara','monza','milano','mediocampidano','massacarrara','macerata','lodi','lecco','latina','laquila','imperia','gorizia','frosinone','foggia','ferrara','enna','crotone','cosenza','chieti','catania','carboniaiglesias','caltanissetta','brindisi','bolzano','biella','benevento','barletta','avellino','ascoli','aosta','alessandria']
-	# url = random.choice(urls)
-	# if b.proxy_city is not None:
-	# 	pattern = '*%s*'%(b.proxy_city)
-	# 	citys = fnmatch.filter(urls, pattern)
-	# 	if len(citys)>0:
-	# 		url = citys[0]
+	
 	
 	
 		
@@ -67,9 +65,11 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 	button = b.select_element_xpath('//*[@id="post"]','click new post')
 	button.click()
-	location = b.try_xpath('/html/body/article/section/p[contains(text(),"choose the location that fits best:")]')
-	if location:
-		sub_aria = b.select_elements('input[type=radio]','get all sub aria')
+	
+	
+	#https://post.craigslist.org/k/sib7px0t7BGflPX08yY-RA/Qdjqi?s=subarea
+	if 'subarea' in  b.current_url():
+		sub_aria = b.select_elements('input[type=radio]')
 		sub_aria =random.choice(sub_aria)
 		print(sub_aria)
 		sub_aria.click()
@@ -77,94 +77,108 @@ def main(account_data,postinfo,packages_id,body_mail):
 	button.click()
 	button = b.select_element_xpath('//*[@id="new-edit"]/div/label/label[2]/div/span[1]','click on apartments / housing for rent')
 	button.click()
-	
-	
-	
-	time.sleep(111111)
 
-	
-	try:
-		citylist =["Agrigento","Alessandria","Ancona","Aosta","Arezzo","Ascoli","Asti","Avellino","Bari","Barletta","Belluno","Benevento","Bergamo","Biella","Bologna","Bolzano","Brescia","Brindisi","Cagliari","Caltanissetta","Campobasso","Carbonia Iglesias","Caserta","Catania","Catanzaro","Chieti","Como","Cosenza","Cremona","Crotone","Cuneo","Enna","Fermo","Ferrara","Firenze","L'Aquila","La Spezia","Latina","Lecce","Lecco","Livorno","Lodi","Lucca","Macerata","Mantova","Massa Carrara","Matera","Medio Campidano","Messina","Milano"," Modena","Monza","Napoli","Novara","Nuoro"," Ogliastra","Olbia Tempio","Oristano","Padova","Palermo","Parma","Pavia","Perugia","Pescara","Piacenza","Pisa","Pistoia","Pordenone","Potenza","Prato"," Ragusa","Ravenna","Reggio Calabria","R. Emilia","Rieti","Rimini","Roma","Rovigo","Salerno","Sassari","Savona","Siena","Siracusa","Sondrio","Taranto","Teramo","Terni"," Torino","Trapani","Trento","Treviso","Trieste","Udine","Urbino","Varese","Venezia","Verbania","Vercelli","Verona","Vibo Valentia","Vicenza","Viterbo"]
-		one_city = random.choice(citylist)
-		if b.proxy_city is not None:
-			pattern = '*%s*'%(b.proxy_city)
-			citylist = fnmatch.filter(citylist, pattern)
-			if len(citylist)>0:
-				one_city = citylist[0]
-			
-		b.select_dropdown_text('city',one_city)
-	except:
-		print('city error')
-	try:
-		# category= b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[2]/div/div[1]/select/option[1]')
-		b.select_dropdown_text('category','Donna Cerca Uomo')
-		
-		# category.click()
-	except:
-		print('category error')
-	
-	popmail = imap(account_id,account_data['email'],account_data['password'])
-	popmail.messages('no_reply@bakecaincontrii.com')
-	popmail.close()
-	ages = [18,19,20,21,22,23,24,25,26,27,28,29,30]
-	age = random.choice(ages)
-
-	b_sub = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[2]/textarea','select subject')
-	postsub = ps_str(postinfo['data1'])
+	#Posting Title setup
+	b_sub = b.select_element_xpath('//*[@id="PostingTitle"]','PostingTitle')
+	post=postinfo.get_post()
+	postsub = ps_str(post['data1'])
 	b_sub.send_keys(postsub.Spin())
-	b_body = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[3]/textarea','select body')
-	postbody = ps_str(postinfo['data4'])
+	#zip code setup
+	postal_code = b.select_element_xpath('//*[@id="postal_code"]','postal code"]')
+	postal_code.send_keys(b.proxy_zip)
+
+	#post body setup
+	b_body = b.select_element_xpath('//*[@id="PostingBody"]','PostingBody')
+	postbody = ps_str(post['data4'])
 	b_body.send_keys(postbody.with_email(body_mail))
-	b_age = b.select_element_xpath('//*[@id="app"]/main/div[2]/form/div/div[3]/div/div[1]/input','select age')
-	b_age.send_keys(age)
-	b_email = b.select_element_xpath('//*[@id="email_input"]','select email')
-	b_email.send_keys(account_data['email'])
-	
-	b.script_run('return  $("#contact_method_only_email").trigger("click")','click contact method')
-	checkbox2 = '''return  $('input[name="terms"]').prop("checked", true)'''
-	b.script_run(checkbox2,'accept terms')
-	btn_remove = '''$("button.btn.btn-primary.waves-effect.btn-block").remove();'''
-	b.script_run(btn_remove,"form sbumit button remove")
 
-	
+	#price setup
+	b_price = b.select_element_xpath('//*[@id="new-edit"]/div/fieldset[1]/div/div[1]/label[1]/label/input','price set')
+	b_price.send_keys(postinfo.price)
 
-
-
-
-	site_url = b.current_url()
-
-	
+	#housing type setup
 	try:
-
-		captcha = b.driver.find_element_by_name('h-captcha-response')
+		type =[1,4,5,6]
+		one_type= random.choice(type)
+		
+		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
+		ju = str('$("#ui-id-1"){}'.format(append))
+		print(ju)
+		b.script_run('$("#ui-id-1").empty();',message='housing_type empty')
+		b.script_run(ju,message='housing_type append')
+			
+		
+		
+			
+		
 	except Exception as e:
-		worker_acc.post_error(account_id,'captcha not load')
-		print('captcha not load')
-		b.exit()
-		exit()
-	b.script_run("document.getElementById('{0}').style.display = 'block';".format(captcha.get_attribute('id')),message='captcha display block')
-		
-	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='it')
-	c_info = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
-	script = 'document.getElementById("{0}").innerHTML="{1}";'.format(captcha.get_attribute('id'),c_info["key"])
-		
-	b.script_run(script,message='captcha key add')
-	b.script_run("document.getElementById('{0}').style.display = 'none';".format(captcha.get_attribute('id')),message='captcha done')
-		
+		print('housing_type error' ,e)
+	
+	#laundry setup
+	try:
+		one_type=1
+		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
+		ju = str('$("#ui-id-2"){}'.format(append))
+		print(ju)
+		b.script_run('$("#ui-id-2").empty();',message='laundry empty')
+		b.script_run(ju,message='laundry append')
+		# b.select_dropdown('#ui-id-2',1)
+	except Exception as e:
+		print('laundry error' ,e)
+	
+	#parking setup
+	try:
+		type =[1,2]
+		one_type= random.choice(type)
+			
+		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
+		ju = str('$("#ui-id-3"){}'.format(append))
+		print(ju)
+		b.script_run('$("#ui-id-3").empty();',message='parking empty')
+		b.script_run(ju,message='parking append')
+	except Exception as e:
+		print('parking error' ,e)
 	
 	
+	#bedrooms setup
+	try:
+		
+			
+		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(postinfo.bed))
+		ju = str('$("#ui-id-4"){}'.format(append))
+		print(ju)
+		b.script_run('$("#ui-id-4").empty();',message='bedrooms empty')
+		b.script_run(ju,message='bedrooms append')
+	except Exception as e:
+		print('bedrooms error' ,e)
 
+	#bathrooms setup
+	try:
+		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(postinfo.bat))
+		ju = str('$("#ui-id-5"){}'.format(append))
+		print(ju)
+		b.script_run('$("#ui-id-5").empty();',message='bathrooms empty')
+		b.script_run(ju,message='bathrooms append')
+	except Exception as e:
+		print('bathrooms error', e)
 	
-	btn_click = '''$("form").submit()'''
-	b.script_run(btn_click,"form sbumit")
+	#email setup
+	# time.sleep(2000)
 	
-	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload',type=2,valu=c_info["id"])
-	b.scroll_element_into_view(img)
-	img.click()
-	Visibility = b.select_element_xpath('//*[@id="app"]/main/form/div[2]/div[2]/div[2]/div/div/div/button','Visibility')
-	b.scroll_element_into_view(Visibility)
-	Visibility.click()
-
+	b_email = b.select_element_xpath('//*[@name="FromEMail"]','select email')
+	b_email.send_keys(account_data['email'])
+	nextpage = b.select_element_xpath('//*[@name="go"]','go next page')
+	nextpage.click()
+	nextpage = b.select_element_xpath('//*[@id="leafletForm"]/button','go from map page')
+	nextpage.click()
+	nextpage = b.select_element_xpath('/html/body/article/section/form/button','go from image page')
+	nextpage.click()
+	nextpage = b.select_element_xpath('//*[@id="publish_top"]/button','go from publish page')
+	nextpage.click()
+	# time.sleep(120)
+	
+	
+	
 	popmail = imap(account_id,account_data['email'],account_data['password'])
 	
 
@@ -179,8 +193,8 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 		counter = counter+1
 		
-		popmail.messages('no_reply@bakecaincontrii.com')
-		links = popmail.get_link('post-publish')
+		popmail.messages('robot@craigslist.org')
+		links = popmail.get_link('craigslist.org/pass?userid')
 		
 		print('links')
 		
@@ -189,7 +203,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 			conf_link = 'window.location.href = "{};'.format(link)
 			b.script_run(conf_link,'link click to verify')
 			
-			worker_acc.post_done(account_id,link)
+			
 			
 			postdone = True
 			break
@@ -201,6 +215,15 @@ def main(account_data,postinfo,packages_id,body_mail):
 			worker_acc.ban_3(account_id,status=2)
 			print("link not recived")
 			break
+	#no pass click
+	nextpage = b.select_element_xpath('/html/body/section/section/div[2]/div[1]/form/div/input','no pass click')
+	nextpage.click()
+	
+	#tams
+	nextpage = b.select_element_xpath('//*[@id="new-edit"]/div/div[4]/div[1]/button','tams')
+	nextpage.click()
+	
+	worker_acc.post_done(account_id,link)
 	print('browser close')
 
 	
@@ -212,6 +235,21 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 	print('start :',starttime)
 	print('end :',datetime.now().strftime("%H:%M:%S"))
+	
+
+	
+	
+
+	
+
+
+
+
+
+	
+	
+
+	
 
 
 
@@ -260,7 +298,7 @@ while True:
 		shutil.rmtree('profiles/' +str(one_account['id']))
 		
 	print('main')
-	main(one_account,postinfo,packages_id,body_mail)
+	main(one_account,post,packages_id,body_mail)
 	time.sleep(10)
 
 		

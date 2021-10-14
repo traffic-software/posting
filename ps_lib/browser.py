@@ -172,14 +172,14 @@ class browser:
 			if self.proxy_company =="soax":
 				data  = self.PROXY_USER+":"+self.PROXY_PASS+"@"+data
 			proxie = {"http": "http://"+data,"https": "http://"+data}
-			print(proxie)
+			# print(proxie)
 			
 			
 				
 			url = "http://ip-api.com/json"
 			timeout = 10
 			r = requests.get(url, timeout=timeout,proxies=proxie)
-			print(r.text)
+			# print(r.text)
 			if self.proxy_save(data, json.loads(r.text)):
 				
 				return True
@@ -446,12 +446,12 @@ class browser:
 			
 			done= self.driver.execute_script(script)
 			print('done: ',message)
-		except:
+		except Exception as e:
 			if "page" in message:
 				message = message + str(self.page_source())
 			self.account.post_error(self.account_id,message=message)
 			self.exit()
-			print('error: ',message)
+			print('error: ',message ,e)
 			exit()
 		
 		
