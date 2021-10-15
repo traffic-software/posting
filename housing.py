@@ -49,9 +49,9 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 	
 	p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
-	# p_pass= "wifi;us;;;los{}angeles;".format("+")
+	p_pass= "wifi;us;;;{};".format(account_data['extra'])
 	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates"
-	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
+	b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
 	time.sleep(5)
 	
 	
@@ -71,7 +71,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	if 'subarea' in  b.current_url():
 		sub_aria = b.select_elements('input[type=radio]')
 		sub_aria =random.choice(sub_aria)
-		print(sub_aria)
+		
 		sub_aria.click()
 	button = b.select_element_xpath('/html/body/article/section/form/ul/li[4]','click on housing offered')
 	button.click()
@@ -103,7 +103,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 		
 		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
 		ju = str('$("#ui-id-1"){}'.format(append))
-		print(ju)
+		
 		b.script_run('$("#ui-id-1").empty();',message='housing_type empty')
 		b.script_run(ju,message='housing_type append')
 			
@@ -119,7 +119,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 		one_type=1
 		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
 		ju = str('$("#ui-id-2"){}'.format(append))
-		print(ju)
+		
 		b.script_run('$("#ui-id-2").empty();',message='laundry empty')
 		b.script_run(ju,message='laundry append')
 		# b.select_dropdown('#ui-id-2',1)
@@ -133,7 +133,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 			
 		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
 		ju = str('$("#ui-id-3"){}'.format(append))
-		print(ju)
+		
 		b.script_run('$("#ui-id-3").empty();',message='parking empty')
 		b.script_run(ju,message='parking append')
 	except Exception as e:
@@ -146,7 +146,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 			
 		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(postinfo.bed))
 		ju = str('$("#ui-id-4"){}'.format(append))
-		print(ju)
+		
 		b.script_run('$("#ui-id-4").empty();',message='bedrooms empty')
 		b.script_run(ju,message='bedrooms append')
 	except Exception as e:
@@ -156,7 +156,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	try:
 		append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(postinfo.bat))
 		ju = str('$("#ui-id-5"){}'.format(append))
-		print(ju)
+		
 		b.script_run('$("#ui-id-5").empty();',message='bathrooms empty')
 		b.script_run(ju,message='bathrooms append')
 	except Exception as e:
@@ -194,9 +194,9 @@ def main(account_data,postinfo,packages_id,body_mail):
 		counter = counter+1
 		
 		popmail.messages('robot@craigslist.org')
-		links = popmail.get_link('craigslist.org/pass?userid')
+		links = popmail.get_link('craigslist.org/login/onetime')
 		
-		print('links')
+		print('Get links')
 		
 		for link in links:
 
@@ -216,14 +216,23 @@ def main(account_data,postinfo,packages_id,body_mail):
 			print("link not recived")
 			break
 	#no pass click
-	nextpage = b.select_element_xpath('/html/body/section/section/div[2]/div[1]/form/div/input','no pass click')
-	nextpage.click()
+	# time.sleep(240)
+	try:
+		check_post = b.select_element_xpath("//*[contains(text(),'View your post at')]")
+	except Exception as e:
+		check_post = False
+	if check_post:
+		print(check_post.text)
+	else:
+		nextpage = b.select_element_xpath('/html/body/section/section/div[2]/div[1]/form/div/input','no pass click')
+		nextpage.click()
+		
+		#tams
+		nextpage = b.select_element_xpath('//*[@id="new-edit"]/div/div[4]/div[1]/button','tams')
+		nextpage.click()
 	
-	#tams
-	nextpage = b.select_element_xpath('//*[@id="new-edit"]/div/div[4]/div[1]/button','tams')
-	nextpage.click()
-	
-	worker_acc.post_done(account_id,link)
+	worker_acc.post_done(account_id,check_post.text)
+	print('post done')
 	print('browser close')
 
 	

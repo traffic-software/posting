@@ -88,7 +88,7 @@ class table:
         
     def replySave(self,acc_mail,lead_mail,sub):
         
-        url = 'http://{host}/api/v1/post/account/lead/{token}'.format(host=self.host_get(),token=self.token)
+        url = 'https://{host}/api/v1/post/account/lead/{token}'.format(host=self.host_get(),token=self.token)
         params = {'lead_mail': lead_mail,"acc_mail":acc_mail,'sub':sub}
 
         r = requests.get(url,params=params)
@@ -166,7 +166,7 @@ class table:
 
         else:
             self.token = token['value']
-        url = 'http://{host}/api/v1/post/info/{token}'.format(host=self.host_get(),token=self.token)
+        url = 'https://{host}/api/v1/post/info/{token}'.format(host=self.host_get(),token=self.token)
 
         r = requests.get(url)
         if "error" in r.json():
@@ -180,7 +180,7 @@ class table:
         token = self.token_get()
         self.token = token['value']
             
-        url = 'http://{host}/api/v1/post/off/{token}'.format(host=self.host_get(),token=self.token)
+        url = 'https://{host}/api/v1/post/off/{token}'.format(host=self.host_get(),token=self.token)
 
         r = requests.get(url)
         
@@ -196,7 +196,7 @@ class table:
     def host_verify(self):
         host = self.host_get()
         if host== None:
-            self.host =  '192.168.0.106'#str(input("please enter your api_token : "))
+            self.host =  'post.pointssoft.com'#str(input("please enter your api_token : "))
             self.host_save()
         return host
     

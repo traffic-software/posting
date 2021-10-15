@@ -43,7 +43,7 @@ class accounts:
 
 
     def get_account(self):
-        url = 'http://{host}/api/v1/post/account/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
+        url = 'https://{host}/api/v1/post/account/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
 
         r = requests.get(url)
         if "error" in r.json():
@@ -52,7 +52,7 @@ class accounts:
         return r.json()["data"]
         
     def get_account_for_lead_find(self):
-        url = 'http://{host}/api/v1/post/account/rendom/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
+        url = 'https://{host}/api/v1/post/account/rendom/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
 
         r = requests.get(url)
         if "error" in r.json():
@@ -99,7 +99,7 @@ class accounts:
         c.execute(sql)
         self.conn.commit()
     def ban_3(self,id,status=1):
-        url = 'http://{host}/api/v1/post/account/ban/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
+        url = 'https://{host}/api/v1/post/account/ban/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
 
         params = {'status': status}
         r = requests.get(url,params=params)
@@ -108,7 +108,7 @@ class accounts:
             exit()
         return r.json()
     def post_done(self,id,messasge='post done'):
-        url = 'http://{host}/api/v1/post/account/postdone/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
+        url = 'https://{host}/api/v1/post/account/postdone/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
 
         params = {'data': messasge}
         r = requests.get(url,params=params)
@@ -117,7 +117,7 @@ class accounts:
             exit()
         return r.json()
     def post_error(self,id,message="default messge"):
-        url = 'http://{host}/api/v1/post/account/posterror/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
+        url = 'https://{host}/api/v1/post/account/posterror/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
 
         params = {'data': message}
         r = requests.get(url,params=params)

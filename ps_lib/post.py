@@ -13,7 +13,7 @@ class post:
 		self.price=3
 		self.set_utility()
 	def get_post(self):
-		url = 'http://{host}/api/v1/post/new/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
+		url = 'https://{host}/api/v1/post/new/{token}'.format(host=self.software.host_verify(),token=self.software.software_token())
 		r = requests.get(url)
 
 		if "error" in r.json():
