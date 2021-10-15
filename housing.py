@@ -73,6 +73,11 @@ def main(account_data,postinfo,packages_id,body_mail):
 		sub_aria =random.choice(sub_aria)
 		
 		sub_aria.click()
+	if 's=hood' in  b.current_url():
+		sub_aria = b.select_elements('input[type=radio]')
+		sub_aria =random.choice(sub_aria)
+		
+		sub_aria.click()
 	button = b.select_element_xpath('/html/body/article/section/form/ul/li[4]','click on housing offered')
 	button.click()
 	button = b.select_element_xpath('//*[@id="new-edit"]/div/label/label[2]/div/span[1]','click on apartments / housing for rent')
