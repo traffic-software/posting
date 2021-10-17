@@ -4,16 +4,10 @@
 # bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
 
-import requests
-proxy = {
-    "http": "http://uyMDe7ALdLkpJmm5:wifi;us;;;los+angeles@proxy.soax.com:9000",
-    "https": "http://uyMDe7ALdLkpJmm5:wifi;us;;;los+angeles@proxy.soax.com:9000"
-}
+if type([])==list:
+    print("list")
 
 
-resp = requests.get("http://checker.soax.com/api/ipinfo",proxies=proxy)
-
-print(resp.text)
 
 # post = post()
 # print(post.get_post())

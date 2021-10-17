@@ -223,40 +223,8 @@ def main(account_data,postinfo,packages_id,body_mail):
 			worker_acc.ban_3(account_id,status=2)
 			print("link not recived")
 			break
-	
-	
-	if 'pass?userid=' in  b.current_url():
-		#no pass click
-		nextpage = b.select_element_xpath('/html/body/section/section/div[2]/div[1]/form/div/input','no pass click')
-		nextpage.click()
-	# check tams page
-	if 's=tou' in  b.current_url():
-		
-		nextpage = b.select_element_xpath('//*[@id="new-edit"]/div/div[4]/div[1]/button','tams')
-		nextpage.click()
-	time.sleep(20)
-		
-	if 's=pn' in  b.current_url():
-		
-		#check_pva = b.select_element_xpath("//*[contains(text(),'Phone Verification)]",'no pva check')
-		worker_acc.post_error(account_id,"no pva")
-		worker_acc.ban_3(account_id,status=3)
-	
-	
-	if b.try_xpath("//*[contains(text(),'View your post at')]"):
-		check_post = b.select_element_xpath("//*[contains(text(),'View your post at')]",'post link check')
-		worker_acc.post_done(account_id,check_post.text)
-	time.sleep(20)
-		
-	
-	
-	print('post done')
-	print('browser close')
-
-	
-
-	b.exit()
-	popmail.close()
+	print("waiting 30 minute for pva")
+	time.sleep(1800)
 	
 
 

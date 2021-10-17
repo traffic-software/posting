@@ -110,45 +110,24 @@ class imap:
 			else:
 				continue
 	def get_link(self,condition=None):
-		urls=[]
-		if None == self.ps_messges:
-			return urls
-		for m in self.ps_messges:
-			
-			st = ps_str(m['body'])
-			print('link search')
-			#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
-			if condition:
-				url = st.find_urls(condition)
-			else:
-				url = st.find_urls("main.php?page=post_publish")
-			if url!=None:
-				print('one link find')
-				urls.append(url)
 		try:
-			
+			urls=[]
+			if None == self.ps_messges:
+				return urls
 			for m in self.ps_messges:
 				
 				st = ps_str(m['body'])
 				print('link search')
 				#https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
-				if condition:
-					url = st.find_urls(condition)
-				else:
-					url = st.find_urls("main.php?page=post_publish")
-				if url!=None:
-					print('one link find')
-					urls.append(url)
-				
-				
-					
-					
-				
-					
+				for text in condition:
+					url =st.find_urls(text)
+					if url!=None:
+						print('one link find')
+						urls.append(url)
 		except:
 			print('link search problem')
 		self.ps_messges=None
-		# print(urls)
+		
 		return urls
 
 
