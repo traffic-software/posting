@@ -167,19 +167,25 @@ class browser:
 			
 			if self.proxy_company =="packetstream":
 				data  = self.PROXY_USER+":"+self.PROXY_PASS+"@"+data
-			proxie = {"http": 'http://'+data,"https": 'http://'+data}
+				proxie = {"http": 'http://'+data,"https": 'http://'+data}
 			
 			if self.proxy_company =="soax":
 				data  = self.PROXY_USER+":"+self.PROXY_PASS+"@"+data
-			proxie = {"http": "http://"+data,"https": "http://"+data}
-			# print(proxie)
+				proxie = {"http": "http://"+data,"https": "http://"+data}
+			
 			
 			
 				
 			url = "http://ip-api.com/json"
 			timeout = 10
 			r = requests.get(url, timeout=timeout,proxies=proxie)
-			# print(r.text)
+			
+			if "isp" not in r.text:
+
+				print("you can contract in your proxy company using this text : ",r.text)
+				time.sleep(60)
+				return False
+
 			if self.proxy_save(data, json.loads(r.text)):
 				
 				return True

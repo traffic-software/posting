@@ -40,6 +40,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	print(datetime.now().strftime("%H:%M:%S"))
 	
 	account_id = account_data['id']
+	print("account id: ",account_id)
 	worker_acc=accounts()
 	popmail = imap(account_id,account_data['email'],account_data['password'])
 	popmail.messages('robot@craigslist.org')
@@ -48,11 +49,11 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 
 	
-	p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
-	# p_pass= "wifi;us;;;{};".format(account_data['extra'])
+	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
+	p_pass= "wifi;us;;;{};".format(account_data['extra'])
 	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-hehell{}".format(account_data['extra'])
-	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
-	# b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
+	# b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
+	b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
 	time.sleep(5)
 	
 	
