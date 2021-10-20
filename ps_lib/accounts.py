@@ -116,6 +116,15 @@ class accounts:
             print("error",r.json()['message'])
             exit()
         return r.json()
+    def post_log(self,id,messasge='post log'):
+        url = 'https://{host}/api/v1/post/account/postlog/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
+
+        params = {'data': messasge}
+        r = requests.get(url,params=params)
+        if "error" in r.json():
+            print("error",r.json()['message'])
+            exit()
+        return r.json()
     def post_error(self,id,message="default messge"):
         url = 'https://{host}/api/v1/post/account/posterror/{token}/{id}'.format(host=self.software.host_verify(),token=self.software.software_token(),id=id)
 

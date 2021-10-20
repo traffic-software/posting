@@ -49,11 +49,12 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 
 	
-	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
-	p_pass= "wifi;us;;;{};".format(account_data['extra'])
-	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-hehell{}".format(account_data['extra'])
-	# b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
-	b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
+	p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
+	
+	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates"
+	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
+	#p_pass= "wifi;us;;;{};".format(account_data['extra'])
+	# b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
 	time.sleep(5)
 	
 	
@@ -176,6 +177,12 @@ def main(account_data,postinfo,packages_id,body_mail):
 	b_email.send_keys(account_data['email'])
 	nextpage = b.select_element_xpath('//*[@name="go"]','go next page')
 	nextpage.click()
+	#no pass click
+	if 's=geoverify=' in  b.current_url():
+		time.sleep(300)
+	
+		nextpage = b.select_element_xpath('/html/body/section/section/div[2]/div[1]/form/div/input','no pass click')
+		nextpage.click()
 	nextpage = b.select_element_xpath('//*[@id="leafletForm"]/button','go from map page')
 	nextpage.click()
 	nextpage = b.select_element_xpath('/html/body/article/section/form/button','go from image page')
@@ -247,6 +254,8 @@ def main(account_data,postinfo,packages_id,body_mail):
 	if b.try_xpath("//*[contains(text(),'View your post at')]"):
 		check_post = b.select_element_xpath("//*[contains(text(),'View your post at')]",'post link check')
 		worker_acc.post_done(account_id,check_post.text)
+		worker_acc.post_log(account_id,b.textProxy())
+
 	time.sleep(20)
 		
 	

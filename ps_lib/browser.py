@@ -9,6 +9,7 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
 import json, requests
 import os, time
+from ps_lib.timezone import t
 from ps_lib.userAgent import l
 import time
 from sys import exit
@@ -179,8 +180,9 @@ class browser:
 			url = "http://ip-api.com/json"
 			timeout = 10
 			r = requests.get(url, timeout=timeout,proxies=proxie)
+			print(r.text)
 			
-			if "isp" not in r.text:
+			if "isp" not in r.text and self.proxy_company =="soax":
 
 				print("you can contract in your proxy company using this text : ",r.text)
 				time.sleep(60)
@@ -207,15 +209,9 @@ class browser:
 			self.proxy_latLon = str(p['lat'])+":"+str(p["lon"])
 			self.proxy_isp = p['isp']
 			self.proxy_ip = p['query']
+			self.settimezoone(p)
 			
-			if sys.platform not in ['Windows', 'win32', 'cygwin']:
-				self.proxy_city = p["city"]
-				oldTime = time.strftime('%X %x %Z')
-				
-				os.environ['TZ'] = p["timezone"]
-				time.tzset()
-				newTime = time.strftime('%X %x %Z')
-				print('old time: ',oldTime,"new time: ",newTime,'timezone: ',p["timezone"])
+			
 			
 			return True
 		except :
@@ -225,6 +221,26 @@ class browser:
 
         
         
+	def textProxy(self):
+		return "{}:{}:{}".format(self.proxy_city,self.proxy_isp,self.proxy_ip)			
+
+        
+        
+	def settimezoone(self,p):
+			oldTime = time.strftime('%X %x %Z')
+			if sys.platform not in ['Windows', 'win32', 'cygwin']:
+				self.proxy_city = p["city"]
+				
+				
+				os.environ['TZ'] = p["timezone"]
+				time.tzset()
+				
+			if sys.platform in ['Windows', 'win32', 'cygwin']:
+				for ti in t:
+					if self.proxy_timezone in ti['utc']:
+						os.system("tzutil /s \"{}\"".format(ti['value']))
+			newTime = time.strftime('%X %x %Z')
+			print('old time: ',oldTime,"new time: ",newTime,'timezone: ',p["timezone"])
 
 	def select_element(self,selector):
 		co=0

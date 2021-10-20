@@ -3,16 +3,21 @@
 
 # bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
-import requests
-p_pass= "wifi;us;;;{};".format("ft.+washington")
-data  = "uyMDe7ALdLkpJmm5:"+p_pass+"@proxy.soax.com:9000"
+# import requests
+# p_pass= "wifi;us;;;{};".format("ft.+washington")
+# data  = "uyMDe7ALdLkpJmm5:"+p_pass+"@proxy.soax.com:9000"
 
-proxie = {"http": "http://"+data,"https": "http://"+data}
-url = "https://checker.soax.com/api/ipinfo"
-timeout = 10
-# r = requests.get(url, timeout=timeout,proxies=proxie)
-r = requests.get(url, timeout=timeout)
-print(r.text)
+# proxie = {"http": "http://"+data,"https": "http://"+data}
+# url = "https://checker.soax.com/api/ipinfo"
+# timeout = 10
+# # r = requests.get(url, timeout=timeout,proxies=proxie)
+# r = requests.get(url, timeout=timeout)
+# print(r.text)
+import os, ps_lib.timezone as t
+
+    
+            
+            
 
 
 # post = post()
