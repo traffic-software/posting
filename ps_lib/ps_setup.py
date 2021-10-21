@@ -200,6 +200,24 @@ class table:
             self.host_save()
         return host
     
+    def proxyhorse_verify(self,api_key):
+        ph_t = self.proxyhorse_get()
+        
+        return ph_t
+    def proxyhorse_get(self):
+        c = self.conn.cursor()
+        sql = "SELECT * FROM settings WHERE name = '{}'".format('ph_token')
+        c.execute(sql)
+        post = c.fetchone()
+        data = self.get_formated_data(c.description, post)
+        if data== None:
+            return data
+        return data['value']
+    def proxyhorse_save(self,token):
+        c = self.conn.cursor()
+        c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['ph_token',token])
+        self.conn.commit()
+    
     def time_diff(self,start,end):
 
         FMT = '%Y-%m-%d'

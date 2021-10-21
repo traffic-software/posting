@@ -13,7 +13,18 @@
 # # r = requests.get(url, timeout=timeout,proxies=proxie)
 # r = requests.get(url, timeout=timeout)
 # print(r.text)
-import os, ps_lib.timezone as t
+import requests
+
+url = "https://api.proxyhorse.com/client/getconnections.php"
+
+payload = {}
+headers = {
+  'Authorization': 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'
+}
+
+response = requests.request("GET", url, headers=headers, data = payload)
+
+print(response.text.encode('utf8'))
 
     
             

@@ -68,4 +68,6 @@ class ps_str:
 		else:
 			self.Spin()
 			return self.str
+	def split(self):
+		return self.str.split("-")
 

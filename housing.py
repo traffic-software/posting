@@ -49,12 +49,16 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 
 	
-	p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
+	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
 	
 	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates"
-	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
+	# b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
 	#p_pass= "wifi;us;;;{};".format(account_data['extra'])
 	# b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
+	
+	p_pass= "{}".format(account_data['extra'])
+	# p_pass= "CA-Los Angeles"
+	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM',proxy_pass=p_pass)
 	time.sleep(5)
 	
 	

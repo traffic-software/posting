@@ -9,11 +9,11 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
 import json, requests
 import os, time
+from ps_lib.ps_str import ps_str
+from ps_lib.proxy import ps_proxy
 from ps_lib.timezone import t
 from ps_lib.userAgent import l
-import time
 from sys import exit
-import os
 import sys
 import zipfile
 import warnings
@@ -49,6 +49,7 @@ class browser:
 			self.packages_id = packages_id
 			self.PROXY_USER = proxy_user # username
 			self.PROXY_PASS = proxy_pass # password
+
 			
 			
 			#............Normal rotating proxy......................
@@ -100,6 +101,8 @@ class browser:
 	def proxy(self):
 		while True:
 			try:
+				
+
 				if self.proxy_company =="packetstream":
 					self.PROXY_HOST = "proxy.packetstream.io"
 					self.PROXY_PORT = 31112
@@ -128,6 +131,24 @@ class browser:
 					data = data['packages'][self.packages_id]['ips']
 					
 					proxy = rendomip=random.choice(data)
+				#............proxyhorse.com......................
+				
+				if self.proxy_company =="proxyhorse":
+					psproxy = ps_proxy(company="proxyhorse",key=self.PROXY_USER)
+					
+					
+
+					proxy = psproxy.proxyhorse(self.PROXY_PASS)
+					
+					
+					print(proxy)
+					self.PROXY_HOST = proxy['ip']
+					self.PROXY_PORT = proxy['port']
+					self.PROXY_USER = proxy['login']
+					self.PROXY_PASS = proxy['password']
+					proxy = "%s:%s"%(self.PROXY_HOST,self.PROXY_PORT)
+					
+					
 
 
 
@@ -171,6 +192,10 @@ class browser:
 				proxie = {"http": 'http://'+data,"https": 'http://'+data}
 			
 			if self.proxy_company =="soax":
+				data  = self.PROXY_USER+":"+self.PROXY_PASS+"@"+data
+				proxie = {"http": "http://"+data,"https": "http://"+data}
+			
+			if self.proxy_company =="proxyhorse":
 				data  = self.PROXY_USER+":"+self.PROXY_PASS+"@"+data
 				proxie = {"http": "http://"+data,"https": "http://"+data}
 			
