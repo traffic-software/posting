@@ -141,7 +141,7 @@ class browser:
 					proxy = psproxy.proxyhorse(self.PROXY_PASS)
 					
 					
-					print(proxy)
+					# print(proxy)
 					self.PROXY_HOST = proxy['ip']
 					self.PROXY_PORT = proxy['port']
 					self.PROXY_USER = proxy['login']
@@ -205,7 +205,7 @@ class browser:
 			url = "http://ip-api.com/json"
 			timeout = 10
 			r = requests.get(url, timeout=timeout,proxies=proxie)
-			print(r.text)
+			# print(r.text)
 			
 			if "isp" not in r.text and self.proxy_company =="soax":
 

@@ -14,7 +14,6 @@ class ps_proxy:
 
     def proxyhorse(self,location):
         for i in self.get_all_proxy():
-            print('\n',i)
             self.proxyhours_delete(i['token'])
         
 
@@ -43,14 +42,13 @@ class ps_proxy:
         url = "https://api.proxyhorse.com/client/deleteconnection.php"
 
         data = {"token": token}
-        print(data)
         headers = {
         'authorization': self.api_key,
         'Content-Type': 'application/json'
         }
 
         response = requests.delete(url, headers=headers, data=json.dumps(data))
-        print(response.text)
+        # print(response.text)
     def get_all_proxy(self):
         url = "https://api.proxyhorse.com/client/getconnections.php"
 

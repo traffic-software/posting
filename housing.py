@@ -57,7 +57,6 @@ def main(account_data,postinfo,packages_id,body_mail):
 	# b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
 	
 	p_pass= "{}".format(account_data['extra'])
-	# p_pass= "CA-Los Angeles"
 	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM',proxy_pass=p_pass)
 	time.sleep(5)
 	
@@ -246,7 +245,6 @@ def main(account_data,postinfo,packages_id,body_mail):
 		
 		nextpage = b.select_element_xpath('//*[@id="new-edit"]/div/div[4]/div[1]/button','tams')
 		nextpage.click()
-	time.sleep(20)
 		
 	if 's=pn' in  b.current_url():
 		
@@ -259,8 +257,6 @@ def main(account_data,postinfo,packages_id,body_mail):
 		check_post = b.select_element_xpath("//*[contains(text(),'View your post at')]",'post link check')
 		worker_acc.post_done(account_id,check_post.text)
 		worker_acc.post_log(account_id,b.textProxy())
-
-	time.sleep(20)
 		
 	
 	
