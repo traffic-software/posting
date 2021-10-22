@@ -141,6 +141,8 @@ class browser:
 					proxy = psproxy.proxyhorse(self.PROXY_PASS)
 					
 					
+					
+					
 					# print(proxy)
 					self.PROXY_HOST = proxy['ip']
 					self.PROXY_PORT = proxy['port']

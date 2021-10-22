@@ -13,22 +13,12 @@
 # # r = requests.get(url, timeout=timeout,proxies=proxie)
 # r = requests.get(url, timeout=timeout)
 # print(r.text)
-import requests
 
-url = "https://api.proxyhorse.com/client/getconnections.php"
 
-payload = {}
-headers = {
-  'Authorization': 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'
-}
-
-response = requests.request("GET", url, headers=headers, data = payload)
-
-print(response.text.encode('utf8'))
-
-    
-            
-            
+from ps_lib.proxy import ps_proxy
+psproxy = ps_proxy(company="proxyhorse",key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
+					
+proxy = psproxy.proxyhorse('NC-Chinquapin')
 
 
 # post = post()

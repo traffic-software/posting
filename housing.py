@@ -57,6 +57,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	# b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
 	
 	p_pass= "{}".format(account_data['extra'])
+	print(p_pass)
 	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM',proxy_pass=p_pass)
 	time.sleep(5)
 	
@@ -182,10 +183,13 @@ def main(account_data,postinfo,packages_id,body_mail):
 	nextpage.click()
 	#no pass click
 	if 's=geoverify=' in  b.current_url():
-		time.sleep(300)
+		
+		sub_aria = b.select_elements('button[name=area_change_ok]')
+		sub_aria =random.choice(sub_aria)
+		
+		sub_aria.click()
+		time.sleep(20)
 	
-		nextpage = b.select_element_xpath('/html/body/section/section/div[2]/div[1]/form/div/input','no pass click')
-		nextpage.click()
 	nextpage = b.select_element_xpath('//*[@id="leafletForm"]/button','go from map page')
 	nextpage.click()
 	nextpage = b.select_element_xpath('/html/body/article/section/form/button','go from image page')
