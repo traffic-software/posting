@@ -69,7 +69,7 @@ class ps_proxy:
         self.t.proxyhorse_save(token=d['data']['token'])
         print("new_connection set location")
         
-        if False == self.proxy_check(token=d['data']):
+        if False == self.proxy_check(d['data']):
             print("post city probolem")
             time.sleep(30)
             exit()

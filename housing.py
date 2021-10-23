@@ -42,7 +42,10 @@ def main(account_data,postinfo,packages_id,body_mail):
 	account_id = account_data['id']
 	print("account id: ",account_id)
 	worker_acc=accounts()
-	popmail = imap(account_id,account_data['email'],account_data['password'])
+	settings = table()
+	popacc = settings.pop_verify()
+	pop = popacc.split(":")
+	popmail = imap(account_id,pop[0],pop[1])
 	popmail.messages('robot@craigslist.org')
 	popmail.close()
 	
@@ -58,7 +61,9 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 	p_pass= "{}".format(account_data['extra'])
 	print(p_pass)
-	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM',proxy_pass=p_pass)
+	#noyon user for proxyhorse = mEOcvdgnggj4xhIIuxNFMT7S7oJGNM
+	#malak user for proxyhorse = XLvBLR8zJpsvUkVgQRYO9Lnf514N9a
+	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user='XLvBLR8zJpsvUkVgQRYO9Lnf514N9a',proxy_pass=p_pass)
 	time.sleep(5)
 	
 	
@@ -188,7 +193,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 		sub_aria =random.choice(sub_aria)
 		
 		sub_aria.click()
-		time.sleep(20)
+		
 	
 	nextpage = b.select_element_xpath('//*[@id="leafletForm"]/button','go from map page')
 	nextpage.click()
@@ -200,7 +205,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 	
 	
-	popmail = imap(account_id,account_data['email'],account_data['password'])
+	popmail = imap(account_id,pop[0],pop[1])
 	
 
 	counter=0
@@ -299,6 +304,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 setup = table()
 setup.token_verify()
+setup.pop_verify()
 
 #w = int(input('how much worker you need? '))
 # packages_id = input('proxy info by a line : ')

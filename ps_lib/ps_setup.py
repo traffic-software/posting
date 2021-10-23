@@ -22,7 +22,7 @@ class table:
         if self.dbfile():
             self.conn = sqlite3.connect(self.databasesfile)
             self.host_verify()
-            self.token_verify()
+            self.pop_verify()
             
 
         else:
@@ -34,6 +34,7 @@ class table:
             self.reply_tebl_create()
             self.host_verify()
             self.token_verify()
+            self.pop_verify()
             
 
     def dbfile(self):
@@ -176,6 +177,16 @@ class table:
         
             
         return True
+    def pop_verify(self):
+        popmail = self.pop_get()
+        if popmail== None:
+            self.popmail =  str(input("please enter your popMail : "))
+            self.pop_save()
+        else:
+            self.popmail = popmail['value']
+        
+        return  self.popmail
+        
     def token_off(self):
         token = self.token_get()
         self.token = token['value']
@@ -231,6 +242,10 @@ class table:
         c = self.conn.cursor()
         c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['token',self.token])
         self.conn.commit()
+    def pop_save(self):
+        c = self.conn.cursor()
+        c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['popmail',self.popmail])
+        self.conn.commit()
     def host_save(self):
         c = self.conn.cursor()
         c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['host',self.host])
@@ -252,6 +267,12 @@ class table:
     def token_get(self):
         c = self.conn.cursor()
         sql = "SELECT * FROM settings WHERE name = '{}'".format('token')
+        c.execute(sql)
+        post = c.fetchone()
+        return self.get_formated_data(c.description, post)
+    def pop_get(self):
+        c = self.conn.cursor()
+        sql = "SELECT * FROM settings WHERE name = '{}'".format('popmail')
         c.execute(sql)
         post = c.fetchone()
         return self.get_formated_data(c.description, post)
