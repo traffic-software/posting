@@ -180,7 +180,7 @@ class browser:
 				continue
 
 			
-			# print(proxy)
+			print(proxy)
 			if self.proxy_check(proxy):
 				break
 		return proxy

@@ -44,26 +44,35 @@ def main(account_data,postinfo,packages_id,body_mail):
 	worker_acc=accounts()
 	settings = table()
 	popacc = settings.pop_verify()
-	pop = popacc.split(":")
-	popmail = imap(account_id,pop[0],pop[1])
+	
+	if "yes" == settings.pva_verify():
+		str(input("type any key to start make pva : "))
+	pp = "pva_pop" == popacc
+	if not pp:
+		pop = popacc.split(":")
+		popmail = imap(account_id,pop[0],pop[1])
+	else:
+		popmail = imap(account_id,account_data['email'],account_data['password'])
+	
+
 	popmail.messages('robot@craigslist.org')
 	popmail.close()
 	
 
 
 	
-	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
+	p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(9)))
 	
 	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates"
-	# b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
+	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass)
 	#p_pass= "wifi;us;;;{};".format(account_data['extra'])
 	# b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass)
 	
-	p_pass= "{}".format(account_data['extra'])
-	print(p_pass)
+	# p_pass= "{}".format(account_data['extra'])
+	# print(p_pass)
 	#noyon user for proxyhorse = mEOcvdgnggj4xhIIuxNFMT7S7oJGNM
 	#malak user for proxyhorse = XLvBLR8zJpsvUkVgQRYO9Lnf514N9a
-	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user='XLvBLR8zJpsvUkVgQRYO9Lnf514N9a',proxy_pass=p_pass)
+	# b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user='XLvBLR8zJpsvUkVgQRYO9Lnf514N9a',proxy_pass=p_pass)
 	time.sleep(5)
 	
 	
@@ -205,7 +214,11 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 	
 	
-	popmail = imap(account_id,pop[0],pop[1])
+	if not pp:
+		popmail = imap(account_id,pop[0],pop[1])
+	else:
+		popmail = imap(account_id,account_data['email'],account_data['password'])
+	
 	
 
 	counter=0
@@ -257,9 +270,26 @@ def main(account_data,postinfo,packages_id,body_mail):
 		
 	if 's=pn' in  b.current_url():
 		
-		#check_pva = b.select_element_xpath("//*[contains(text(),'Phone Verification)]",'no pva check')
-		worker_acc.post_error(account_id,"no pva")
-		worker_acc.ban_3(account_id,status=3)
+		
+		pva_verify = settings.pva_verify()
+		if "yes" == pva_verify:
+			pva = b.select_element_xpath('//*[@id="new-edit"]/div/div[3]/div[1]/label/label/input','number for pva')
+			
+			pva_number = str(input("please enter number for pva : "))
+			pva.send_keys(pva_number)
+			pva_num_submit = b.select_element_xpath('//*[@id="new-edit"]/div/div[3]/div[2]/button','pva code')
+			pva_num_submit.click()
+			pva_code = str(input("please enter code for pva : "))
+			pvacode = b.select_element_xpath('//*[@id="userCode"]','number for pva')
+			pvacode.send_keys(pva_code)
+			pva_code_submit = b.select_element_xpath('//*[@id="new-edit"]/div/div[2]/div[5]/button','pva code submit')
+			pva_code_submit.click()
+			time.sleep(30)
+		
+		else:
+			worker_acc.post_error(account_id,"no pva")
+			worker_acc.ban_3(account_id,status=3)
+
 	
 	
 	if b.try_xpath("//*[contains(text(),'View your post at')]"):

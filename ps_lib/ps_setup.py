@@ -23,6 +23,7 @@ class table:
             self.conn = sqlite3.connect(self.databasesfile)
             self.host_verify()
             self.pop_verify()
+            self.pva_verify()
             
 
         else:
@@ -35,6 +36,7 @@ class table:
             self.host_verify()
             self.token_verify()
             self.pop_verify()
+            self.pva_verify()
             
 
     def dbfile(self):
@@ -180,12 +182,41 @@ class table:
     def pop_verify(self):
         popmail = self.pop_get()
         if popmail== None:
-            self.popmail =  str(input("please enter your popMail : "))
+            self.popmail =  str(input("please enter your popMail or pva_pop : "))
             self.pop_save()
         else:
             self.popmail = popmail['value']
         
         return  self.popmail
+    def pop_get(self):
+        c = self.conn.cursor()
+        sql = "SELECT * FROM settings WHERE name = '{}'".format('popmail')
+        c.execute(sql)
+        post = c.fetchone()
+        return self.get_formated_data(c.description, post)
+    def pop_save(self):
+        c = self.conn.cursor()
+        c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['popmail',self.popmail])
+        self.conn.commit()
+    def pva_verify(self):
+        make_pva = self.pva_get()
+        if make_pva== None:
+            self.make_pva =  str(input("your make pva using this software yes or no : "))
+            self.pva_save()
+        else:
+            self.make_pva = make_pva['value']
+        
+        return  self.make_pva
+    def pva_get(self):
+        c = self.conn.cursor()
+        sql = "SELECT * FROM settings WHERE name = '{}'".format('make_pva')
+        c.execute(sql)
+        post = c.fetchone()
+        return self.get_formated_data(c.description, post)
+    def pva_save(self):
+        c = self.conn.cursor()
+        c.execute("INSERT INTO settings (name,value) VALUES  (?,?)", ['make_pva',self.make_pva])
+        self.conn.commit()
         
     def token_off(self):
         token = self.token_get()
