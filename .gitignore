@@ -5,5 +5,7 @@ build
 *.zip
 *.db
 __pycache__
+profiles
+docker
 
 

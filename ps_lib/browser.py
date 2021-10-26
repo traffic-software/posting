@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
 from selenium.webdriver.common.proxy import Proxy, ProxyType
@@ -23,7 +24,7 @@ class browser:
 	account_id=None
 
 
-	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT",proxy_user='malaknoyn100',proxy_pass="51310fe4"):
+	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT",proxy_user='malaknoyn100',proxy_pass="51310fe4",profile_dir=False):
 		
 		self.proxy_country = proxy_country
 		self.proxy_city = None
@@ -87,8 +88,13 @@ class browser:
 		
 		# self.options.add_argument("--lang=it-IT")
 		self.options.add_argument("--no-sandbox")
+		if profile_dir:
+			self.options.add_argument("--user-data-dir={}".format(profile_dir))
+			
+		else:
+			self.options.add_argument("--use-temporary-user-data-dir")
+
 		
-		self.options.add_argument("--use-temporary-user-data-dir")
 		self.driver = webdriver.Chrome(driverUrl,chrome_options=self.options)
 		
 		
@@ -387,6 +393,13 @@ class browser:
 		dropdown.select_by_visible_text(child)
 		print("select_dropdown")
 		return True
+	def slow_type(el, text):
+		"""Send a text to an element one character at a time with a delay."""
+		print('body text typing')
+		for character in text:
+			el.send_keys(character)
+			time.sleep(0.2)
+		print('body text typing done')
 	def get_screenshot(self,filename):
 
 			try:
@@ -474,6 +487,17 @@ class browser:
 
 		s = "window.scrollTo(0,{})".format(y)
 		self.driver.execute_script(s)
+	def	scroll_like_user(self,element):
+		
+		total_height = int(self.driver.execute_script("return document.body.scrollHeight"))
+		print(total_height)
+		total = total_height /random.choice([2,3,4,7,1])
+		print(total)
+		
+		for i in range(1, round(total), 1):
+			self.driver.execute_script("window.scrollTo(0, {});".format(i))
+			# time.sleep(1)
+		self.scroll_element_into_view(element)
 
 	def element_window_size(self, element):
 
@@ -592,7 +616,7 @@ class browser:
 
 		background_js = """
 		function FindProxyForURL(url, host) {
-			if (url.search("/static/")>"1" || 
+			if (url.search("google")>"1" ||
 			url.search("cloudflare")>"1" || 
 			url.search("google")>"1" || 
 			url.search("GTM")>"1") {

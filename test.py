@@ -1,24 +1,34 @@
 
 # from os import path
-
+for i in reversed(range(100)):
+    print(i)
+exit()
 # bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
-# import requests
-# p_pass= "wifi;us;;;{};".format("ft.+washington")
-# data  = "uyMDe7ALdLkpJmm5:"+p_pass+"@proxy.soax.com:9000"
+import requests,json
+p_pass= "wifi;us;;;{};".format("ft.+washington")
+data  = "uyMDe7ALdLkpJmm5:"+p_pass+"@proxy.soax.com:9000"
 
-# proxie = {"http": "http://"+data,"https": "http://"+data}
-# url = "https://checker.soax.com/api/ipinfo"
-# timeout = 10
-# # r = requests.get(url, timeout=timeout,proxies=proxie)
+proxie = {"http": "http://"+data,"https": "http://"+data}
+url = 'https://soax.com/api/get-country-regions?api_key=HzoxSzpE1Y_zJf5Y&package_key=uyMDe7ALdLkpJmm5&country_iso=us&conn_type=wifi'
+url = "https://soax.com/api/get-country-cities?api_key=HzoxSzpE1Y_zJf5Y&package_key=uyMDe7ALdLkpJmm5&country_iso=us&conn_type=wifi"
+# https://soax.com/api/get-country-cities?api_key=<api_key>&package_key=<package_key>&country_iso=<country_iso>&conn_type=<conn_type>[&provider=<provider_name>[&region=<region_name>]]
+timeout = 10
+proxy_payload ={
+    'api_key':'HzoxSzpE1Y_zJf5Y',
+    'package_key':'uyMDe7ALdLkpJmm5',
+    'country_iso':'us',
+    'conn_type':'wifi'
+}
+r = requests.get(url, timeout=timeout,data=proxy_payload)
 # r = requests.get(url, timeout=timeout)
-# print(r.text)
+print(r.text)
 
 
-from ps_lib.proxy import ps_proxy
-psproxy = ps_proxy(company="proxyhorse",key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
+# from ps_lib.proxy import ps_proxy
+# psproxy = ps_proxy(company="proxyhorse",key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
 					
-proxy = psproxy.proxyhorse('NC-Chinquapin')
+# proxy = psproxy.proxyhorse('NC-Chinquapin')
 
 
 # post = post()
