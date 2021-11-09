@@ -81,9 +81,12 @@ class browser:
 		
 		if sys.platform not in ['Windows', 'win32', 'cygwin']:
 			
-			self.options.add_argument("start-maximized")
+			
 			self.options.add_argument("--disable-dev-shm-usage")
 		self.options.add_argument("--disable-infobars")
+		self.options.add_argument("start-maximized")
+		self.options.add_experimental_option("useAutomationExtension", False)
+		self.options.add_experimental_option("excludeSwitches",["enable-automation"])
 			
 		
 		# self.options.add_argument("--lang=it-IT")
@@ -118,6 +121,13 @@ class browser:
 					self.PROXY_HOST = "proxy.soax.com"
 					self.PROXY_PORT = 9000
 					proxy = "%s:%s"%(self.PROXY_HOST,self.PROXY_PORT)
+					psproxy = ps_proxy(company="soax",key=self.PROXY_USER)
+					self.PROXY_PASS = psproxy.proxysoax(self.PROXY_PASS)
+					if self.PROXY_PASS:
+						d=self.PROXY_USER.split("-")
+						self.PROXY_USER=d[1]
+					else:
+						break
 				#............rsocks.net......................
 				if self.proxy_company =="rsocks":
 					
@@ -490,9 +500,7 @@ class browser:
 	def	scroll_like_user(self,element):
 		
 		total_height = int(self.driver.execute_script("return document.body.scrollHeight"))
-		print(total_height)
 		total = total_height /random.choice([2,3,4,7,1])
-		print(total)
 		
 		for i in range(1, round(total), 1):
 			self.driver.execute_script("window.scrollTo(0, {});".format(i))

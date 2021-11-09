@@ -67,26 +67,20 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 	# p_pass= "4mdloQgXxS8lcB3J_country-UnitedStates"
 	# b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="UnitedStates",proxy_user='malaknoyn',proxy_pass=p_pass,profile_dir=profile_dir)
-	p=account_data['extra'].split("-")
-	city = p[1].split(" ")
-	if city.count(" ") >= 1:
-		password = city.replace(" ","+")
-	else:
-		password=""
+	
 
 
 	
-	p_pass= "wifi;us;;{};{};".format(p[0],password)
-	p_pass= "wifi;us;;;{};".format(password)
-	b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='uyMDe7ALdLkpJmm5',proxy_pass=p_pass,profile_dir=profile_dir)
 	
-	# p_pass= "{}".format(account_data['extra'])
+	# b = browser(account_id,packages_id,proxy_company='soax',proxy_country="UnitedStates",proxy_user='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5',proxy_pass=account_data['extra'],profile_dir=profile_dir)
+	
+	p_pass= "{}".format(account_data['extra'])
 	print(p_pass)
 	
 	# proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'#noyon
-	# proxyhorse_pass = 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'#malak
+	proxyhorse_pass = 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'#malak
 	
-	# b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user=proxyhorse_pass,proxy_pass=p_pass,profile_dir=profile_dir)
+	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user=proxyhorse_pass,proxy_pass=p_pass,profile_dir=profile_dir)
 	time.sleep(5)
 	
 	
@@ -234,17 +228,16 @@ def main(account_data,postinfo,packages_id,body_mail):
 	b.scroll_like_user(nextpage)
 	nextpage.click()
 	#no pass click
-	if 's=geoverify=' in  b.current_url():
-		
-		sub_aria = b.select_elements('button[name=area_change_ok]')
-		sub_aria =random.choice(sub_aria)
-		
-		sub_aria.click()
+	
 		
 	
 	nextpage = b.select_element_xpath('//*[@id="leafletForm"]/button','go from map page')
 	b.scroll_like_user(nextpage)
 	nextpage.click()
+	if 's=geoverify=' in  b.current_url():
+		
+		sub_aria = b.select_element_xpath('//*[@name="area_change_ok"]')
+		sub_aria.click()
 	nextpage = b.select_element_xpath('/html/body/article/section/form/button','go from image page')
 	b.scroll_like_user(nextpage)
 	nextpage.click()

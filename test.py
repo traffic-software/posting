@@ -1,31 +1,59 @@
+# from selenium import webdriver
 
+# options = webdriver.ChromeOptions()
+# options.add_experimental_option("useAutomationExtension", False)
+# options.add_experimental_option("excludeSwitches",["enable-automation"])
+
+# driver_path = 'chromedriver.exe'
+# driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
+# driver.get('https://google.com')
+
+# driver.close()
 # from os import path
-for i in reversed(range(100)):
-    print(i)
-exit()
+
 # bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
 import requests,json
-p_pass= "wifi;us;;;{};".format("ft.+washington")
-data  = "uyMDe7ALdLkpJmm5:"+p_pass+"@proxy.soax.com:9000"
+# p_pass= "wifi;us;;;{};".format("ft.+washington")
+# data  = "uyMDe7ALdLkpJmm5:"+p_pass+"@proxy.soax.com:9000"
 
-proxie = {"http": "http://"+data,"https": "http://"+data}
-url = 'https://soax.com/api/get-country-regions?api_key=HzoxSzpE1Y_zJf5Y&package_key=uyMDe7ALdLkpJmm5&country_iso=us&conn_type=wifi'
-url = "https://soax.com/api/get-country-cities?api_key=HzoxSzpE1Y_zJf5Y&package_key=uyMDe7ALdLkpJmm5&country_iso=us&conn_type=wifi"
-# https://soax.com/api/get-country-cities?api_key=<api_key>&package_key=<package_key>&country_iso=<country_iso>&conn_type=<conn_type>[&provider=<provider_name>[&region=<region_name>]]
-timeout = 10
-proxy_payload ={
-    'api_key':'HzoxSzpE1Y_zJf5Y',
-    'package_key':'uyMDe7ALdLkpJmm5',
-    'country_iso':'us',
-    'conn_type':'wifi'
+# proxie = {"http": "http://"+data,"https": "http://"+data}
+# url = 'https://soax.com/api/get-country-cities?api_key=HzoxSzpE1Y_zJf5Y&package_key=uyMDe7ALdLkpJmm5&country_iso=us&conn_type=wifi&region=nevada'
+# # https://soax.com/api/get-country-cities?api_key=<api_key>&package_key=<package_key>&country_iso=<country_iso>&conn_type=<conn_type>[&provider=<provider_name>[&region=<region_name>]]
+# timeout = 10
+# proxy_payload ={
+#     'api_key':'HzoxSzpE1Y_zJf5Y',
+#     'package_key':'uyMDe7ALdLkpJmm5',
+#     'country_iso':'us',
+#     'conn_type':'wifi'
+# }
+# r = requests.get(url, timeout=timeout,data=proxy_payload)
+# # r = requests.get(url, timeout=timeout)
+# print(r.text)
+
+
+from ps_lib.proxy import ps_proxy
+url = "https://api.proxyhorse.com/client/getconnections.php"
+
+payload = {}
+headers = {
+  'Authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'
 }
-r = requests.get(url, timeout=timeout,data=proxy_payload)
-# r = requests.get(url, timeout=timeout)
-print(r.text)
 
+response = requests.request("GET", url, headers=headers, data = payload)
+d = json.loads(response.text.encode('utf8'))
+print(d)
 
-# from ps_lib.proxy import ps_proxy
+for i in d['data']:
+    url = "https://api.proxyhorse.com/client/deleteconnection.php"
+
+    payload = {"token": "{}".format(i['token'])}
+    headers = {
+    'authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a',
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("DELETE", url, headers=headers, data = json.dumps(payload))
 # psproxy = ps_proxy(company="proxyhorse",key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
 					
 # proxy = psproxy.proxyhorse('NC-Chinquapin')

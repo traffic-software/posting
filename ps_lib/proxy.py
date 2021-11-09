@@ -6,6 +6,7 @@ import random
 import requests
 from requests.exceptions import ProxyError
 from ps_lib.ps_setup import table
+from ps_lib.loction import s 
 import os
 import time
 
@@ -22,6 +23,11 @@ class ps_proxy:
         if self.company == "proxyhorse":
             
             self.api_key = key
+        if self.company == "soax":
+            k=key.split("-")
+            
+            self.api_key = k[0]
+            self.package_key = k[1]
 
     def proxy_headers(self):
         return {'authorization': self.api_key, 'Content-Type': 'application/json'}
@@ -40,6 +46,73 @@ class ps_proxy:
         if type==0:
             d={}
         return d
+   
+    def proxysoax(self,location):
+        proxy_loction = location.split("-")
+        self.state = proxy_loction[0].upper()
+        self.city = proxy_loction[1].lower()
+        check_city=self.get_soax_city(self.city)
+
+        if  check_city== False:
+            print(self.city,"city not available")
+            return False
+        else:
+            returndata = False
+            p = "wifi;us;;;{};".format(check_city)
+            proxy = {}
+            proxy['login'] = self.package_key
+            proxy['password'] = p
+            proxy['ip'] = "proxy.soax.com"
+            proxy['port'] = 9000
+            if False == self.proxy_check(data=proxy):
+                print("proxy not have in city try to new city")
+
+                newcity = self.get_soax_city_by_state(self.get_soax_state())
+                p = "wifi;us;;;{};".format(newcity)
+                proxy['password'] = p
+                if self.proxy_check(data=proxy):
+                    returndata =p
+                else:
+                    return False
+            else:
+                returndata =p
+            
+            return returndata
+
+            
+           
+
+        
+        
+        
+    def get_soax_city(self,city):
+        d=False
+        url = "https://soax.com/api/get-country-cities?api_key={0}&package_key={1}&country_iso=us&conn_type=wifi".format(self.api_key,self.package_key)
+        response = requests.get(url,headers=self.proxy_headers(), data=json.dumps(self.proxy_payload(type=0)))
+        t = json.loads(response.text.encode('utf8'))
+        for i in t:
+            
+            if city == i:
+                print(city,i)
+                d = i
+                break
+        return d
+    
+    def get_soax_city_by_state(self,state):
+        url = "https://soax.com/api/get-country-cities?api_key={0}&package_key={1}&country_iso=us&conn_type=wifi&region={2}".format(self.api_key,self.package_key,state)
+        response = requests.get(url,headers=self.proxy_headers(), data=json.dumps(self.proxy_payload(type=0)))
+        t = json.loads(response.text.encode('utf8'))
+        d=random.choice(t)
+        return d
+    
+    def get_soax_state(self):
+        n = None
+        for i in s:
+            if self.state == i['av']:
+                n = i['name']
+                break
+        return n
+    
 
     def proxyhorse(self,location):
         proxy_loction = location.split("-")
@@ -54,13 +127,10 @@ class ps_proxy:
            new_proxy = self.change(token=token)
         else:
             new_proxy = self.new_connection()
-        
-
-        
-        
-            
-        
         return new_proxy
+        
+    
+
     def new_connection(self):
         #new connection
         url = "https://api.proxyhorse.com/client/createconnection.php"
@@ -159,6 +229,9 @@ class ps_proxy:
         proxie = {"http": "http://"+d,"https": "http://"+d}
         url = "http://ip-api.com/json"
         r = requests.get(url, timeout=10,proxies=proxie)
+        if 'request_uuid' in r.text:
+            self.city=""
+            return False
         ip=json.loads(r.text)
         if "United States" in ip['country'] and self.state ==ip['region']:
             print("country:",ip['country'],"sate:",ip['region'],"city:",ip['city'])
