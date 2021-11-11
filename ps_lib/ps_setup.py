@@ -196,7 +196,7 @@ class table:
     def host_verify(self):
         host = self.host_get()
         if host== None:
-            self.host =  '192.168.0.106'#str(input("please enter your api_token : "))
+            self.host =  'post.pointssoft.com'#str(input("please enter your api_token : "))
             self.host_save()
         return host
     

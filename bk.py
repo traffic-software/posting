@@ -39,12 +39,16 @@ def main(account_data,postinfo,packages_id,body_mail):
 	print(datetime.now().strftime("%H:%M:%S"))
 	
 	account_id = account_data['id']
+	print('accountd id : ',account_id)
 	worker_acc=accounts()
+	popmail = imap(account_id,account_data['email'],account_data['password'])
+	popmail.messages('no_reply@bakecaincontrii.com')
+	popmail.close()
 
 
 	
 	p_pass= "4mdloQgXxS8lcB3J_country-Italy_session-%s"% (''.join(random.choice(string.ascii_letters) for i in range(10)))
-	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="Italy",proxy_user='malaknoyn',proxy_pass=p_pass)
+	b = browser(account_id,packages_id,proxy_company='packetstream',proxy_country="Italy",proxy_user='malaknoyn',proxy_pass=p_pass,use_proxy=False)
 	time.sleep(5)
 	urls = ['brescia','cagliari','campobasso','caserta','catanzaro','cremona','cremona','cuneo','fermo','firenze','forli','genova','grosseto','isernia','laspezia','lecce','livorno','lucca','mantova','matera','messina','modena','napoli','nuoro','olbiatempio','padova','parma','perugia','piacenza','pistoia','potenza','ragusa','reggiocalabria','rieti','roma','salerno','savona','siracusa','taranto','terni','trapani','treviso','varese','verbania','verona','vicenza','viterbo','vibovalentia','vercelli','venezia','urbino','udine','trieste','trento','torino','teramo','sondrio','siena','sassari','rovigo','rimini','reggioemilia','ravenna','prato','pordenone','pisa','pescara','pavia','palermo','oristano','ogliastra','novara','monza','milano','mediocampidano','massacarrara','macerata','lodi','lecco','latina','laquila','imperia','gorizia','frosinone','foggia','ferrara','enna','crotone','cosenza','chieti','catania','carboniaiglesias','caltanissetta','brindisi','bolzano','biella','benevento','barletta','avellino','ascoli','aosta','alessandria']
 	url = random.choice(urls)
@@ -87,9 +91,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	except:
 		print('category error')
 	
-	popmail = imap(account_id,account_data['email'],account_data['password'])
-	popmail.messages('no_reply@bakecaincontrii.com')
-	popmail.close()
+	
 	ages = [18,19,20,21,22,23,24,25,26,27,28,29,30]
 	age = random.choice(ages)
 
@@ -113,36 +115,41 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 
 
+	# captcha done by auto
 
-
-	site_url = b.current_url()
+	# site_url = b.current_url()
 
 	
-	try:
+	# try:
 
-		captcha = b.driver.find_element_by_name('h-captcha-response')
-	except Exception as e:
-		worker_acc.post_error(account_id,'captcha not load')
-		print('captcha not load')
-		b.exit()
-		exit()
-	b.script_run("document.getElementById('{0}').style.display = 'block';".format(captcha.get_attribute('id')),message='captcha display block')
+	# 	captcha = b.driver.find_element_by_name('h-captcha-response')
+	# except Exception as e:
+	# 	worker_acc.post_error(account_id,'captcha not load')
+	# 	print('captcha not load')
+	# 	b.exit()
+	# 	exit()
+	# b.script_run("document.getElementById('{0}').style.display = 'block';".format(captcha.get_attribute('id')),message='captcha display block')
 		
-	chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='it')
-	c_info = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
-	script = 'document.getElementById("{0}").innerHTML="{1}";'.format(captcha.get_attribute('id'),c_info["key"])
+	# chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da',1,lan='it')
+	# c_info = chacha_worker.two_captcha('a5c093a2-bc6f-4e21-a32b-003180834ca6', site_url)
+	# script = 'document.getElementById("{0}").innerHTML="{1}";'.format(captcha.get_attribute('id'),c_info["key"])
 		
-	b.script_run(script,message='captcha key add')
-	b.script_run("document.getElementById('{0}').style.display = 'none';".format(captcha.get_attribute('id')),message='captcha done')
-		
+	# b.script_run(script,message='captcha key add')
+	# b.script_run("document.getElementById('{0}').style.display = 'none';".format(captcha.get_attribute('id')),message='captcha done')
 	
+	
+	# captcha done by menual
+	print('Please complete the captcha \n i\'m waiting for captcha')
+	sec = input('Press the enter button')
+		
+
 	
 
 	
 	btn_click = '''$("form").submit()'''
 	b.script_run(btn_click,"form sbumit")
 	
-	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload',type=2,valu=c_info["id"])
+	img = b.select_element_xpath('//*[@id="app"]/main/form/div/div[4]/div/button','image upload')
 	b.scroll_element_into_view(img)
 	img.click()
 	Visibility = b.select_element_xpath('//*[@id="app"]/main/form/div[2]/div[2]/div[2]/div/div/div/button','Visibility')
