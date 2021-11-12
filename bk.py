@@ -41,7 +41,15 @@ def main(account_data,postinfo,packages_id,body_mail):
 	account_id = account_data['id']
 	print('accountd id : ',account_id)
 	worker_acc=accounts()
-	popmail = imap(account_id,account_data['email'],account_data['password'])
+	settings = table()
+	popacc = settings.pop_verify()
+	pp = "pva_pop" == popacc
+	if not pp:
+		pop = popacc.split(":")
+		popmail = imap(account_id,pop[0],pop[1])
+	else:
+		popmail = imap(account_id,account_data['email'],account_data['password'])
+	
 	popmail.messages('no_reply@bakecaincontrii.com')
 	popmail.close()
 
@@ -156,7 +164,10 @@ def main(account_data,postinfo,packages_id,body_mail):
 	b.scroll_element_into_view(Visibility)
 	Visibility.click()
 
-	popmail = imap(account_id,account_data['email'],account_data['password'])
+	if not pp:
+		popmail = imap(account_id,pop[0],pop[1])
+	else:
+		popmail = imap(account_id,account_data['email'],account_data['password'])
 	
 
 	counter=0
