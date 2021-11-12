@@ -22,7 +22,7 @@ class browser:
 	account_id=None
 
 
-	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT",proxy_user='malaknoyn100',proxy_pass="51310fe4"):
+	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT",proxy_user='malaknoyn100',proxy_pass="51310fe4",profile_dir=False):
 		
 		self.proxy_country = proxy_country
 		self.proxy_city = None
@@ -81,12 +81,18 @@ class browser:
 			self.options.add_argument("start-maximized")
 			self.options.add_argument("--disable-dev-shm-usage")
 		self.options.add_argument("--disable-infobars")
+		self.options.add_experimental_option("useAutomationExtension", False)
+		self.options.add_experimental_option("excludeSwitches",["enable-automation"])
 			
 		
 		self.options.add_argument("--lang=it-IT")
 		self.options.add_argument("--no-sandbox")
 		
-		self.options.add_argument("--use-temporary-user-data-dir")
+		if profile_dir:
+			self.options.add_argument("--user-data-dir={}".format(profile_dir))
+			
+		else:
+			self.options.add_argument("--use-temporary-user-data-dir")
 		self.driver = webdriver.Chrome(driverUrl,chrome_options=self.options)
 		
 		
