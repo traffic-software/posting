@@ -14,20 +14,19 @@ from getpass import getpass
 import re
 import os
 
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
 
-def reply_check(id=1):
+def reply_check():
     acc = accounts()
+    ac = acc.get_account_for_lead_find()
     setup = table()
-    
-    my_file = open(setup.dname+'/..'+'/reply_text.txt','r')
-    bot_body = my_file.read()
-    my_file.close()
-    text=ps_str(bot_body)
     while True:
         
         
-        ac = acc.get_account_for_lead_find()
-        # print('reply chcking : ',ac['email'])
+        
+        #print('reply chcking : ',ac['email'])
         
        
         
@@ -40,9 +39,6 @@ def reply_check(id=1):
             continue
         for m in popmail.ps_messges:
             m['body']='ok'
-            bot_body =text.Spin()
-            
-            bot_body = bot_body.replace('[name]', '')
            
             if ("replyad" in m['from_mail']):
                 password = ac['password']  # ps_data[1] or  getpass('opnqvheifcpsxrel')
@@ -100,3 +96,4 @@ def reply_test():
 
 
 
+reply_check()

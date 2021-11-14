@@ -1,0 +1,44 @@
+nano /etc/sysctl.conf
+net.ipv6.conf.all.disable_ipv6 = 1
+sysctl -p
+route -n
+# docker system prune
+# docker build . -t ps_bk
+# docker save -o bk.tar ps_bk
+# docker load -i bk.tar
+docker network create -d macvlan \
+  --subnet=192.168.0.0/24 \
+  --gateway=192.168.0.1 \
+  -o parent=ens33 router_net
+
+docker run  -d -it --restart=always \
+ --network router_net -p 22:22 \
+ --hostname worker-4 \
+ --ip=192.168.0.197 --name worker-4 ps_bk
+ docker exec -it 3adc95ddec45 /bin/bash
+cd ../mydir/
+python3 bk.py
+
+docker ps 
+
+
+sudo su 
+cd ../mydir/
+python3 bk.py
+reboot
+shutdown -h 0
+docker container start id
+docker container stop worker-4
+docker container rm worker-4
+docker container rm -f $(docker ps -a -q)
+docker image rm -f $(docker images -a -q)
+docker load -i bk.tar
+
+
+
+
+{'body': 'd','from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'pellel83@libero.it'}
+{'body': 's', 'from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'maxdiva23@gmail.com'}
+{'body': 'ok', 'from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'marcoeros72@lubero.it'}
+{'body': 'ok','from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'padux-91@outlook.it'}
+
