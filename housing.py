@@ -87,13 +87,16 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 		
 	try:
-		b.get_url('https://geo.craigslist.org')
+		if b.PROXY:
+			b.get_url('https://geo.craigslist.org')
+		else:
+			b.exit()
 	except:
 		b.exit()
 	
 	
 	button = b.select_element_xpath('//*[@id="post"]','click new post')
-	b.scroll_like_user(button)
+	# b.scroll_like_user(button)
 	# time.sleep(random.choice([1,2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]))
 	button.click()
 	
@@ -103,25 +106,25 @@ def main(account_data,postinfo,packages_id,body_mail):
 		sub_aria = b.select_elements('input[type=radio]')
 
 		sub_aria =random.choice(sub_aria)
-		b.scroll_like_user(sub_aria)
+		# b.scroll_like_user(sub_aria)
 		
 		sub_aria.click()
 	if 's=hood' in  b.current_url():
 		sub_aria = b.select_elements('input[type=radio]')
 		sub_aria =random.choice(sub_aria)
-		b.scroll_like_user(sub_aria)
+		# b.scroll_like_user(sub_aria)
 		
 		sub_aria.click()
 	button = b.select_element_xpath('/html/body/article/section/form/ul/li[4]','click on housing offered')
-	b.scroll_like_user(button)
+	# b.scroll_like_user(button)
 	button.click()
 	button = b.select_element_xpath('//*[@id="new-edit"]/div/label/label[2]/div/span[1]','click on apartments / housing for rent')
-	b.scroll_like_user(button)
+	# b.scroll_like_user(button)
 	button.click()
 
 	#Posting Title setup
 	b_sub = b.select_element_xpath('//*[@id="PostingTitle"]','PostingTitle')
-	b.scroll_like_user(b_sub)
+	# b.scroll_like_user(b_sub)
 	post=postinfo.get_post()
 	postsub = ps_str(post['data1'])
 	print('b_sub text typing')
@@ -132,12 +135,12 @@ def main(account_data,postinfo,packages_id,body_mail):
 	# b_sub.send_keys(character)
 	#zip code setup
 	postal_code = b.select_element_xpath('//*[@id="postal_code"]','postal code"]')
-	b.scroll_like_user(postal_code)
+	# b.scroll_like_user(postal_code)
 	postal_code.send_keys(b.proxy_zip)
 
 	#post body setup
 	b_body = b.select_element_xpath('//*[@id="PostingBody"]','PostingBody')
-	b.scroll_like_user(b_body)
+	# b.scroll_like_user(b_body)
 	postbody = ps_str(post['data4'])
 	print('body text typing')
 	for character in postbody.with_email(body_mail):
@@ -149,7 +152,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 
 	#price setup
 	b_price = b.select_element_xpath('//*[@id="new-edit"]/div/fieldset[1]/div/div[1]/label[1]/label/input','price set')
-	b.scroll_like_user(b_price)
+	# b.scroll_like_user(b_price)
 	b_price.send_keys(postinfo.price)
 
 	#housing type setup
@@ -222,10 +225,10 @@ def main(account_data,postinfo,packages_id,body_mail):
 	# time.sleep(2000)
 	
 	b_email = b.select_element_xpath('//*[@name="FromEMail"]','select email')
-	b.scroll_like_user(b_email)
+	# b.scroll_like_user(b_email)
 	b_email.send_keys(account_data['email'])
 	nextpage = b.select_element_xpath('//*[@name="go"]','go next page')
-	b.scroll_like_user(nextpage)
+	# b.scroll_like_user(nextpage)
 	nextpage.click()
 	#no pass click
 	
@@ -239,10 +242,10 @@ def main(account_data,postinfo,packages_id,body_mail):
 		sub_aria = b.select_element_xpath('//*[@name="area_change_ok"]')
 		sub_aria.click()
 	nextpage = b.select_element_xpath('/html/body/article/section/form/button','go from image page')
-	b.scroll_like_user(nextpage)
+	# b.scroll_like_user(nextpage)
 	nextpage.click()
 	nextpage = b.select_element_xpath('//*[@id="publish_top"]/button','go from publish page')
-	b.scroll_like_user(nextpage)
+	# b.scroll_like_user(nextpage)
 	nextpage.click()
 	# time.sleep(120)
 	
@@ -295,13 +298,13 @@ def main(account_data,postinfo,packages_id,body_mail):
 	if 'pass?userid=' in  b.current_url():
 		#no pass click
 		nextpage = b.select_element_xpath('/html/body/section/section/div[2]/div[1]/form/div/input','no pass click')
-		b.scroll_like_user(nextpage)
+		# b.scroll_like_user(nextpage)
 		nextpage.click()
 	# check tams page
 	if 's=tou' in  b.current_url():
 		
 		nextpage = b.select_element_xpath('//*[@id="new-edit"]/div/div[4]/div[1]/button','tams')
-		b.scroll_like_user(nextpage)
+		# b.scroll_like_user(nextpage)
 		nextpage.click()
 		
 	if 's=pn' in  b.current_url():
@@ -314,14 +317,14 @@ def main(account_data,postinfo,packages_id,body_mail):
 			pva_number = str(input("please enter number for pva : "))
 			pva.send_keys(pva_number)
 			pva_num_submit = b.select_element_xpath('//*[@id="new-edit"]/div/div[3]/div[2]/button','pva code')
-			b.scroll_like_user(pva_num_submit)
+			# b.scroll_like_user(pva_num_submit)
 			pva_num_submit.click()
 			pva_code = str(input("please enter code for pva : "))
 			pvacode = b.select_element_xpath('//*[@id="userCode"]','number for pva')
-			b.scroll_like_user(pvacode)
+			# b.scroll_like_user(pvacode)
 			pvacode.send_keys(pva_code)
 			pva_code_submit = b.select_element_xpath('//*[@id="new-edit"]/div/div[2]/div[5]/button','pva code submit')
-			b.scroll_like_user(pva_code_submit)
+			# b.scroll_like_user(pva_code_submit)
 			pva_code_submit.click()
 			time.sleep(30)
 		
@@ -333,7 +336,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 	if b.try_xpath("//*[contains(text(),'View your post at')]"):
 		check_post = b.select_element_xpath("//*[contains(text(),'View your post at')]",'post link check')
-		b.scroll_like_user(check_post)
+		# b.scroll_like_user(check_post)
 		worker_acc.post_done(account_id,check_post.text)
 		worker_acc.post_log(account_id,b.textProxy())
 		

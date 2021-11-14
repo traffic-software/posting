@@ -138,15 +138,15 @@ class ps_proxy:
         d =json.loads(r.text.encode('utf8'))
         self.t.proxyhorse_save(token=d['data']['token'])
         print("new_connection set location")
+        proxy = d['data']
         
         if False == self.proxy_check(d['data']):
             print("post city probolem")
-            time.sleep(30)
-            exit()
+            proxy=False
 
             
             
-        return d['data']
+        return proxy
     #retun proxy info
     def change(self,token):
         url = "https://api.proxyhorse.com/client/changeconnection.php"
@@ -158,8 +158,7 @@ class ps_proxy:
         
         if False == self.proxy_check(proxy):
             print("post city probolem")
-            time.sleep(30)
-            exit()
+            proxy=False
         
         return proxy
     def delete(self,token):

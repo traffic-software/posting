@@ -55,13 +55,14 @@ class browser:
 			
 			#............Normal rotating proxy......................
 			self.PROXY = str(self.proxy())
-			proxy = self.PROXY.split(":")
-			self.PROXY_HOST =  proxy[0]
-			self.PROXY_PORT =  proxy[1]
-			self.PROXY_TYPE = 'http'
-			print("done: proxy set")
-			# self.proxy_auth_plugin()
-			self.proxy_auth_plugin_pac_script()
+			if self.PROXY:
+				proxy = self.PROXY.split(":")
+				self.PROXY_HOST =  proxy[0]
+				self.PROXY_PORT =  proxy[1]
+				self.PROXY_TYPE = 'http'
+				print("done: proxy set")
+				# self.proxy_auth_plugin()
+				self.proxy_auth_plugin_pac_script()
 			
 
 		
@@ -155,6 +156,9 @@ class browser:
 					
 
 					proxy = psproxy.proxyhorse(self.PROXY_PASS)
+					if proxy == False:
+						break
+					
 					
 					
 					
@@ -303,7 +307,6 @@ class browser:
 		if element == False:
 			print("element not find: ",selector)
 			
-			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
@@ -340,7 +343,6 @@ class browser:
 			if type ==2:
 				mesasage = mesasage + self.check_error(valu)
 			self.account.post_error(self.account_id,message=mesasage)
-			self.account.account_inactive(self.account_id)
 			self.exit()
 			exit()
 		return element
