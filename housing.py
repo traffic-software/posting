@@ -87,11 +87,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 	
 		
 	try:
-		if b.PROXY:
-			b.get_url('https://geo.craigslist.org')
-		else:
-			worker_acc.ban_3(account_id,status=4)
-			b.exit()
+		b.get_url('https://geo.craigslist.org')
 	except:
 		b.exit()
 	

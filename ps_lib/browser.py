@@ -54,15 +54,15 @@ class browser:
 			
 			
 			#............Normal rotating proxy......................
-			self.PROXY = str(self.proxy())
-			if self.PROXY:
-				proxy = self.PROXY.split(":")
-				self.PROXY_HOST =  proxy[0]
-				self.PROXY_PORT =  proxy[1]
-				self.PROXY_TYPE = 'http'
-				print("done: proxy set")
-				# self.proxy_auth_plugin()
-				self.proxy_auth_plugin_pac_script()
+			self.PROXY = self.proxy()
+			
+			proxy = self.PROXY.split(":")
+			self.PROXY_HOST =  proxy[0]
+			self.PROXY_PORT =  proxy[1]
+			self.PROXY_TYPE = 'http'
+			print("done: proxy set")
+			# self.proxy_auth_plugin()
+			self.proxy_auth_plugin_pac_script()
 			
 
 		
@@ -155,9 +155,8 @@ class browser:
 					
 					
 
-					proxy = psproxy.proxyhorse(self.PROXY_PASS)
-					if proxy == False:
-						break
+					proxy = psproxy.proxyhorse(self.PROXY_PASS,pva_id=self.account_id)
+					
 					
 					
 					

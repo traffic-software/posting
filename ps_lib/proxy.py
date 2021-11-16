@@ -6,6 +6,7 @@ import random
 import requests
 from requests.exceptions import ProxyError
 from ps_lib.ps_setup import table
+from ps_lib.accounts import accounts
 from ps_lib.loction import s 
 import os
 import time
@@ -14,11 +15,13 @@ import time
 class ps_proxy:
     def __init__(self, company, key):
         self.t = table()
+        self.pva=accounts()
         self.company =company
         self.country = "US"
         self.state = ""
         self.city = ""
         self.asn = ""
+        self.pva_id=None
         
         if self.company == "proxyhorse":
             
@@ -114,11 +117,12 @@ class ps_proxy:
         return n
     
 
-    def proxyhorse(self,location):
+    def proxyhorse(self,location,pva_id=None):
         proxy_loction = location.split("-")
         self.state = proxy_loction[0]
         self.city = proxy_loction[1]
         self.set_city(proxy_loction[1])
+        self.pva_id = pva_id
         
         
         token = self.t.proxyhorse_get()
@@ -142,7 +146,8 @@ class ps_proxy:
         
         if False == self.proxy_check(d['data']):
             print("post city probolem")
-            proxy=False
+            time.sleep(30)
+            exit()
 
             
             
@@ -158,7 +163,9 @@ class ps_proxy:
         
         if False == self.proxy_check(proxy):
             print("post city probolem")
-            proxy=False
+            self.pva.ban_3(self.pva_id,status=4)
+            time.sleep(30)
+            exit()
         
         return proxy
     def delete(self,token):
