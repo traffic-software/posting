@@ -24,10 +24,11 @@ class browser:
 	account_id=None
 
 
-	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT",proxy_user='malaknoyn100',proxy_pass="51310fe4",profile_dir=False):
+	def __init__(self,pofileLocation,packages_id,use_proxy=True,proxy_company='proxyrotator',proxy_country="IT",proxy_user='malaknoyn100',proxy_pass="51310fe4",profile_dir=False,proxy_other_city=None):
 		
 		self.proxy_country = proxy_country
 		self.proxy_city = None
+		self.other_city = proxy_other_city
 		self.proxy_region = None
 		self.proxy_zip = None
 		self.proxy_timezone = None
@@ -155,19 +156,19 @@ class browser:
 					
 					
 
-					proxy = psproxy.proxyhorse(self.PROXY_PASS,pva_id=self.account_id)
-					
-					
-					
-					
-					
-					
-					# print(proxy)
+					pva_id = None
+					if self.other_city == None:
+						pva_id = self.account_id
+					proxy = psproxy.proxyhorse(self.PROXY_PASS,pva_id=pva_id)
+					if not proxy:
+						continue
+						
 					self.PROXY_HOST = proxy['ip']
 					self.PROXY_PORT = proxy['port']
 					self.PROXY_USER = proxy['login']
 					self.PROXY_PASS = proxy['password']
 					proxy = "%s:%s"%(self.PROXY_HOST,self.PROXY_PORT)
+						
 					
 					
 

@@ -1,1 +1,0 @@
-Hello [name] {Dave|Tom} it's a {lovely|beautiful|rainy} day today, perfect for going on a {long walk|bike ride}

@@ -1,0 +1,162 @@
+from email.policy import SMTP
+from re import sub
+import threading
+import time
+import shutil
+import random
+import string
+import fnmatch
+import sys
+from os import path
+from pyvirtualdisplay import Display
+from datetime import datetime
+import smtp
+from ps_lib.browser import browser
+from ps_lib.accounts import accounts
+from ps_lib.psThread import psThread
+from ps_lib.helper import helper
+from ps_lib.ps_setup import table
+from ps_lib.post import post
+from ps_lib.captcha import capcha
+from ps_lib.ps_str import ps_str
+from ps_lib.imap import imap
+from selenium.webdriver.common.keys import Keys
+import os
+
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+bundle_dir = path.abspath(path.dirname(__file__))
+
+# from pynput.mouse import Button, Controller
+
+
+
+
+
+def main(account_data,postinfo,packages_id,body_mail):
+	#work start time
+	starttime=datetime.now().strftime("%H:%M:%S")
+
+	print(datetime.now().strftime("%H:%M:%S"))
+	
+	account_id = account_data['id']
+	print(account_data)
+	worker_acc=accounts()
+	
+
+	
+	
+
+
+	
+	p_pass= "{}".format(account_data['extra'])
+	print(p_pass)
+	
+	# proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'#noyon
+	proxyhorse_pass = 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'#malak
+	
+	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user=proxyhorse_pass,proxy_pass=p_pass,proxy_other_city=True)
+	time.sleep(5)
+	
+	
+	
+		
+	try:
+		b.get_url('https://' + account_data['email'])
+	except:
+		b.exit()
+	
+	
+	if b.try_xpath("//*[contains(text(),'posting has been flagged')]"):
+		print('This posting has been flagged for removal')
+		worker_acc.ban_3(account_id,status=3)
+	else:
+		
+		nextpage = b.select_element_xpath('//*[@class="flag-action action"]','flag button')
+		
+		nextpage.click()
+		worker_acc.post_error(account_id,"flag action try")
+		time.sleep(10)
+		
+	print('browser close')
+	b.exit()
+	
+
+
+	print('start :',starttime)
+	print('end :',datetime.now().strftime("%H:%M:%S"))
+	
+
+	
+	
+
+	
+
+
+
+
+
+	
+	
+
+	
+
+
+
+
+
+
+setup = table()
+setup.token_verify()
+# setup.pop_verify()
+
+#w = int(input('how much worker you need? '))
+# packages_id = input('proxy info by a line : ')
+packages_id = '317345'
+
+# worker = w + 1
+worker = 2
+# ........................start worker....................
+open('active.txt', "w+")
+utility = helper()
+headers = {}
+profile_ids = {}
+acc = accounts()
+post = post()
+if sys.platform not in ['Windows', 'win32', 'cygwin']:
+	display = Display(visible=0, size=(1024, 768))
+	display.start()
+# x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
+# x.start()
+while True:
+	utility.network_check()
+	if setup.token_off():
+		print('software off now but reply checking runing')
+		time.sleep(60)
+		continue
+	one_account = acc.get_account()
+		
+	postinfo = post.get_post()
+	body_mail=None
+	if one_account == None or postinfo == None:
+		print('post or account not find for worker')
+		time.sleep(60)
+		continue
+	print('account last use time is : ',one_account['last_updates'])
+	if int(one_account['error_count']) >= 15:
+		acc.post_done(one_account['id'])
+		print('flaging try 15  done not flag')
+		continue
+		
+
+	if path.isdir('profiles/' +str(one_account['id'])) == True:
+		shutil.rmtree('profiles/' +str(one_account['id']))
+		
+	print('main')
+	main(one_account,post,packages_id,body_mail)
+	time.sleep(10)
+
+		
+
+	

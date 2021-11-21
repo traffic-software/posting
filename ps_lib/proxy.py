@@ -4,6 +4,7 @@ import json
 from re import T
 import random
 import requests
+from requests import exceptions
 from requests.exceptions import ProxyError
 from ps_lib.ps_setup import table
 from ps_lib.accounts import accounts
@@ -140,14 +141,19 @@ class ps_proxy:
         url = "https://api.proxyhorse.com/client/createconnection.php"
         r = requests.request("POST", url, headers=self.proxy_headers(), data=json.dumps(self.proxy_payload()))
         d =json.loads(r.text.encode('utf8'))
+        print(d)
         self.t.proxyhorse_save(token=d['data']['token'])
         print("new_connection set location")
         proxy = d['data']
+        self.get_ip(proxy['token'])
         
         if False == self.proxy_check(d['data']):
             print("post city probolem")
-            time.sleep(30)
-            exit()
+            if self.pva_id == None:
+                proxy = False
+            else:
+                time.sleep(30)
+                exit()
 
             
             
@@ -161,11 +167,19 @@ class ps_proxy:
         print("Change location")
         proxy = self.get_connecton(token=token)
         
+        self.get_ip(proxy['token'])
+        
         if False == self.proxy_check(proxy):
             print("post city probolem")
-            self.pva.ban_3(self.pva_id,status=4)
-            time.sleep(30)
-            exit()
+            
+            if self.pva_id == None:
+                proxy = False
+            else:
+                self.pva.ban_3(self.pva_id,status=4)
+                time.sleep(30)
+                exit()
+
+            
         
         return proxy
     def delete(self,token):
@@ -231,18 +245,24 @@ class ps_proxy:
             return False
 
     def proxy_check(self,data):
-        d  ="{}:{}@{}:{}".format(data['login'],data['password'],data['ip'],data['port'])
-        proxie = {"http": "http://"+d,"https": "http://"+d}
-        url = "http://ip-api.com/json"
-        r = requests.get(url, timeout=10,proxies=proxie)
-        if 'request_uuid' in r.text:
-            self.city=""
-            return False
-        ip=json.loads(r.text)
-        if "United States" in ip['country'] and self.state ==ip['region']:
-            print("country:",ip['country'],"sate:",ip['region'],"city:",ip['city'])
+        try:
+            d  ="{}:{}@{}:{}".format(data['login'],data['password'],data['ip'],data['port'])
+            proxie = {"http": "http://"+d,"https": "http://"+d}
+            url = "http://ip-api.com/json"
+            r = requests.get(url, timeout=10,proxies=proxie)
             
-            return True
-        else:
-            self.city=""
+            if 'request_uuid' in r.text:
+                self.city=""
+                return False
+            ip=json.loads(r.text)
+            
+            if "United States" in ip['country'] and self.state ==ip['region']:
+                print("country:",ip['country'],"sate:",ip['region'],"city:",ip['city'])
+                
+                return True
+            else:
+                self.city=""
+                return False
+        except Exception as e:
+            print(e)
             return False
