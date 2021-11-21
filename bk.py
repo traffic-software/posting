@@ -174,10 +174,11 @@ def main(account_data,postinfo,packages_id,body_mail):
 	postdone = False
 	
 	while True:
-		time.sleep(10)
+		
 		if postdone == True:
 			break
 			postdone = False
+		time.sleep(10)
 
 		counter = counter+1
 		
@@ -203,6 +204,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 			worker_acc.ban_3(account_id,status=2)
 			print("link not recived")
 			break
+		
 	print('browser close')
 
 	
@@ -239,8 +241,8 @@ post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
 	display = Display(visible=0, size=(1024, 768))
 	display.start()
-x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
-x.start()
+# x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
+# x.start()
 while True:
 	utility.network_check()
 	if setup.token_off():
