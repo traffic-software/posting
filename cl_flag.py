@@ -41,7 +41,6 @@ def main(account_data,postinfo,packages_id,body_mail):
 	print(datetime.now().strftime("%H:%M:%S"))
 	
 	account_id = account_data['id']
-	print(account_data)
 	worker_acc=accounts()
 	
 
@@ -77,7 +76,6 @@ def main(account_data,postinfo,packages_id,body_mail):
 		
 		nextpage.click()
 		worker_acc.post_error(account_id,"flag action try")
-		time.sleep(10)
 		
 	print('browser close')
 	b.exit()
