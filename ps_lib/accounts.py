@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import time
 import requests
 from sys import exit
 from ps_lib.ps_setup import table
@@ -19,6 +20,7 @@ class accounts:
         r = requests.get(url)
         if "error" in r.json():
             print("error",r.json()['message'])
+            time.sleep(10)
             exit()
         return r.json()["data"]
         

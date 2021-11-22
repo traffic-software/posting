@@ -75,7 +75,11 @@ def main(account_data,postinfo,packages_id,body_mail):
 		nextpage = b.select_element_xpath('//*[@class="flag-action action"]','flag button')
 		
 		nextpage.click()
+		b.driver.implicitly_wait
 		worker_acc.post_error(account_id,"flag action try")
+		#title="thanks for flagging!"
+		b.wait('//*[@title="thanks for flagging!"]')
+		time.sleep(2)
 		
 	print('browser close')
 	b.exit()
@@ -143,7 +147,7 @@ while True:
 		continue
 	print('account last use time is : ',one_account['last_updates'])
 	if int(one_account['error_count']) >= 15:
-		acc.post_done(one_account['id'])
+		acc.ban_3(one_account['id'],5)
 		print('flaging try 15  done not flag')
 		continue
 		

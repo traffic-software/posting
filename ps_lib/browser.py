@@ -521,6 +521,10 @@ class browser:
 
 	def current_url(self):
 		return self.driver.current_url
+	def wait(self,x):
+		
+		wait = WebDriverWait(self.driver, 10)
+		return wait.until(EC.element_to_be_clickable((By.XPATH, x)))
 	def link_save(self,link):
 		with open('links.txt', 'a') as file:
 			file.write(link+"\n")
