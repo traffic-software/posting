@@ -9,7 +9,7 @@ route -n
 docker network create -d macvlan \
   --subnet=192.168.0.0/24 \
   --gateway=192.168.0.1 \
-  -o parent=ens33 router_net
+  -o parent=enp0s25 router_net
 
 docker run  -d -it --restart=always \
  --network router_net -p 22:22 \

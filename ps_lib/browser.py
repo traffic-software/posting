@@ -607,11 +607,38 @@ class browser:
 	def proxy_auth_plugin_pac_script(self):
 
 
+		rules_json = """[
+			{
+				"id": 1,
+				"priority": 1,
+				"action": { "type": "block" },
+				"condition": {"urlFilter": "jpeg", "resourceTypes": ["image"] }
+			},
+			{
+				"id": 2,
+				"priority": 2,
+				"action": { "type": "block" },
+				"condition": {"urlFilter": "jpg", "resourceTypes": ["image"] }
+			},
+			{
+				"id": 3,
+				"priority": 3,
+				"action": { "type": "block" },
+				"condition": {"urlFilter": "png)", "resourceTypes": ["image"] }
+			}
+		]"""
 		manifest_json = """
 		{
 			"version": "1.0.0",
 			"manifest_version": 2,
 			"name": "Chrome Proxy",
+			"declarative_net_request": {
+				"rule_resources": [{
+				"id": "ruleset_1",
+				"enabled": true,
+				"path": "rules.json"
+				}]
+			},
 			"permissions": [
 				"proxy",
 				"tabs",
@@ -619,7 +646,8 @@ class browser:
 				"storage",
 				"<all_urls>",
 				"webRequest",
-				"webRequestBlocking"
+				"webRequestBlocking",
+				"declarativeNetRequest"
 			],
 			"background": {
 				"scripts": ["background.js"]
@@ -630,9 +658,9 @@ class browser:
 
 		background_js = """
 		function FindProxyForURL(url, host) {
-			if (url.search("google")>"1" ||
-			url.search("cloudflare")>"1" || 
+			if (url.search("GTM")>"1" ||
 			url.search("google")>"1" || 
+			url.search("GTM")>"1" || 
 			url.search("GTM")>"1") {
 				return 'DIRECT';
 				
@@ -667,7 +695,9 @@ class browser:
 		""" % (self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
 		pluginfile = 'proxy_auth_plugin.zip'
 		zp=zipfile.ZipFile(pluginfile, 'w')
+		zp.writestr("rules.json", rules_json)
 		zp.writestr("manifest.json", manifest_json)
+		
 		zp.writestr("background.js", background_js)
 		self.options.add_extension(pluginfile)
 	

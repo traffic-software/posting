@@ -52,8 +52,8 @@ def main(account_data,postinfo,packages_id,body_mail):
 	p_pass= "{}".format(account_data['extra'])
 	print(p_pass)
 	
-	# proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'#noyon
-	proxyhorse_pass = 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'#malak
+	proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'#noyon
+	# proxyhorse_pass = 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'#malak
 	
 	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user=proxyhorse_pass,proxy_pass=p_pass,proxy_other_city=True)
 	time.sleep(5)
@@ -65,6 +65,7 @@ def main(account_data,postinfo,packages_id,body_mail):
 		b.get_url('https://' + account_data['email'])
 	except:
 		b.exit()
+	
 	
 	
 	if b.try_xpath("//*[contains(text(),'posting has been flagged')]"):
