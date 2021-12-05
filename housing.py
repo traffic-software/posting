@@ -78,9 +78,9 @@ def main(account_data,postinfo,packages_id,body_mail):
 	print(p_pass)
 	
 	# proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'#noyon
-	proxyhorse_pass = 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'#malak
+	proxyhorse_pass = 'i2xOxxg1kCKkn54H2QZOg411OfJ1ea'#suzon
 	
-	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user=proxyhorse_pass,proxy_pass=p_pass,profile_dir=profile_dir)
+	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user=proxyhorse_pass,proxy_pass=p_pass)
 	time.sleep(5)
 	
 	
