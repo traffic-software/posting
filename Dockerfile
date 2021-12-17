@@ -24,6 +24,8 @@ RUN apt-get install python3 -y
 RUN sudo apt install python3-pip -y
 RUN python3 -m pip install selenium
 RUN python3 -m pip install requests
+RUN python3 -m pip install -U requests[socks]
+RUN python3 -m pip install beautifulsoup4
 RUN python3 -m pip install zipfile38
 RUN python3 -m pip install imapclient
 RUN python3 -m pip install python_anticaptcha

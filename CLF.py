@@ -1,5 +1,5 @@
 from email.policy import SMTP
-from re import sub
+from re import I, sub
 import threading
 import time
 import shutil
@@ -8,6 +8,7 @@ import string
 import fnmatch
 import sys
 from os import path
+from zipfile import error
 from pyvirtualdisplay import Display
 from datetime import datetime
 import smtp
@@ -31,83 +32,52 @@ bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
 
 
+def main(account_data, postinfo, packages_id, body_mail):
+    # work start time
+    starttime = datetime.now().strftime("%H:%M:%S")
 
+    print(datetime.now().strftime("%H:%M:%S"))
+    # print(account_data)
+    account_id = account_data['id']
+    worker_acc = accounts()
 
+    b = browser(account_id, packages_id, proxy_company='soax', proxy_country="UnitedStates",
+                proxy_user='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5', proxy_pass=account_data['extra'])
 
-def main(account_data,postinfo,packages_id,body_mail):
-	#work start time
-	starttime=datetime.now().strftime("%H:%M:%S")
+    # b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user=proxyhorse_pass,proxy_pass=p_pass)
+    time.sleep(5)
+    if b.PROXY_PASS == False:
+        b.exit()
+        print('proxy condition not fulfilled')
+        worker_acc.ban_3(account_id, 5)
+        time.sleep(10)
+        
 
-	print(datetime.now().strftime("%H:%M:%S"))
-	
-	account_id = account_data['id']
-	worker_acc=accounts()
-	
+    try:
+        b.get_url(account_data['email'])
+    except:
+        b.exit()
 
-	
-	
+    if b.try_xpath("//*[contains(text(),'posting has been flagged')]"):
+        print('This posting has been flagged for removal')
+        worker_acc.ban_3(account_id, status=3)
+    else:
 
+        nextpage = b.select_element_xpath(
+            '//*[@class="flag-action action"]', 'flag button')
 
-	
-	p_pass= "{}".format(account_data['extra'])
-	print(p_pass)
-	
-	proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'#noyon
-	# proxyhorse_pass = 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'#malak
-	
-	b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user=proxyhorse_pass,proxy_pass=p_pass,proxy_other_city=True)
-	time.sleep(5)
-	
-	
-	
-		
-	try:
-		b.get_url('https://' + account_data['email'])
-	except:
-		b.exit()
-	
-	
-	
-	if b.try_xpath("//*[contains(text(),'posting has been flagged')]"):
-		print('This posting has been flagged for removal')
-		worker_acc.ban_3(account_id,status=3)
-	else:
-		
-		nextpage = b.select_element_xpath('//*[@class="flag-action action"]','flag button')
-		
-		nextpage.click()
-		b.driver.implicitly_wait
-		worker_acc.post_error(account_id,"flag action try")
-		#title="thanks for flagging!"
-		b.wait('//*[@title="thanks for flagging!"]')
-		time.sleep(2)
-		
-	print('browser close')
-	b.exit()
-	
+        nextpage.click()
+        b.driver.implicitly_wait
+        worker_acc.post_error(account_id, "flag action try")
+        #title="thanks for flagging!"
+        b.wait('//*[@title="thanks for flagging!"]')
+        time.sleep(2)
 
+    print('browser close')
+    b.exit()
 
-	print('start :',starttime)
-	print('end :',datetime.now().strftime("%H:%M:%S"))
-	
-
-	
-	
-
-	
-
-
-
-
-
-	
-	
-
-	
-
-
-
-
+    print('start :', starttime)
+    print('end :', datetime.now().strftime("%H:%M:%S"))
 
 
 setup = table()
@@ -121,45 +91,45 @@ packages_id = '317345'
 # worker = w + 1
 worker = 2
 # ........................start worker....................
-open('active.txt', "w+")
+# open('active.txt', "w+")
 utility = helper()
 headers = {}
 profile_ids = {}
 acc = accounts()
 post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
-	display = Display(visible=0, size=(1024, 768))
-	display.start()
+    display = Display(visible=0, size=(1024, 768))
+    display.start()
 # x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
 # x.start()
 while True:
-	utility.network_check()
-	if setup.token_off():
-		print('software off now but reply checking runing')
-		time.sleep(60)
-		continue
-	one_account = acc.get_account()
-		
-	postinfo = post.get_post()
-	body_mail=None
-	if one_account == None or postinfo == None:
-		print('post or account not find for worker')
-		time.sleep(60)
-		continue
-	print('account last use time is : ',one_account['last_updates'])
-	if int(one_account['error_count']) >= 15:
-		acc.ban_3(one_account['id'],5)
-		print('flaging try 15  done not flag')
-		continue
-		
+    utility.network_check()
+    if setup.token_off():
+        print('software off now but reply checking runing')
+        time.sleep(60)
+        continue
+    one_account = acc.get_account()
 
-	if path.isdir('profiles/' +str(one_account['id'])) == True:
-		shutil.rmtree('profiles/' +str(one_account['id']))
-		
-	print('main')
-	main(one_account,post,packages_id,body_mail)
-	time.sleep(10)
+    postinfo = post.get_post()
+    body_mail = None
+    if one_account == None or postinfo == None:
+        print('post or account not find for worker')
+        time.sleep(60)
+        continue
+    print('account id : ', one_account['id'])
+    try:
+        error_count = int(one_account['error_count'])
+    except:
+        error_count = 0
 
-		
+    if error_count >= 15:
+        acc.ban_3(one_account['id'], 5)
+        print('flaging try 15  done not flag')
+        continue
 
-	
+    if path.isdir('profiles/' + str(one_account['id'])) == True:
+        shutil.rmtree('profiles/' + str(one_account['id']))
+
+    print('main')
+    main(one_account, post, packages_id, body_mail)
+    time.sleep(10)
