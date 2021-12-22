@@ -6,6 +6,7 @@ import shutil
 import random
 import string
 import fnmatch
+import subprocess
 import sys
 from os import path
 from zipfile import error
@@ -41,17 +42,17 @@ def main(account_data, postinfo, packages_id, body_mail):
     account_id = account_data['id']
     worker_acc = accounts()
 
-    b = browser(account_id, packages_id, proxy_company='soax', proxy_country="UnitedStates",
-                proxy_user='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5', proxy_pass=account_data['extra'])
-
-    # b = browser(account_id,packages_id,proxy_company='proxyhorse',proxy_country="UnitedStates",proxy_user=proxyhorse_pass,proxy_pass=p_pass)
+    # b = browser(account_id, packages_id, proxy_company='soax', proxy_country="UnitedStates",
+    # proxy_user='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5', proxy_pass=account_data['extra'])
+    proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'  # noyon
+    b = browser(account_id, packages_id, proxy_company='proxyhorse', proxy_country="UnitedStates",
+                proxy_user=proxyhorse_pass, proxy_pass=account_data['extra'])
     time.sleep(5)
     if b.PROXY_PASS == False:
         b.exit()
         print('proxy condition not fulfilled')
         worker_acc.ban_3(account_id, 5)
         time.sleep(10)
-        
 
     try:
         b.get_url(account_data['email'])
@@ -103,6 +104,11 @@ if sys.platform not in ['Windows', 'win32', 'cygwin']:
 # x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
 # x.start()
 while True:
+
+    # subprocess.call(["sudo", "ifconfig", "ens33", "down"])
+    # subprocess.call(["sudo", "ifconfig", "ens33", "hw",
+    #                 "ether", "00:11:22:33:44:55"])
+    # subprocess.call(["sudo", "ifconfig", "ens33", "up"])
     utility.network_check()
     if setup.token_off():
         print('software off now but reply checking runing')

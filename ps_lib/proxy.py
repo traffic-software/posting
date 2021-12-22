@@ -39,17 +39,18 @@ class ps_proxy:
     def proxy_payload(self, token=False, type=None, country=True, state=True, city=True, asn=True):
         d = {}
         if country:
-            d["country"] = str(self.country)
+            d["country"] = str(self.country).upper()
         if state:
-            d["state"] = str(self.state)
+            d["state"] = str(self.state).upper()
         if city:
-            d["city"] = str(self.city)
+            d["city"] = str(self.city).title()
         if asn:
             d["asn"] = str(self.asn)
         if token:
             d['token'] = token
         if type == 0:
             d = {}
+
         return d
 
     def proxysoax(self, location):
@@ -58,24 +59,23 @@ class ps_proxy:
         self.city = proxy_loction[1].lower()
         check_city = self.get_soax_city(self.city)
         print(check_city)
-
         if not check_city:
             print(self.city, "city not available")
             return False
         else:
             returndata = False
-            p = "wifi;us;;;{};".format(check_city)
+            p = "wifi;us;;;{};".format(check_city.replace(' ', '+'))
             proxy = {}
             proxy['login'] = self.package_key
             proxy['password'] = p
             proxy['ip'] = "proxy.soax.com"
-            proxy['port'] = 9000
+            proxy['port'] = random.randrange(9000, 9299)
             if False == self.proxy_check(data=proxy):
                 print("proxy not have in city try to new city")
 
                 allcitys = self.get_soax_city_by_state(self.get_soax_state())
                 for city in allcitys:
-                    p = "wifi;us;;;{};".format(city)
+                    p = "wifi;us;;;{};".format(city.replace(' ', '+'))
                     proxy['password'] = p
                     if self.proxy_check(data=proxy):
                         returndata = p
@@ -142,7 +142,7 @@ class ps_proxy:
         r = requests.request("POST", url, headers=self.proxy_headers(
         ), data=json.dumps(self.proxy_payload()))
         d = json.loads(r.text.encode('utf8'))
-        print(d)
+
         self.t.proxyhorse_save(token=d['data']['token'])
         print("new_connection set location")
         proxy = d['data']
@@ -162,8 +162,11 @@ class ps_proxy:
     def change(self, token):
         url = "https://api.proxyhorse.com/client/changeconnection.php"
 
+        payload = self.proxy_payload(token=token)
+        print('change payload', payload)
+
         r = requests.post(url, headers=self.proxy_headers(),
-                          data=json.dumps(self.proxy_payload(token)))
+                          data=json.dumps(payload))
         d = json.loads(r.text.encode('utf8'))
         print("Change location")
         proxy = self.get_connecton(token=token)
@@ -176,16 +179,16 @@ class ps_proxy:
             if self.pva_id == None:
                 proxy = False
             else:
-                self.pva.ban_3(self.pva_id, status=4)
-                time.sleep(30)
-                exit()
+                self.pva.ban_3(self.pva_id, status=5)
 
         return proxy
 
     def delete(self, token):
         url = "https://api.proxyhorse.com/client/deleteconnection.php"
+        payload = self.proxy_payload(token=token)
+        print('delete payload', payload)
         r = requests.delete(url, headers=self.proxy_headers(),
-                            data=json.dumps(self.proxy_payload(token)))
+                            data=json.dumps(payload))
 
     def get_connecton(self, token=False):
         d = False
@@ -194,8 +197,10 @@ class ps_proxy:
 
         if token:
             url = "https://api.proxyhorse.com/client/getconnections.php"
+            payload = self.proxy_payload(type=0)
+            print('get_connecton payload', payload)
             response = requests.get(url, headers=self.proxy_headers(
-            ), data=json.dumps(self.proxy_payload(type=0)))
+            ), data=json.dumps(payload))
             t = json.loads(response.text.encode('utf8'))
             for i in t['data']:
                 if token == i['token']:
@@ -206,21 +211,27 @@ class ps_proxy:
 
     def set_city(self, city):
         url = "https://api.proxyhorse.com/client/getlocations.php"
+        payload = self.proxy_payload(city=False, asn=False)
+        print('set_city payload', payload)
         response = requests.get(url, headers=self.proxy_headers(
-        ), data=json.dumps(self.proxy_payload(city=False, asn=False)))
+        ), data=json.dumps(payload))
         t = json.loads(response.text.encode('utf8'))
         ip = t['data']
+
         ct = True
         try:
             for c in ip:
-                if city == c['city_name']:
-                    self.city = c['city_name']
+                if city.title() == c['city_name'].title():
+                    self.city = c['city_name'].title()
+                    print('city find ', self.city)
+
                     ct = False
                     break
 
             if ct and len(ip):
                 one_city = random.choice(ip)
-                self.city = one_city['city_name']
+                self.city = one_city['city_name'].title()
+                print('rendom city ', self.city)
             else:
                 self.city = ""
         except:
@@ -231,8 +242,10 @@ class ps_proxy:
 
     def get_ip(self, token=False):
         url = "https://api.proxyhorse.com/client/getconnectionip.php"
+        payload = self.proxy_payload(token=token)
+        print('get_ip payload', payload)
         response = requests.post(url, headers=self.proxy_headers(
-        ), data=json.dumps(self.proxy_payload(token=token)))
+        ), data=json.dumps(payload))
         t = json.loads(response.text.encode('utf8'))
         ip = t['data']
 
@@ -257,7 +270,8 @@ class ps_proxy:
                 self.city = ""
                 return False
             ip = json.loads(r.text)
-            # print(ip)
+            print('proxy_check', self.city, self.state)
+            print(ip)
 
             if "United States".lower() in ip['country'].lower() and self.state.lower() == ip['region'].lower():
                 print("country:", ip['country'], "sate:",
@@ -266,6 +280,7 @@ class ps_proxy:
                 return True
             else:
                 self.city = ""
+
                 return False
         except Exception as e:
             print(e)

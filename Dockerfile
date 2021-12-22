@@ -20,6 +20,9 @@ RUN service ssh start
 #install text editor
 RUN apt-get install nano -y
 #install python and python module
+#sudo apt-get install xvfb
+#whereis chromedriver
+#sudo apt-get install chromium-chromedriver
 RUN apt-get install python3 -y
 RUN sudo apt install python3-pip -y
 RUN python3 -m pip install selenium
