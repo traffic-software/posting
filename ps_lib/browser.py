@@ -54,6 +54,8 @@ class browser:
             self.packages_id = packages_id
             self.PROXY_USER = proxy_user  # username
             self.PROXY_PASS = proxy_pass  # password
+            self.PROXY_HOST = "proxy.com"
+            self.PROXY_PORT = 80
 
             # ............Normal rotating proxy......................
             self.PROXY = self.proxy()
@@ -100,89 +102,87 @@ class browser:
             print("browser close")
 
     def proxy(self):
-        while True:
-            try:
-
-                if self.proxy_company == "packetstream":
-                    self.PROXY_HOST = "proxy.packetstream.io"
-                    self.PROXY_PORT = 31112
-                    proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
+        try:
+            if self.proxy_company == "packetstream":
+                self.PROXY_HOST = "proxy.packetstream.io"
+                self.PROXY_PORT = 31112
+                proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
                 # ............https://dashboard.soax.com/......................
-                if self.proxy_company == "soax":
-                    self.PROXY_HOST = "proxy.soax.com"
-                    self.PROXY_PORT = random.randrange(9000, 9299)
-                    proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
-                    psproxy = ps_proxy(company="soax", key=self.PROXY_USER)
-                    self.PROXY_PASS = psproxy.proxysoax(self.PROXY_PASS)
-                    if self.PROXY_PASS:
-                        d = self.PROXY_USER.split("-")
-                        self.PROXY_USER = d[1]
-                    else:
-                        break
-                # ............rsocks.net......................
-                if self.proxy_company == "rsocks":
+            if self.proxy_company == "soax":
+                self.PROXY_HOST = "proxy.soax.com"
+                self.PROXY_PORT = random.randrange(9000, 9299)
+                proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
+                psproxy = ps_proxy(company="soax", key=self.PROXY_USER)
+                self.PROXY_PASS = psproxy.proxysoax(self.PROXY_PASS)
+                if self.PROXY_PASS:
+                    d = self.PROXY_USER.split("-")
+                    self.PROXY_USER = d[1]
 
-                    headers = {
-                        'X-Auth-ID': '107841',
-                        'X-Auth-Key': '3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
-                    }
-                    resp = requests.post(
-                        'https://rsocks.net/api/v1/file/get-proxy', headers=headers, timeout=1)
+            # ............rsocks.net......................
+            if self.proxy_company == "rsocks":
 
-                    data = json.loads(resp.text)
+                headers = {
+                    'X-Auth-ID': '107841',
+                    'X-Auth-Key': '3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
+                }
+                resp = requests.post(
+                    'https://rsocks.net/api/v1/file/get-proxy', headers=headers, timeout=1)
 
-                    # data = random.choice(data['packages'])
-                    print(data['packages'])
-                    # proxy = rendomip=random.choice(data['ips'])
-                    data = data['packages'][self.packages_id]['ips']
+                data = json.loads(resp.text)
 
-                    proxy = rendomip = random.choice(data)
+                # data = random.choice(data['packages'])
+                print(data['packages'])
+                # proxy = rendomip=random.choice(data['ips'])
+                data = data['packages'][self.packages_id]['ips']
+
+                proxy = rendomip = random.choice(data)
                 # ............proxyhorse.com......................
 
-                if self.proxy_company == "proxyhorse":
-                    psproxy = ps_proxy(company="proxyhorse",
-                                       key=self.PROXY_USER)
+            if self.proxy_company == "proxyhorse":
 
-                    pva_id = None
-                    if self.other_city == None:
-                        pva_id = self.account_id
-                    proxy = psproxy.proxyhorse(self.PROXY_PASS, pva_id=pva_id)
-                    if not proxy:
-                        self.PROXY_PASS = False
-                        break
+                psproxy = ps_proxy(company="proxyhorse",
+                                   key=self.PROXY_USER)
+
+                pva_id = None
+                if self.other_city == None:
+                    pva_id = self.account_id
+                proxy = psproxy.proxyhorse(
+                    location=self.PROXY_PASS, pva_id=pva_id)
+                self.PROXY_PASS = False
+                print(proxy)
+
+                if proxy:
 
                     self.PROXY_HOST = proxy['ip']
                     self.PROXY_PORT = proxy['port']
                     self.PROXY_USER = proxy['login']
                     self.PROXY_PASS = proxy['password']
-                    proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
+                proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
 
                 # .............proxyrotator.com................
 
-                if self.proxy_company == "proxyrotator":
-                    url = 'http://falcon.proxyrotator.com:51337'
-                    params = dict(
-                        apiKey='TX2DLoKZVd6peF8fuJ59wqsyQgc4CGnv',
-                        userAgent='true',
-                        country=self.proxy_country,
-                        get='true',
-                        connectionType='Residential'
-                    )
-                    resp = requests.get(url, params=params, timeout=3)
+            if self.proxy_company == "proxyrotator":
+                url = 'http://falcon.proxyrotator.com:51337'
+                params = dict(
+                    apiKey='TX2DLoKZVd6peF8fuJ59wqsyQgc4CGnv',
+                    userAgent='true',
+                    country=self.proxy_country,
+                    get='true',
+                    connectionType='Residential'
+                )
+                resp = requests.get(url, params=params, timeout=3)
 
-                    data = json.loads(resp.text)
-                    proxy = data['proxy']
+                data = json.loads(resp.text)
+                proxy = data['proxy']
 
                 # .............pubproxy.com......................
                 # url = 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT'
 
-            except (requests.ConnectionError, requests.Timeout) as exception:
-                print('plz check your internet connection')
-                continue
+        except (requests.ConnectionError, requests.Timeout) as exception:
+            print('plz check your internet connection')
 
-            print(proxy)
-            if self.proxy_check(proxy):
-                break
+        print(proxy)
+
         return proxy
 
     def proxy_check(self, data):

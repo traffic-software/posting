@@ -39,7 +39,9 @@ RUN python3 -m pip install fake-useragent
 
 RUN apt-get install -y net-tools 
 ADD . /mydir/
+RUN sudo rm /mydir/ps_lib/databases.db
 # prossess meneger
+
 
 RUN sudo apt-get install -y supervisor
 # RUN touch /mydir/worker.log

@@ -41,9 +41,11 @@ class ps_proxy:
         if country:
             d["country"] = str(self.country).upper()
         if state:
-            d["state"] = str(self.state).upper()
+            s = str(self.state)
+            d["state"] = s.upper()
         if city:
-            d["city"] = str(self.city).title()
+            c = str(self.city)
+            d["city"] = c.title()
         if asn:
             d["asn"] = str(self.asn)
         if token:
@@ -121,11 +123,11 @@ class ps_proxy:
                 break
         return n
 
-    def proxyhorse(self, location, pva_id=None):
+    def proxyhorse(self, location="any-any", pva_id=None):
         proxy_loction = location.split("-")
         self.state = proxy_loction[0]
         self.city = proxy_loction[1]
-        self.set_city(proxy_loction[1])
+        # self.set_city(proxy_loction[1])
         self.pva_id = pva_id
 
         token = self.t.proxyhorse_get()
@@ -148,14 +150,6 @@ class ps_proxy:
         proxy = d['data']
         self.get_ip(proxy['token'])
 
-        if False == self.proxy_check(d['data']):
-            print("post city probolem")
-            if self.pva_id == None:
-                proxy = False
-            else:
-                time.sleep(30)
-                exit()
-
         return proxy
     # retun proxy info
 
@@ -168,18 +162,11 @@ class ps_proxy:
         r = requests.post(url, headers=self.proxy_headers(),
                           data=json.dumps(payload))
         d = json.loads(r.text.encode('utf8'))
+        print(d)
         print("Change location")
         proxy = self.get_connecton(token=token)
 
         self.get_ip(proxy['token'])
-
-        if False == self.proxy_check(proxy):
-            print("post city probolem")
-
-            if self.pva_id == None:
-                proxy = False
-            else:
-                self.pva.ban_3(self.pva_id, status=5)
 
         return proxy
 
@@ -197,16 +184,18 @@ class ps_proxy:
 
         if token:
             url = "https://api.proxyhorse.com/client/getconnections.php"
-            payload = self.proxy_payload(type=0)
+            payload = {'token': token}
             print('get_connecton payload', payload)
             response = requests.get(url, headers=self.proxy_headers(
             ), data=json.dumps(payload))
             t = json.loads(response.text.encode('utf8'))
+
             for i in t['data']:
                 if token == i['token']:
 
                     d = i
                     break
+
         return d
 
     def set_city(self, city):
@@ -217,36 +206,39 @@ class ps_proxy:
         ), data=json.dumps(payload))
         t = json.loads(response.text.encode('utf8'))
         ip = t['data']
+        print(ip)
 
         ct = True
         try:
             for c in ip:
-                if city.title() == c['city_name'].title():
+
+                if (city.title() == c['city_name'].title()):
                     self.city = c['city_name'].title()
                     print('city find ', self.city)
 
                     ct = False
                     break
 
-            if ct and len(ip):
+            if ct:
+
                 one_city = random.choice(ip)
                 self.city = one_city['city_name'].title()
                 print('rendom city ', self.city)
-            else:
-                self.city = ""
+
         except:
             self.city = ""
             print('city problem')
-
+        print(self.city)
         return self.city
 
     def get_ip(self, token=False):
         url = "https://api.proxyhorse.com/client/getconnectionip.php"
-        payload = self.proxy_payload(token=token)
+        payload = {'token': token}
         print('get_ip payload', payload)
         response = requests.post(url, headers=self.proxy_headers(
         ), data=json.dumps(payload))
         t = json.loads(response.text.encode('utf8'))
+        print(t)
         ip = t['data']
 
         if "United States" == ip['country'] and self.city == ip['city']:

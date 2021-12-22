@@ -97,7 +97,6 @@ class table:
         r = requests.get(url,params=params)
         if "error" in r.json():
             print("token error")
-            exit()
         
             
         return True
