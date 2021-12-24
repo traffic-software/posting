@@ -24,10 +24,14 @@ docker ps
 
 sudo su 
 cd ../mydir/
+python3 -c "import os; print(os.environ['PS_KEY'])"
 python3 bk.py
 reboot
 shutdown -h 0
+docker run --rm -d -it --memory="300m" malaknoyn/clf
+docker exec -it id /bin/bash
 docker container start id
+docker container restart $(docker ps -a -q)
 docker container stop worker-4
 docker container rm worker-4
 docker container rm -f $(docker ps -a -q)
@@ -35,7 +39,42 @@ docker image rm -f $(docker images -a -q)
 docker load -i bk.tar
 
 
+........setup clf in container start..........
+sudo apt-get update
+sudo apt-get install \
+  ca-certificates \
+  curl \
+  gnupg \
+  lsb-release
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io -y
+docker images
+sudo docker info
+sudo nano /etc/default/grub
+#GRUB_CMDLINE_LINUX="cdgroup_enable=memory swapaccount=1"
+sudo update-grub
 
+
+reboot
+docker login
+docker pull malaknoyn/clf
+.......upload monitor software to server root folder.........
+
+cat monitor.py
+sudo apt-get install supervisor
+
+cp monitor.conf /etc/supervisor/conf.d/
+ls -l /etc/supervisor/conf.d/
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl restart all
+sudo supervisorctl stop all
+docker ps -a
+........setup clf in container end..........
 
 {'body': 'd','from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'pellel83@libero.it'}
 {'body': 's', 'from_mail': 'replyad@bakecaincontrii.com', 'sub': 'Risposta al tuo annuncio', 'Reply_To':'maxdiva23@gmail.com'}
