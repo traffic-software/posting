@@ -59,67 +59,31 @@ class ps_proxy:
         proxy_loction = location.split("-")
         self.state = proxy_loction[0].upper()
         self.city = proxy_loction[1].lower()
-        check_city = self.get_soax_city(self.city)
-        print(check_city)
-        if not check_city:
-            print(self.city, "city not available")
-            return False
-        else:
-            returndata = False
-            p = "wifi;us;;;{};".format(check_city.replace(' ', '+'))
-            proxy = {}
-            proxy['login'] = self.package_key
-            proxy['password'] = p
-            proxy['ip'] = "proxy.soax.com"
-            proxy['port'] = random.randrange(9000, 9299)
-            if False == self.proxy_check(data=proxy):
-                print("proxy not have in city try to new city")
-
-                allcitys = self.get_soax_city_by_state(self.get_soax_state())
-                for city in allcitys:
-                    p = "wifi;us;;;{};".format(city.replace(' ', '+'))
-                    proxy['password'] = p
-                    if self.proxy_check(data=proxy):
-                        returndata = p
-                        break
-
-            else:
-                returndata = p
-
+        returndata = False
+        p = "wifi;us;;;{};".format(self.city.replace(' ', '+'))
+        proxy = {}
+        proxy['login'] = self.package_key
+        proxy['password'] = p
+        proxy['ip'] = "proxy.soax.com"
+        proxy['port'] = random.randrange(9000, 9299)
+        if self.proxy_city_check(data=proxy, city=self.city):
+            returndata = proxy
             return returndata
 
-    def get_soax_city(self, city):
-        d = False
-        url = "https://soax.com/api/get-country-cities?api_key={0}&package_key={1}&country_iso=us&conn_type=wifi".format(
-            self.api_key, self.package_key)
-        response = requests.get(url, headers=self.proxy_headers(
-        ), data=json.dumps(self.proxy_payload(type=0)))
-        t = json.loads(response.text.encode('utf8'))
+        state = self.get_soax_state()
+        p = "wifi;us;;{};;".format(state.replace(' ', '+'))
+        proxy['password'] = p
+        if self.proxy_check(data=proxy):
+            returndata = proxy
 
-        for i in t:
-
-            if city == i:
-                print(city, i)
-                d = i
-                break
-        return d
-
-    def get_soax_city_by_state(self, state):
-        url = "https://soax.com/api/get-country-cities?api_key={0}&package_key={1}&country_iso=us&conn_type=wifi&region={2}".format(
-            self.api_key, self.package_key, state.lower())
-
-        response = requests.get(url, headers=self.proxy_headers(
-        ), data=json.dumps(self.proxy_payload(type=0)))
-        t = json.loads(response.text.encode('utf8'))
-
-        return t
+        return returndata
 
     def get_soax_state(self):
         n = None
         for i in s:
 
-            if self.state == i['av']:
-                n = i['name']
+            if self.state.upper() == i['av'].upper():
+                n = i['name'].lower()
                 break
         return n
 
@@ -262,10 +226,37 @@ class ps_proxy:
                 self.city = ""
                 return False
             ip = json.loads(r.text)
-            print('proxy_check', self.city, self.state)
-            print(ip)
+            print('proxy_check', self.state)
 
             if "United States".lower() in ip['country'].lower() and self.state.lower() == ip['region'].lower():
+                print("country:", ip['country'], "sate:",
+                      ip['region'], "city:", ip['city'])
+
+                return True
+            else:
+                self.city = ""
+
+                return False
+        except Exception as e:
+            print(e)
+            return False
+
+    def proxy_city_check(self, data, city):
+        try:
+            d = "{}:{}@{}:{}".format(data['login'],
+                                     data['password'], data['ip'], data['port'])
+            proxie = {"http": "http://"+d, "https": "http://"+d}
+            url = "http://ip-api.com/json"
+            r = requests.get(url, timeout=10, proxies=proxie)
+
+            if 'request_uuid' in r.text:
+                print(r.text)
+                self.city = ""
+                return False
+            ip = json.loads(r.text)
+            print('proxy_check city ', self.city)
+
+            if "United States".lower() in ip['country'].lower() and city.lower() == ip['city'].lower():
                 print("country:", ip['country'], "sate:",
                       ip['region'], "city:", ip['city'])
 

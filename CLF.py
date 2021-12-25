@@ -42,16 +42,20 @@ def main(account_data, postinfo, packages_id, body_mail):
     account_id = account_data['id']
     worker_acc = accounts()
 
-    # b = browser(account_id, packages_id, proxy_company='soax', proxy_country="UnitedStates",
-    # proxy_user='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5', proxy_pass=account_data['extra'])
+    b = browser(account_id, packages_id, proxy_company='soax', proxy_country="UnitedStates",
+                proxy_user='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5', proxy_pass=account_data['extra'])
     proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'  # noyon
-    b = browser(account_id, packages_id, proxy_company='proxyhorse', proxy_country="UnitedStates",
-                proxy_user=proxyhorse_pass, proxy_pass=account_data['extra'])
+    # b = browser(account_id, packages_id, proxy_company='proxyhorse', proxy_country="UnitedStates",
+    #             proxy_user=proxyhorse_pass, proxy_pass=account_data['extra'])
+    # p_pass = "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s" % (
+    #     ''.join(random.choice(string.ascii_letters) for i in range(10)))
+    # b = browser(account_id, packages_id, proxy_company='packetstream',
+    #             proxy_country="UnitedStates", proxy_user='malaknoyn', proxy_pass=p_pass)
     time.sleep(5)
     if b.PROXY_PASS == False:
         b.exit()
         print('proxy condition not fulfilled')
-        worker_acc.ban_3(account_id, 5)
+        # worker_acc.ban_3(account_id, 5)
         time.sleep(10)
 
     try:
@@ -68,8 +72,8 @@ def main(account_data, postinfo, packages_id, body_mail):
             '//*[@class="flag-action action"]', 'flag button')
 
         nextpage.click()
-        b.driver.implicitly_wait
-        worker_acc.post_error(account_id, "flag action try")
+
+        worker_acc.post_error(account_id, "flag action try",software_type='clf')
         #title="thanks for flagging!"
         b.wait('//*[@title="thanks for flagging!"]')
         time.sleep(2)

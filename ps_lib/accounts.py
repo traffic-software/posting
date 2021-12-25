@@ -22,6 +22,7 @@ class accounts:
         r = requests.get(url)
         if "error" in r.json():
             print("error", r.json()['message'])
+            return None
         return r.json()["data"]
 
     def get_account_for_lead_find(self):
@@ -31,6 +32,7 @@ class accounts:
         r = requests.get(url)
         if "error" in r.json():
             print("error", r.json()['message'])
+            return None
         return r.json()["data"]
 
     def get_formated_data(self, headers, data):
@@ -48,6 +50,7 @@ class accounts:
         r = requests.get(url, params=params)
         if "error" in r.json():
             print("error", r.json()['message'])
+            return None
 
         return r.json()
 
@@ -59,6 +62,7 @@ class accounts:
         r = requests.get(url, params=params)
         if "error" in r.json():
             print("error", r.json()['message'])
+            return None
         return r.json()
 
     def post_log(self, id, messasge='post log'):
@@ -69,14 +73,16 @@ class accounts:
         r = requests.get(url, params=params)
         if "error" in r.json():
             print("error", r.json()['message'])
+            return None
         return r.json()
 
-    def post_error(self, id, message="default messge"):
+    def post_error(self, id, message="default messge",software_type='clf'):
         url = 'https://{host}/api/v1/post/account/posterror/{token}/{id}'.format(
             host=self.software.host_verify(), token=self.software.software_token(), id=id)
 
-        params = {'data': message}
+        params = {'data': message,'software_type':software_type}
         r = requests.get(url, params=params)
         if "error" in r.json():
             print("error", r.json()['message'])
+            return None
         return r.json()

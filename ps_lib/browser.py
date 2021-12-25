@@ -101,6 +101,9 @@ class browser:
         except:
             print("browser close")
 
+    def __del__(self):
+        self.exit()
+
     def proxy(self):
         try:
             if self.proxy_company == "packetstream":
@@ -109,14 +112,19 @@ class browser:
                 proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
                 # ............https://dashboard.soax.com/......................
             if self.proxy_company == "soax":
-                self.PROXY_HOST = "proxy.soax.com"
-                self.PROXY_PORT = random.randrange(9000, 9299)
-                proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
+
                 psproxy = ps_proxy(company="soax", key=self.PROXY_USER)
-                self.PROXY_PASS = psproxy.proxysoax(self.PROXY_PASS)
-                if self.PROXY_PASS:
-                    d = self.PROXY_USER.split("-")
-                    self.PROXY_USER = d[1]
+                soax = psproxy.proxysoax(self.PROXY_PASS)
+                if soax:
+
+                    self.PROXY_USER = soax['login']
+                    self.PROXY_PASS = soax['password']
+                    self.PROXY_HOST = soax['ip']
+                    self.PROXY_PORT = soax['port']
+                    proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
+                else:
+                    self.PROXY_PASS = False
+                    proxy = "%s:%s" % ("proxy.soax.com", 9000)
 
             # ............rsocks.net......................
             if self.proxy_company == "rsocks":
@@ -149,7 +157,6 @@ class browser:
                 proxy = psproxy.proxyhorse(
                     location=self.PROXY_PASS, pva_id=pva_id)
                 self.PROXY_PASS = False
-                print(proxy)
 
                 if proxy:
 
@@ -180,8 +187,6 @@ class browser:
 
         except (requests.ConnectionError, requests.Timeout) as exception:
             print('plz check your internet connection')
-
-        print(proxy)
 
         return proxy
 
@@ -226,6 +231,7 @@ class browser:
 
     def proxy_save(self, px, p):
         try:
+            print(p)
 
             self.proxy_city = p["city"]
             self.proxy_region = p['regionName']
@@ -307,8 +313,6 @@ class browser:
                 print("waiting for : ", mesasage)
                 if type == 2 and co == 1:
                     self.refresh()
-
-                self.driver.implicitly_wait(1)
         if element == False:
 
             print("element not find : ", mesasage)
@@ -316,7 +320,6 @@ class browser:
                 mesasage = mesasage + self.check_error(valu)
             self.account.post_error(self.account_id, message=mesasage)
             self.exit()
-            exit()
         return element
 
     def try_xpath(self, selector, mesasage="genarl work"):
@@ -412,7 +415,6 @@ class browser:
         except:
             self.exit()
             print("get url", url)
-        return self.driver.title
 
     def page_source(self):
         try:
@@ -505,9 +507,12 @@ class browser:
         return self.driver.current_url
 
     def wait(self, x):
-
-        wait = WebDriverWait(self.driver, 10)
-        return wait.until(EC.element_to_be_clickable((By.XPATH, x)))
+        try:
+            wait = WebDriverWait(self.driver, 10)
+            return wait.until(EC.element_to_be_clickable((By.XPATH, x)))
+        except:
+            self.exit()
+            print("wait")
 
     def link_save(self, link):
         with open('links.txt', 'a') as file:
@@ -524,7 +529,6 @@ class browser:
             self.account.post_error(self.account_id, message=message)
             self.exit()
             print('error: ', message, e)
-            exit()
 
     # proxy plugin
 

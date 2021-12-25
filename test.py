@@ -1,101 +1,274 @@
-# from selenium import webdriver
 
-# options = webdriver.ChromeOptions()
-# options.add_experimental_option("useAutomationExtension", False)
-# options.add_experimental_option("excludeSwitches",["enable-automation"])
-
-# driver_path = 'chromedriver.exe'
-# driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
-# driver.get('https://google.com')
-
-# driver.close()
-# from os import path
-
-# bundle_dir = path.abspath(path.dirname(__file__))
-# from pynput.mouse import Button, Controller
-import requests,json
-# p_pass= "wifi;us;;;{};".format("ft.+washington")
-# data  = "uyMDe7ALdLkpJmm5:"+p_pass+"@proxy.soax.com:9000"
-
-# proxie = {"http": "http://"+data,"https": "http://"+data}
-# url = 'https://soax.com/api/get-country-cities?api_key=HzoxSzpE1Y_zJf5Y&package_key=uyMDe7ALdLkpJmm5&country_iso=us&conn_type=wifi&region=nevada'
-# # https://soax.com/api/get-country-cities?api_key=<api_key>&package_key=<package_key>&country_iso=<country_iso>&conn_type=<conn_type>[&provider=<provider_name>[&region=<region_name>]]
-# timeout = 10
-# proxy_payload ={
-#     'api_key':'HzoxSzpE1Y_zJf5Y',
-#     'package_key':'uyMDe7ALdLkpJmm5',
-#     'country_iso':'us',
-#     'conn_type':'wifi'
-# }
-# r = requests.get(url, timeout=timeout,data=proxy_payload)
-# # r = requests.get(url, timeout=timeout)
-# print(r.text)
-
-
-from ps_lib.proxy import ps_proxy
-url = "https://api.proxyhorse.com/client/getconnections.php"
-
-payload = {}
-headers = {
-  'Authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'
-}
-
-response = requests.request("GET", url, headers=headers, data = payload)
-d = json.loads(response.text.encode('utf8'))
-print(d)
-
-for i in d['data']:
-    url = "https://api.proxyhorse.com/client/deleteconnection.php"
-
-    payload = {"token": "{}".format(i['token'])}
-    headers = {
-    'authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a',
-    'Content-Type': 'application/json'
-    }
-
-    response = requests.request("DELETE", url, headers=headers, data = json.dumps(payload))
-# psproxy = ps_proxy(company="proxyhorse",key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
-					
-# proxy = psproxy.proxyhorse('NC-Chinquapin')
-
-
-# post = post()
-# print(post.get_post())
-# account = accounts()
-# print(account.get_account())
-import string
+from datetime import date
+import json
+from re import T
 import random
+import requests
+from requests import exceptions
+from requests.exceptions import ProxyError
+from ps_lib.ps_setup import table
+from ps_lib.accounts import accounts
+from ps_lib.loction import s
+import os
+import time
 
 
-# ## characters to generate password from
-# characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
+class ps_proxy:
+    def __init__(self, company, key):
+        self.t = table()
+        self.pva = accounts()
+        self.company = company
+        self.country = "US"
+        self.state = ""
+        self.city = ""
+        self.asn = ""
+        self.pva_id = None
 
-# def generate_random_password():
-# 	## length of password from the user
-# 	length = int(15)
+        if self.company == "proxyhorse":
 
-# 	## shuffling the characters
-# 	random.shuffle(characters)
-	
-# 	## picking random characters from the list
-# 	password = []
-# 	for i in range(length):
-# 		password.append(random.choice(characters))
+            self.api_key = key
+        if self.company == "soax":
+            k = key.split("-")
 
-# 	## shuffling the resultant password
-# 	random.shuffle(password)
+            self.api_key = k[0]
+            self.package_key = k[1]
 
-# 	## converting the list to string
-# 	## printing the list
-# 	return "".join(password)
+    def proxy_headers(self):
+        return {'authorization': self.api_key, 'Content-Type': 'application/json'}
+
+    def proxy_payload(self, token=False, type=None, country=True, state=True, city=True, asn=True):
+        d = {}
+        if country:
+            d["country"] = str(self.country).upper()
+        if state:
+            s = str(self.state)
+            d["state"] = s.upper()
+        if city:
+            c = str(self.city)
+            d["city"] = c.title()
+        if asn:
+            d["asn"] = str(self.asn)
+        if token:
+            d['token'] = token
+        if type == 0:
+            d = {}
+
+        return d
+
+    def proxysoax(self, location):
+        proxy_loction = location.split("-")
+        self.state = proxy_loction[0].upper()
+        self.city = proxy_loction[1].lower()
+        returndata = False
+        p = "wifi;us;;;{};".format(self.city.replace(' ', '+'))
+        proxy = {}
+        proxy['login'] = self.package_key
+        proxy['password'] = p
+        proxy['ip'] = "proxy.soax.com"
+        proxy['port'] = random.randrange(9000, 9299)
+        if self.proxy_city_check(data=proxy, city=self.city):
+            returndata = proxy
+
+        state = self.get_soax_state()
+        p = "wifi;us;;{};;".format(state.replace(' ', '+'))
+        proxy['password'] = p
+        if self.proxy_check(data=proxy):
+            returndata = proxy
+
+        return returndata
+
+    def get_soax_state(self):
+        n = None
+        for i in s:
+
+            if self.state.upper() == i['av'].upper():
+                n = i['name'].lower()
+                break
+        return n
+
+    def proxyhorse(self, location="any-any", pva_id=None):
+        proxy_loction = location.split("-")
+        self.state = proxy_loction[0]
+        self.city = proxy_loction[1]
+        # self.set_city(proxy_loction[1])
+        self.pva_id = pva_id
+
+        token = self.t.proxyhorse_get()
+
+        if token:
+            new_proxy = self.change(token=token)
+        else:
+            new_proxy = self.new_connection()
+        return new_proxy
+
+    def new_connection(self):
+        # new connection
+        url = "https://api.proxyhorse.com/client/createconnection.php"
+        r = requests.request("POST", url, headers=self.proxy_headers(
+        ), data=json.dumps(self.proxy_payload()))
+        d = json.loads(r.text.encode('utf8'))
+
+        self.t.proxyhorse_save(token=d['data']['token'])
+        print("new_connection set location")
+        proxy = d['data']
+        self.get_ip(proxy['token'])
+
+        return proxy
+    # retun proxy info
+
+    def change(self, token):
+        url = "https://api.proxyhorse.com/client/changeconnection.php"
+
+        payload = self.proxy_payload(token=token)
+        print('change payload', payload)
+
+        r = requests.post(url, headers=self.proxy_headers(),
+                          data=json.dumps(payload))
+        d = json.loads(r.text.encode('utf8'))
+        print(d)
+        print("Change location")
+        proxy = self.get_connecton(token=token)
+
+        self.get_ip(proxy['token'])
+
+        return proxy
+
+    def delete(self, token):
+        url = "https://api.proxyhorse.com/client/deleteconnection.php"
+        payload = self.proxy_payload(token=token)
+        print('delete payload', payload)
+        r = requests.delete(url, headers=self.proxy_headers(),
+                            data=json.dumps(payload))
+
+    def get_connecton(self, token=False):
+        d = False
+        if token == False:
+            token = self.t.proxyhorse_get()
+
+        if token:
+            url = "https://api.proxyhorse.com/client/getconnections.php"
+            payload = {'token': token}
+            print('get_connecton payload', payload)
+            response = requests.get(url, headers=self.proxy_headers(
+            ), data=json.dumps(payload))
+            t = json.loads(response.text.encode('utf8'))
+
+            for i in t['data']:
+                if token == i['token']:
+
+                    d = i
+                    break
+
+        return d
+
+    def set_city(self, city):
+        url = "https://api.proxyhorse.com/client/getlocations.php"
+        payload = self.proxy_payload(city=False, asn=False)
+        print('set_city payload', payload)
+        response = requests.get(url, headers=self.proxy_headers(
+        ), data=json.dumps(payload))
+        t = json.loads(response.text.encode('utf8'))
+        ip = t['data']
+        print(ip)
+
+        ct = True
+        try:
+            for c in ip:
+
+                if (city.title() == c['city_name'].title()):
+                    self.city = c['city_name'].title()
+                    print('city find ', self.city)
+
+                    ct = False
+                    break
+
+            if ct:
+
+                one_city = random.choice(ip)
+                self.city = one_city['city_name'].title()
+                print('rendom city ', self.city)
+
+        except:
+            self.city = ""
+            print('city problem')
+        print(self.city)
+        return self.city
+
+    def get_ip(self, token=False):
+        url = "https://api.proxyhorse.com/client/getconnectionip.php"
+        payload = {'token': token}
+        print('get_ip payload', payload)
+        response = requests.post(url, headers=self.proxy_headers(
+        ), data=json.dumps(payload))
+        t = json.loads(response.text.encode('utf8'))
+        print(t)
+        ip = t['data']
+
+        if "United States" == ip['country'] and self.city == ip['city']:
+            print("country:", ip['country'], "sate:",
+                  ip['state'], "city:", ip['city'])
+            return True
+        else:
+            self.city = ""
+            return False
+
+    def proxy_check(self, data):
+        try:
+            d = "{}:{}@{}:{}".format(data['login'],
+                                     data['password'], data['ip'], data['port'])
+            proxie = {"http": "http://"+d, "https": "http://"+d}
+            url = "http://ip-api.com/json"
+            r = requests.get(url, timeout=10, proxies=proxie)
+
+            if 'request_uuid' in r.text:
+                print(r.text)
+                self.city = ""
+                return False
+            ip = json.loads(r.text)
+            print('proxy_check', self.state)
+
+            if "United States".lower() in ip['country'].lower() and self.state.lower() == ip['region'].lower():
+                print("country:", ip['country'], "sate:",
+                      ip['region'], "city:", ip['city'])
+
+                return True
+            else:
+                self.city = ""
+
+                return False
+        except Exception as e:
+            print(e)
+            return False
+
+    def proxy_city_check(self, data, city):
+        try:
+            d = "{}:{}@{}:{}".format(data['login'],
+                                     data['password'], data['ip'], data['port'])
+            proxie = {"http": "http://"+d, "https": "http://"+d}
+            url = "http://ip-api.com/json"
+            r = requests.get(url, timeout=10, proxies=proxie)
+
+            if 'request_uuid' in r.text:
+                print(r.text)
+                self.city = ""
+                return False
+            ip = json.loads(r.text)
+            print('proxy_check city ', self.city)
+            print(ip)
+
+            if "United States".lower() in ip['country'].lower() and city.lower() == ip['city'].lower():
+                print("country:", ip['country'], "sate:",
+                      ip['region'], "city:", ip['city'])
+
+                return True
+            else:
+                self.city = ""
+
+                return False
+        except Exception as e:
+            print(e)
+            return False
 
 
-
-## invoking the function
-
-# for i in range(1,10000):
-#     print(generate_random_password())
-
-		
-
-	
+psproxy = ps_proxy(company="soax", key='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5')
+print(psproxy.proxysoax('NJ-Jersey Shore'))
