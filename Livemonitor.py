@@ -66,17 +66,17 @@ def main(account_data, postinfo, packages_id, body_mail):
     if b.try_xpath("//*[contains(text(),'posting has been flagged')]"):
         print('This posting has been flagged for removal')
         worker_acc.ban_3(account_id, status=3)
-    else:
+    time.sleep(10)
+    nextpage = b.select_element_xpath(
+        '//*[@class="bestof-link"]', 'bestof-link')
 
-        nextpage = b.select_element_xpath(
-            '//*[@class="flag-action action"]', 'flag button')
-
+    if nextpage:
         nextpage.click()
 
-        worker_acc.post_error(account_id, "flag action try",software_type='clf')
+        worker_acc.post_done(account_id, "bestof-link")
         #title="thanks for flagging!"
-        b.wait('//*[@title="thanks for flagging!"]')
-        time.sleep(2)
+        # b.wait('//*[@title="thanks for flagging!"]')
+    time.sleep(10)
 
     print('browser close')
     b.exit()
@@ -127,15 +127,6 @@ while True:
         time.sleep(60)
         continue
     print('account id : ', one_account['id'])
-    try:
-        error_count = int(one_account['error_count'])
-    except:
-        error_count = 0
-
-    if error_count >= 15:
-        acc.ban_3(one_account['id'], 5)
-        print('flaging try 15  done not flag')
-        continue
 
     if path.isdir('profiles/' + str(one_account['id'])) == True:
         shutil.rmtree('profiles/' + str(one_account['id']))

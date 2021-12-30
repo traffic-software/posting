@@ -412,9 +412,9 @@ class browser:
     def get_url(self, url):
         try:
             self.driver.get(url)
-        except:
+        except Exception as e:
             self.exit()
-            print("get url", url)
+            print("get url", e)
 
     def page_source(self):
         try:
