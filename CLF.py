@@ -41,10 +41,10 @@ def main(account_data, postinfo, packages_id, body_mail):
     # print(account_data)
     account_id = account_data['id']
     worker_acc = accounts()
-
+    proxyuser = os.environ['PS_PROXY_USER']
     b = browser(account_id, packages_id, proxy_company='soax', proxy_country="UnitedStates",
-                proxy_user='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5', proxy_pass=account_data['extra'])
-    proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'  # noyon
+                proxy_user=proxyuser, proxy_pass=account_data['extra'])
+    # proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'  # noyon
     # b = browser(account_id, packages_id, proxy_company='proxyhorse', proxy_country="UnitedStates",
     #             proxy_user=proxyhorse_pass, proxy_pass=account_data['extra'])
     # p_pass = "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s" % (
@@ -73,7 +73,8 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         nextpage.click()
 
-        worker_acc.post_error(account_id, "flag action try",software_type='clf')
+        worker_acc.post_error(
+            account_id, "flag action try", software_type='clf')
         #title="thanks for flagging!"
         b.wait('//*[@title="thanks for flagging!"]')
         time.sleep(2)

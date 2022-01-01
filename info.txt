@@ -24,7 +24,7 @@ docker ps
 
 sudo su 
 cd ../mydir/
-python3 -c "import os; print(os.environ['PS_KEY'])"
+python3 -c "import os; print(os.environ['PS_PROXY_USER'])"
 python3 bk.py
 reboot
 shutdown -h 0
