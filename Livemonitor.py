@@ -68,12 +68,12 @@ def main(account_data, postinfo, packages_id, body_mail):
         worker_acc.ban_3(account_id, status=3)
     time.sleep(10)
     nextpage = b.select_element_xpath(
-        '//*[@class="bestof-link"]', 'bestof-link')
+        '//*[@class="bestof-link"]', 'link')
 
     if nextpage:
         nextpage.click()
 
-        worker_acc.post_done(account_id, "bestof-link")
+        worker_acc.post_done(account_id, "link")
         #title="thanks for flagging!"
         # b.wait('//*[@title="thanks for flagging!"]')
     time.sleep(10)
