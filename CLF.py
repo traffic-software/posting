@@ -41,9 +41,8 @@ def main(account_data, postinfo, packages_id, body_mail):
     # print(account_data)
     account_id = account_data['id']
     worker_acc = accounts()
-    proxyuser = os.environ['PS_PROXY_USER']
-    b = browser(account_id, packages_id, proxy_company='soax', proxy_country="UnitedStates",
-                proxy_user=proxyuser, proxy_pass=account_data['extra'])
+
+    b = browser(account_id, pva=account_data)
     # proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'  # noyon
     # b = browser(account_id, packages_id, proxy_company='proxyhorse', proxy_country="UnitedStates",
     #             proxy_user=proxyhorse_pass, proxy_pass=account_data['extra'])
@@ -57,6 +56,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         print('proxy condition not fulfilled')
         # worker_acc.ban_3(account_id, 5)
         time.sleep(10)
+        return False
 
     try:
         b.get_url(account_data['email'])
@@ -102,6 +102,8 @@ utility = helper()
 headers = {}
 profile_ids = {}
 acc = accounts()
+# print(acc.get_proxy_list())
+# exit()
 post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
     display = Display(visible=0, size=(1024, 768))
@@ -128,15 +130,6 @@ while True:
         time.sleep(60)
         continue
     print('account id : ', one_account['id'])
-    try:
-        error_count = int(one_account['error_count'])
-    except:
-        error_count = 0
-
-    if error_count >= 15:
-        acc.ban_3(one_account['id'], 5)
-        print('flaging try 15  done not flag')
-        continue
 
     if path.isdir('profiles/' + str(one_account['id'])) == True:
         shutil.rmtree('profiles/' + str(one_account['id']))

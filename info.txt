@@ -59,9 +59,9 @@ sudo nano /etc/default/grub
 sudo update-grub
 
 
-reboot
+
 docker login
-docker pull malaknoyn/clf
+docker pull malaknoyn/clf:soax
 .......upload monitor software to server root folder.........
 
 cat monitor.py
@@ -71,6 +71,7 @@ cp monitor.conf /etc/supervisor/conf.d/
 ls -l /etc/supervisor/conf.d/
 sudo supervisorctl reread
 sudo supervisorctl update
+reboot
 sudo supervisorctl restart all
 sudo supervisorctl stop all
 docker ps -a

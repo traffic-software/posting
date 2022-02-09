@@ -1,3 +1,4 @@
+from email.policy import default
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -27,18 +28,19 @@ import string
 class browser:
     account_id = None
 
-    def __init__(self, pofileLocation, packages_id, use_proxy=True, proxy_company='proxyrotator', proxy_country="IT", proxy_user='malaknoyn100', proxy_pass="51310fe4", profile_dir=False, proxy_other_city=None):
+    def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None):
 
-        self.proxy_country = proxy_country
+        self.proxy_country = "IT"
         self.proxy_city = None
-        self.other_city = proxy_other_city
+        self.other_city = None
         self.proxy_region = None
         self.proxy_zip = None
         self.proxy_timezone = None
         self.proxy_latLon = None
         self.proxy_isp = None
         self.proxy_ip = None
-        self.proxy_company = proxy_company
+        self.proxy_company = 'proxyrotator'
+        self.pva = pva
         self.account_id = pofileLocation
         warnings.filterwarnings('ignore')
         # ................account.....................................
@@ -47,20 +49,16 @@ class browser:
         self.options = webdriver.ChromeOptions()
         # https://peter.sh/experiments/chromium-command-line-switches/
         ####################proxy user##############
-        self.use_proxy = use_proxy
-        if packages_id == 'no':
-            self.use_proxy = False
-        if self.use_proxy:
-            self.packages_id = packages_id
-            self.PROXY_USER = proxy_user  # username
-            self.PROXY_PASS = proxy_pass  # password
-            self.PROXY_HOST = "proxy.com"
-            self.PROXY_PORT = 80
+
+        if use_proxy:
+            self.PROXY_USER = False  # username
+            self.PROXY_PASS = False  # password
+            self.PROXY_HOST = False
+            self.PROXY_PORT = False
 
             # ............Normal rotating proxy......................
-            self.PROXY = self.proxy()
+        if self.proxy():
 
-            proxy = self.PROXY.split(":")
             self.PROXY_TYPE = 'http'
             print("done: proxy set")
             # self.proxy_auth_plugin()
@@ -71,9 +69,9 @@ class browser:
         else:
             driverUrl = '/usr/bin/chromedriver'
 
-        a = random.choice(l)
+        self.a = random.choice(l)
 
-        self.options.add_argument(f'user-agent={a}')
+        self.options.add_argument(f'user-agent={self.a}')
         print('user set')
 
         if sys.platform not in ['Windows', 'win32', 'cygwin']:
@@ -106,81 +104,104 @@ class browser:
 
     def proxy(self):
         try:
-            if self.proxy_company == "packetstream":
-                self.PROXY_HOST = "proxy.packetstream.io"
-                self.PROXY_PORT = 31112
-                proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
-                # ............https://dashboard.soax.com/......................
-            if self.proxy_company == "soax":
 
-                psproxy = ps_proxy(company="soax", key=self.PROXY_USER)
-                soax = psproxy.proxysoax(self.PROXY_PASS)
-                if soax:
+            proxyinfo = self.account.get_proxy_list()
+            # check for use defaultProxy
+            dProxy = proxyinfo['defaultProxy']
+            defaultProxy = ps_proxy(
+                company=dProxy['company'], key=dProxy['user'])
+            defaultByCity = defaultProxy.firstProxy(
+                location=self.pva['extra'], proxyinfo=dProxy)
+            
+            if 'checkinfo' in defaultByCity:
 
-                    self.PROXY_USER = soax['login']
-                    self.PROXY_PASS = soax['password']
-                    self.PROXY_HOST = soax['ip']
-                    self.PROXY_PORT = soax['port']
-                    proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
-                else:
-                    self.PROXY_PASS = False
-                    proxy = "%s:%s" % ("proxy.soax.com", 9000)
+                self.proxy_save(p=defaultByCity['checkinfo'])
+                self.PROXY_HOST = defaultByCity['host']
+                self.PROXY_PORT = defaultByCity['port']
+                self.PROXY_USER = defaultByCity['user']
+                self.PROXY_PASS = defaultByCity['password']
+                self.proxy_company = dProxy['company']
+                return True
+            else:
+                print('city not present')
+                return False
+            # ............packetstream.io......................
+
+            # if self.proxy_company == "packetstream":
+            #     self.PROXY_HOST = "proxy.packetstream.io"
+            #     self.PROXY_PORT = 31112
+            #     proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
+            # ............https://dashboard.soax.com/......................
+            # if self.proxy_company == "soax":
+
+            #     psproxy = ps_proxy(company="soax", key=self.PROXY_USER)
+            #     soax = psproxy.proxysoax(self.PROXY_PASS)
+            #     if soax:
+
+            #         self.PROXY_USER = soax['login']
+            #         self.PROXY_PASS = soax['password']
+            #         self.PROXY_HOST = soax['ip']
+            #         self.PROXY_PORT = soax['port']
+            #         proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
+            #     else:
+            #         self.PROXY_PASS = False
+            #         proxy = "%s:%s" % ("proxy.soax.com", 9000)
 
             # ............rsocks.net......................
-            if self.proxy_company == "rsocks":
+            # if self.proxy_company == "rsocks":
 
-                headers = {
-                    'X-Auth-ID': '107841',
-                    'X-Auth-Key': '3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
-                }
-                resp = requests.post(
-                    'https://rsocks.net/api/v1/file/get-proxy', headers=headers, timeout=1)
+            #     headers = {
+            #         'X-Auth-ID': '107841',
+            #         'X-Auth-Key': '3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
+            #     }
+            #     resp = requests.post(
+            #         'https://rsocks.net/api/v1/file/get-proxy', headers=headers, timeout=1)
 
-                data = json.loads(resp.text)
+            #     data = json.loads(resp.text)
 
-                # data = random.choice(data['packages'])
-                print(data['packages'])
-                # proxy = rendomip=random.choice(data['ips'])
-                data = data['packages'][self.packages_id]['ips']
+            #     # data = random.choice(data['packages'])
+            #     print(data['packages'])
+            #     # proxy = rendomip=random.choice(data['ips'])
+            #     data = data['packages'][self.packages_id]['ips']
 
-                proxy = rendomip = random.choice(data)
+            #     proxy = rendomip = random.choice(data)
                 # ............proxyhorse.com......................
 
-            if self.proxy_company == "proxyhorse":
+            # if self.proxy_company == "proxyhorse":
 
-                psproxy = ps_proxy(company="proxyhorse",
-                                   key=self.PROXY_USER)
+            #     psproxy = ps_proxy(company="proxyhorse",
+            #                        key=self.PROXY_USER)
 
-                pva_id = None
-                if self.other_city == None:
-                    pva_id = self.account_id
-                proxy = psproxy.proxyhorse(
-                    location=self.PROXY_PASS, pva_id=pva_id)
-                self.PROXY_PASS = False
+            #     pva_id = None
+            #     if self.other_city == None:
+            #         pva_id = self.account_id
+            #     proxy = psproxy.proxyhorse(
+            #         location=self.PROXY_PASS, pva_id=pva_id)
+            #     self.PROXY_PASS = False
 
-                if proxy:
+            #     if proxy:
 
-                    self.PROXY_HOST = proxy['ip']
-                    self.PROXY_PORT = proxy['port']
-                    self.PROXY_USER = proxy['login']
-                    self.PROXY_PASS = proxy['password']
-                proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
+            #         self.PROXY_HOST = proxy['ip']
+            #         self.PROXY_PORT = proxy['port']
+            #         self.PROXY_USER = proxy['login']
+            #         self.PROXY_PASS = proxy['password']
+            #     proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
 
                 # .............proxyrotator.com................
 
-            if self.proxy_company == "proxyrotator":
-                url = 'http://falcon.proxyrotator.com:51337'
-                params = dict(
-                    apiKey='TX2DLoKZVd6peF8fuJ59wqsyQgc4CGnv',
-                    userAgent='true',
-                    country=self.proxy_country,
-                    get='true',
-                    connectionType='Residential'
-                )
-                resp = requests.get(url, params=params, timeout=3)
+            # if self.proxy_company == "proxyrotator":
+            #     url = 'http://falcon.proxyrotator.com:51337'
+            #     params = dict(
+            #         apiKey='TX2DLoKZVd6peF8fuJ59wqsyQgc4CGnv',
+            #         userAgent='true',
+            #         country=self.proxy_country,
+            #         get='true',
+            #         connectionType='Residential'
+            #     )
+            #     resp = requests.get(url, params=params, timeout=3)
 
-                data = json.loads(resp.text)
-                proxy = data['proxy']
+            #     data = json.loads(resp.text)
+            #     proxy = data['proxy']
 
                 # .............pubproxy.com......................
                 # url = 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT'
@@ -188,7 +209,7 @@ class browser:
         except (requests.ConnectionError, requests.Timeout) as exception:
             print('plz check your internet connection')
 
-        return proxy
+        return False
 
     def proxy_check(self, data):
 
@@ -229,9 +250,9 @@ class browser:
             time.sleep(5)
             return False
 
-    def proxy_save(self, px, p):
+    def proxy_save(self, px=None, p=None):
         try:
-            print(p)
+            
 
             self.proxy_city = p["city"]
             self.proxy_region = p['regionName']
@@ -243,7 +264,8 @@ class browser:
             self.settimezoone(p)
 
             return True
-        except:
+        except Exception as e:
+            print(e)
             print('proxy error')
 
             return False
@@ -254,7 +276,6 @@ class browser:
     def settimezoone(self, p):
         oldTime = time.strftime('%X %x %Z')
         if sys.platform not in ['Windows', 'win32', 'cygwin']:
-            self.proxy_city = p["city"]
 
             os.environ['TZ'] = p["timezone"]
             time.tzset()
@@ -645,13 +666,13 @@ class browser:
         background_js = """
 		function FindProxyForURL(url, host) {
 			if (url.search("GTM")>"1" ||
-			url.search("google")>"1" || 
-			url.search("GTM")>"1" || 
+			url.search("google")>"1" ||
+			url.search("GTM")>"1" ||
 			url.search("GTM")>"1") {
 				return 'DIRECT';
-				
+
 			}
-			
+
 			return "PROXY %s:%s";
 			}
 		var config = {

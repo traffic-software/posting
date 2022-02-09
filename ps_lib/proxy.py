@@ -1,8 +1,10 @@
 
+import urllib.request
 from datetime import date
 import json
 from re import T
 import random
+from weakref import proxy
 import requests
 from requests import exceptions
 from requests.exceptions import ProxyError
@@ -11,6 +13,8 @@ from ps_lib.accounts import accounts
 from ps_lib.loction import s
 import os
 import time
+
+import string
 
 
 class ps_proxy:
@@ -77,6 +81,27 @@ class ps_proxy:
             returndata = proxy
 
         return returndata
+
+    def firstProxy(self, location, proxyinfo):
+        proxy_loction = location.split("-")
+        self.state = proxy_loction[0].upper()
+        self.city = proxy_loction[1].lower()
+        letters = string.ascii_lowercase
+
+        if proxyinfo['company'] == 'oxylabs':
+            city = self.city.replace(' ', '_')
+            session = ''.join(random.choice(letters) for i in range(10))
+
+            user = 'customer-{user}-cc-{country}-city-{city}-sessid-{session}'.format(
+                user=proxyinfo['user'], country='US', city=city, session=session)
+            proxyinfo['user'] = user
+        if proxyinfo['company'] == 'soax':
+            city = "wifi;us;;;{};".format(self.city.replace(' ', '+'))
+            proxyinfo['password'] = city
+            proxyinfo['user'] = self.package_key
+            proxyinfo['port'] = random.randrange(9000, 9299)
+
+        return self.proxy_check(proxyinfo, city.title())
 
     def get_soax_state(self):
         n = None
@@ -213,30 +238,30 @@ class ps_proxy:
             self.city = ""
             return False
 
-    def proxy_check(self, data):
+    def proxy_check(self, data, city):
         try:
-            d = "{}:{}@{}:{}".format(data['login'],
-                                     data['password'], data['ip'], data['port'])
+            d = "{}:{}@{}:{}".format(data['user'],
+                                     data['password'], data['host'], data['port'])
             proxie = {"http": "http://"+d, "https": "http://"+d}
+
             url = "http://ip-api.com/json"
             r = requests.get(url, timeout=10, proxies=proxie)
 
             if 'request_uuid' in r.text:
-                print(r.text)
+
                 self.city = ""
                 return False
             ip = json.loads(r.text)
-            print('proxy_check', self.state)
 
-            if "United States".lower() in ip['country'].lower() and self.state.lower() == ip['region'].lower():
-                print("country:", ip['country'], "sate:",
-                      ip['region'], "city:", ip['city'])
+            city = city.replace('_', ' ')
+            
+            
 
-                return True
-            else:
-                self.city = ""
+            if city.lower() == ip['city'].lower():
+                data['checkinfo'] = ip
 
-                return False
+            return data
+            
         except Exception as e:
             print(e)
             return False
@@ -268,3 +293,20 @@ class ps_proxy:
         except Exception as e:
             print(e)
             return False
+
+
+if __name__ == "__main__":
+    a = accounts()
+    proxyinfo = a.get_proxy_list()
+    # check for use defaultProxy
+    dProxy = proxyinfo['defaultProxy']
+
+    defaultProxy = ps_proxy(company=dProxy['company'], key=dProxy['user'])
+    proxyinfo = defaultProxy.firstProxy(
+        location='any-Alexander City', proxyinfo=dProxy)
+    if proxyinfo:
+        print('proxy find')
+        print(proxyinfo)
+    else:
+        print('proxy not find')
+        print(proxyinfo)
