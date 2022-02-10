@@ -106,25 +106,50 @@ class browser:
         try:
 
             proxyinfo = self.account.get_proxy_list()
-            # check for use defaultProxy
+            #............. check for use defaultProxy.............#
             dProxy = proxyinfo['defaultProxy']
-            defaultProxy = ps_proxy(
-                company=dProxy['company'], key=dProxy['user'])
-            defaultByCity = defaultProxy.firstProxy(
-                location=self.pva['extra'], proxyinfo=dProxy)
-            
-            if 'checkinfo' in defaultByCity:
+            if 'company' in dProxy:
 
-                self.proxy_save(p=defaultByCity['checkinfo'])
-                self.PROXY_HOST = defaultByCity['host']
-                self.PROXY_PORT = defaultByCity['port']
-                self.PROXY_USER = defaultByCity['user']
-                self.PROXY_PASS = defaultByCity['password']
-                self.proxy_company = dProxy['company']
-                return True
-            else:
-                print('city not present')
-                return False
+                defaultProxy = ps_proxy(
+                    company=dProxy['company'], key=dProxy['user'])
+                defaultByCity = defaultProxy.firstProxy(
+                    location=self.pva['extra'], proxyinfo=dProxy)
+
+                if 'checkinfo' in defaultByCity:
+
+                    self.proxy_save(p=defaultByCity['checkinfo'])
+                    self.PROXY_HOST = defaultByCity['host']
+                    self.PROXY_PORT = defaultByCity['port']
+                    self.PROXY_USER = defaultByCity['user']
+                    self.PROXY_PASS = defaultByCity['password']
+                    self.proxy_company = dProxy['company']
+                    return True
+                else:
+
+                    self.account.post_log(id=self.pva['id'], messasge='city not present account {extra}'.format(extra=self.pva['extra']))
+                    print('city not present')
+            #............. check for use backupProxy.............#
+            bProxy = proxyinfo['backupProxy']
+            if 'company' in bProxy:
+                backupProxy = ps_proxy(
+                    company=bProxy['company'], key=bProxy['user'])
+                backupByCity = backupProxy.firstProxy(
+                    location=self.pva['extra'], proxyinfo=bProxy)
+
+                if 'checkinfo' in backupByCity:
+
+                    self.proxy_save(p=backupByCity['checkinfo'])
+                    self.PROXY_HOST = backupByCity['host']
+                    self.PROXY_PORT = backupByCity['port']
+                    self.PROXY_USER = backupByCity['user']
+                    self.PROXY_PASS = backupByCity['password']
+                    self.proxy_company = bProxy['company']
+                    return True
+                else:
+
+                    self.account.post_log(id=self.pva['id'], messasge='city not present account {extra}'.format(extra=self.pva['extra']))
+                    print('city not present')
+
             # ............packetstream.io......................
 
             # if self.proxy_company == "packetstream":
@@ -252,7 +277,6 @@ class browser:
 
     def proxy_save(self, px=None, p=None):
         try:
-            
 
             self.proxy_city = p["city"]
             self.proxy_region = p['regionName']
@@ -262,6 +286,24 @@ class browser:
             self.proxy_isp = p['isp']
             self.proxy_ip = p['query']
             self.settimezoone(p)
+
+            return True
+        except Exception as e:
+            print(e)
+            print('proxy error')
+
+            return False
+
+    def ipinfo_save(self, software_name):
+        try:
+
+            message = ('%s-%s-%s-%s-%s-%s' % (software_name,
+                                              self.proxy_ip,
+                                              self.proxy_city,
+                                              self.proxy_region,
+                                              self.proxy_isp,
+                                              self.proxy_company))
+            self.account.post_log(id=self.pva['id'], messasge=message)
 
             return True
         except Exception as e:

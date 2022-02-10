@@ -87,6 +87,7 @@ class ps_proxy:
         self.state = proxy_loction[0].upper()
         self.city = proxy_loction[1].lower()
         letters = string.ascii_lowercase
+        city = "any"
 
         if proxyinfo['company'] == 'oxylabs':
             city = self.city.replace(' ', '_')
@@ -245,26 +246,26 @@ class ps_proxy:
             proxie = {"http": "http://"+d, "https": "http://"+d}
 
             url = "http://ip-api.com/json"
-            r = requests.get(url, timeout=10, proxies=proxie)
+            r = requests.get(url, timeout=60, proxies=proxie)
+            print(r.text)
+            if r.status_code in [400, 407, 500, 502, 522, 525]:
+                return data
 
-            if 'request_uuid' in r.text:
-
-                self.city = ""
-                return False
             ip = json.loads(r.text)
 
             city = city.replace('_', ' ')
-            
-            
+            print(city.lower(), ip['city'].lower())
 
             if city.lower() == ip['city'].lower():
                 data['checkinfo'] = ip
+            else:
+                data['notproxy'] = r.text
 
             return data
-            
+
         except Exception as e:
             print(e)
-            return False
+            return data
 
     def proxy_city_check(self, data, city):
         try:

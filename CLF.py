@@ -79,8 +79,11 @@ def main(account_data, postinfo, packages_id, body_mail):
         b.wait('//*[@title="thanks for flagging!"]')
         time.sleep(2)
 
-    print('browser close')
+    
+    b.ipinfo_save(software_name='clf')
+    
     b.exit()
+    print('browser close')
 
     print('start :', starttime)
     print('end :', datetime.now().strftime("%H:%M:%S"))
