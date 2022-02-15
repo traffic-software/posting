@@ -108,7 +108,8 @@ class browser:
             proxyinfo = self.account.get_proxy_list()
             #............. check for use defaultProxy.............#
             dProxy = proxyinfo['defaultProxy']
-            if 'company' in dProxy:
+
+            if type(dProxy) is dict:
 
                 defaultProxy = ps_proxy(
                     company=dProxy['company'], key=dProxy['user'])
@@ -126,14 +127,16 @@ class browser:
                     return True
                 else:
 
-                    self.account.post_log(id=self.pva['id'], messasge='city not present account {extra}'.format(extra=self.pva['extra']))
+                    self.account.post_log(id=self.pva['id'], messasge='city not present default {extra}'.format(
+                        extra=self.pva['extra']))
                     print('city not present')
             #............. check for use backupProxy.............#
             bProxy = proxyinfo['backupProxy']
-            if 'company' in bProxy:
+
+            if type(bProxy) is dict:
                 backupProxy = ps_proxy(
                     company=bProxy['company'], key=bProxy['user'])
-                backupByCity = backupProxy.firstProxy(
+                backupByCity = backupProxy.backupProxy(
                     location=self.pva['extra'], proxyinfo=bProxy)
 
                 if 'checkinfo' in backupByCity:
@@ -147,8 +150,11 @@ class browser:
                     return True
                 else:
 
-                    self.account.post_log(id=self.pva['id'], messasge='city not present account {extra}'.format(extra=self.pva['extra']))
+                    self.account.post_log(id=self.pva['id'], messasge='city not present backup {extra}'.format(
+                        extra=self.pva['extra']))
                     print('city not present')
+            else:
+                print('you not set backup proxy')
 
             # ............packetstream.io......................
 

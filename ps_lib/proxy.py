@@ -97,12 +97,95 @@ class ps_proxy:
                 user=proxyinfo['user'], country='US', city=city, session=session)
             proxyinfo['user'] = user
         if proxyinfo['company'] == 'soax':
-            city = "wifi;us;;;{};".format(self.city.replace(' ', '+'))
-            proxyinfo['password'] = city
+            city = self.city
+            password = "wifi;us;;;{};".format(self.city.replace(' ', '+'))
+            proxyinfo['password'] = password
             proxyinfo['user'] = self.package_key
             proxyinfo['port'] = random.randrange(9000, 9299)
 
         return self.proxy_check(proxyinfo, city.title())
+
+    def backupProxy(self, location, proxyinfo):
+        proxy_loction = location.split("-")
+        self.state = proxy_loction[0].upper()
+        letters = string.ascii_lowercase
+
+        state = self.get_soax_state()
+
+        # use oxylabs proxy compnay
+        if proxyinfo['company'] == 'oxylabs':
+            state = self.state.replace(' ', '_')
+            session = ''.join(random.choice(letters) for i in range(10))
+            user = 'customer-{user}-st-{country}_{st}-sessid-{session}'.format(
+                user='user', country='US'.lower(), st=state.lower(), session=session)
+
+            proxyinfo['user'] = user
+
+        # use soax proxy compnay
+        if proxyinfo['company'] == 'soax':
+
+            proxyinfo['password'] = "wifi;us;;{};;".format(
+                state.replace(' ', '+'))
+            proxyinfo['user'] = self.package_key
+            proxyinfo['port'] = random.randrange(9000, 9299)
+
+        return self.proxy_state_check(data=proxyinfo, state=state.lower())
+
+    def proxy_check(self, data, city):
+        try:
+            d = "{}:{}@{}:{}".format(data['user'],
+                                     data['password'], data['host'], data['port'])
+            proxie = {"http": "http://"+d, "https": "http://"+d}
+
+            url = "http://ip-api.com/json"
+            r = requests.get(url, timeout=60, proxies=proxie)
+            print(r.text)
+            if r.status_code in [400, 407, 500, 502, 522, 525]:
+                return data
+
+            ip = json.loads(r.text)
+
+            city = city.replace('_', ' ')
+            print(city.lower(), ip['city'].lower())
+
+            if city.lower() == ip['city'].lower():
+                data['checkinfo'] = ip
+            else:
+                data['notproxy'] = r.text
+
+            return data
+
+        except Exception as e:
+            print(e)
+            return data
+
+    def proxy_state_check(self, data, state):
+        try:
+            d = "{}:{}@{}:{}".format(data['user'],
+                                     data['password'], data['host'], data['port'])
+            proxie = {"http": "http://"+d, "https": "http://"+d}
+
+            url = "http://ip-api.com/json"
+            r = requests.get(url, timeout=60, proxies=proxie)
+            print(r.text)
+            if r.status_code in [400, 407, 500, 502, 522, 525]:
+                return data
+
+            ip = json.loads(r.text)
+
+            state = state.replace('_', ' ')
+            print(state.lower(), ip['regionName'].lower())
+
+            if state.lower() == ip['regionName'].lower():
+                data['checkinfo'] = ip
+            else:
+                data['notproxy'] = r.text
+
+            return data
+
+        except Exception as e:
+            print(e)
+            return data
 
     def get_soax_state(self):
         n = None
@@ -238,34 +321,6 @@ class ps_proxy:
         else:
             self.city = ""
             return False
-
-    def proxy_check(self, data, city):
-        try:
-            d = "{}:{}@{}:{}".format(data['user'],
-                                     data['password'], data['host'], data['port'])
-            proxie = {"http": "http://"+d, "https": "http://"+d}
-
-            url = "http://ip-api.com/json"
-            r = requests.get(url, timeout=60, proxies=proxie)
-            print(r.text)
-            if r.status_code in [400, 407, 500, 502, 522, 525]:
-                return data
-
-            ip = json.loads(r.text)
-
-            city = city.replace('_', ' ')
-            print(city.lower(), ip['city'].lower())
-
-            if city.lower() == ip['city'].lower():
-                data['checkinfo'] = ip
-            else:
-                data['notproxy'] = r.text
-
-            return data
-
-        except Exception as e:
-            print(e)
-            return data
 
     def proxy_city_check(self, data, city):
         try:

@@ -61,7 +61,16 @@ sudo update-grub
 
 
 docker login
-docker pull malaknoyn/clf:soax
+............update............
+sudo supervisorctl status
+sudo supervisorctl stop  all
+docker container rm -f $(docker ps -a -q)
+docker image rm -f $(docker images -a -q)
+docker image pull malaknoyn/clf:proxy
+sudo supervisorctl restart all
+docker ps
+............update............
+
 .......upload monitor software to server root folder.........
 
 cat monitor.py
