@@ -102,6 +102,15 @@ class browser:
     def __del__(self):
         self.exit()
 
+    def checkipused(self, ip, postlog):
+        returndata = False
+        for i in postlog:
+
+            if ip in i["message"]:
+                returndata = True
+                break
+        return returndata
+
     def proxy(self):
         try:
 
@@ -124,7 +133,8 @@ class browser:
                     self.PROXY_USER = defaultByCity['user']
                     self.PROXY_PASS = defaultByCity['password']
                     self.proxy_company = dProxy['company']
-                    return True
+                    if self.checkipused(defaultByCity['checkinfo']['query'], self.pva['postlog']) == False:
+                        return True
                 else:
 
                     self.account.post_log(id=self.pva['id'], messasge='city not present default {extra}'.format(
@@ -147,10 +157,32 @@ class browser:
                     self.PROXY_USER = backupByCity['user']
                     self.PROXY_PASS = backupByCity['password']
                     self.proxy_company = bProxy['company']
-                    return True
+                    if self.checkipused(backupByCity['checkinfo']['query'], self.pva['postlog']) == False:
+                        return True
                 else:
 
                     self.account.post_log(id=self.pva['id'], messasge='city not present backup {extra}'.format(
+                        extra=self.pva['extra']))
+                    print('city not present')
+            aProxy = proxyinfo['activeProxys']
+            if type(aProxy) is dict:
+                activeProxys = ps_proxy(
+                    company=aProxy['company'], key=aProxy['user'])
+                activeByCity = activeProxys.normalProxy(
+                    location=self.pva['extra'], proxyinfo=aProxy)
+
+                if 'checkinfo' in activeByCity:
+
+                    self.proxy_save(p=activeByCity['checkinfo'])
+                    self.PROXY_HOST = activeByCity['host']
+                    self.PROXY_PORT = activeByCity['port']
+                    self.PROXY_USER = activeByCity['user']
+                    self.PROXY_PASS = activeByCity['password']
+                    self.proxy_company = aProxy['company']
+                    return True
+                else:
+
+                    self.account.post_log(id=self.pva['id'], messasge='city not present normal {extra}'.format(
                         extra=self.pva['extra']))
                     print('city not present')
             else:

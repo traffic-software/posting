@@ -3,7 +3,7 @@ net.ipv6.conf.all.disable_ipv6 = 1
 sysctl -p
 route -n
 # docker system prune
-# docker build . -t ps_bk
+# docker build . -t clf:proxy
 # docker save -o bk.tar ps_bk
 # docker load -i bk.tar
 docker network create -d macvlan \

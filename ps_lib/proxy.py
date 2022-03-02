@@ -93,8 +93,8 @@ class ps_proxy:
             city = self.city.replace(' ', '_')
             session = ''.join(random.choice(letters) for i in range(10))
 
-            user = 'customer-{user}-cc-{country}-city-{city}-sessid-{session}'.format(
-                user=proxyinfo['user'], country='US', city=city, session=session)
+            user = 'customer-{user}-st-{country}-city-{city}-sessid-{session}'.format(
+                user=proxyinfo['user'], country=self.get_oxylabs_state(self.state), city=city, session=session)
             proxyinfo['user'] = user
         if proxyinfo['company'] == 'soax':
             city = self.city
@@ -108,6 +108,29 @@ class ps_proxy:
     def backupProxy(self, location, proxyinfo):
         proxy_loction = location.split("-")
         self.state = proxy_loction[0].upper()
+        self.city = proxy_loction[1].lower()
+        letters = string.ascii_lowercase
+        city = "any"
+
+        if proxyinfo['company'] == 'oxylabs':
+            city = self.city.replace(' ', '_')
+            session = ''.join(random.choice(letters) for i in range(10))
+
+            user = 'customer-{user}-st-{country}-city-{city}-sessid-{session}'.format(
+                user=proxyinfo['user'], country=self.get_oxylabs_state(self.state), city=city, session=session)
+            proxyinfo['user'] = user
+        if proxyinfo['company'] == 'soax':
+            city = self.city
+            password = "wifi;us;;;{};".format(self.city.replace(' ', '+'))
+            proxyinfo['password'] = password
+            proxyinfo['user'] = self.package_key
+            proxyinfo['port'] = random.randrange(9000, 9299)
+
+        return self.proxy_check(proxyinfo, city.title())
+
+    def normalProxy(self, location, proxyinfo):
+        proxy_loction = location.split("-")
+        self.state = proxy_loction[0].upper()
         letters = string.ascii_lowercase
 
         state = self.get_soax_state()
@@ -116,8 +139,8 @@ class ps_proxy:
         if proxyinfo['company'] == 'oxylabs':
             state = self.state.replace(' ', '_')
             session = ''.join(random.choice(letters) for i in range(10))
-            user = 'customer-{user}-st-{country}_{st}-sessid-{session}'.format(
-                user='user', country='US'.lower(), st=state.lower(), session=session)
+            user = 'customer-{user}-st-{country}-sessid-{session}'.format(
+                user='user', country=self.get_oxylabs_state(self.state), session=session)
 
             proxyinfo['user'] = user
 
@@ -193,6 +216,17 @@ class ps_proxy:
 
             if self.state.upper() == i['av'].upper():
                 n = i['name'].lower()
+                break
+        return n
+
+    def get_oxylabs_state(self, st):
+        n = None
+        for i in s:
+
+            if st.upper() == i['av'].upper():
+                n = 'us_'+i['name'].lower()
+                n = n.replace('_', ' ')
+
                 break
         return n
 
@@ -359,7 +393,7 @@ if __name__ == "__main__":
 
     defaultProxy = ps_proxy(company=dProxy['company'], key=dProxy['user'])
     proxyinfo = defaultProxy.firstProxy(
-        location='any-Alexander City', proxyinfo=dProxy)
+        location='us_new jersey', proxyinfo=dProxy)
     if proxyinfo:
         print('proxy find')
         print(proxyinfo)
