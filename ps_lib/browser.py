@@ -179,7 +179,8 @@ class browser:
                     self.PROXY_USER = activeByCity['user']
                     self.PROXY_PASS = activeByCity['password']
                     self.proxy_company = aProxy['company']
-                    return True
+                    if self.checkipused(activeByCity['checkinfo']['query'], self.pva['postlog']) == False:
+                        return True
                 else:
 
                     self.account.post_log(id=self.pva['id'], messasge='city not present normal {extra}'.format(

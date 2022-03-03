@@ -137,10 +137,10 @@ class ps_proxy:
 
         # use oxylabs proxy compnay
         if proxyinfo['company'] == 'oxylabs':
-            state = self.state.replace(' ', '_')
             session = ''.join(random.choice(letters) for i in range(10))
             user = 'customer-{user}-st-{country}-sessid-{session}'.format(
-                user='user', country=self.get_oxylabs_state(self.state), session=session)
+                user=proxyinfo['user'], country=self.get_oxylabs_state(self.state), session=session)
+            print(user)
 
             proxyinfo['user'] = user
 
@@ -171,7 +171,7 @@ class ps_proxy:
             city = city.replace('_', ' ')
             print(city.lower(), ip['city'].lower())
 
-            if city.lower() == ip['city'].lower():
+            if (city.lower() == ip['city'].lower()) and (self.state.lower() == ip['region'].lower()):
                 data['checkinfo'] = ip
             else:
                 data['notproxy'] = r.text
@@ -196,10 +196,9 @@ class ps_proxy:
 
             ip = json.loads(r.text)
 
-            state = state.replace('_', ' ')
-            print(state.lower(), ip['regionName'].lower())
+            print(self.state, ip['region'].lower())
 
-            if state.lower() == ip['regionName'].lower():
+            if (self.state.lower() == ip['region'].lower()) and (ip['countryCode'].lower() == 'us'):
                 data['checkinfo'] = ip
             else:
                 data['notproxy'] = r.text
@@ -225,7 +224,7 @@ class ps_proxy:
 
             if st.upper() == i['av'].upper():
                 n = 'us_'+i['name'].lower()
-                n = n.replace('_', ' ')
+                n = n.replace(' ', '_')
 
                 break
         return n
