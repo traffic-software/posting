@@ -55,11 +55,11 @@ class browser:
             self.PROXY_PASS = False  # password
             self.PROXY_HOST = False
             self.PROXY_PORT = False
+            self.PROXY_TYPE = 'http'
 
             # ............Normal rotating proxy......................
         if self.proxy():
 
-            self.PROXY_TYPE = 'http'
             print("done: proxy set")
             # self.proxy_auth_plugin()
             self.proxy_auth_plugin_pac_script()
@@ -127,14 +127,13 @@ class browser:
 
                 if 'checkinfo' in defaultByCity:
 
-                    self.proxy_save(p=defaultByCity['checkinfo'])
+                    self.proxy_save(px=dProxy, p=defaultByCity['checkinfo'])
                     self.PROXY_HOST = defaultByCity['host']
                     self.PROXY_PORT = defaultByCity['port']
                     self.PROXY_USER = defaultByCity['user']
                     self.PROXY_PASS = defaultByCity['password']
                     self.proxy_company = dProxy['company']
-                    if self.checkipused(defaultByCity['checkinfo']['query'], self.pva['postlog']) == False:
-                        return True
+                    return True
                 else:
 
                     self.account.post_log(id=self.pva['id'], messasge='city not present default {extra}'.format(
@@ -151,14 +150,13 @@ class browser:
 
                 if 'checkinfo' in backupByCity:
 
-                    self.proxy_save(p=backupByCity['checkinfo'])
+                    self.proxy_save(px=dProxy, p=backupByCity['checkinfo'])
                     self.PROXY_HOST = backupByCity['host']
                     self.PROXY_PORT = backupByCity['port']
                     self.PROXY_USER = backupByCity['user']
                     self.PROXY_PASS = backupByCity['password']
                     self.proxy_company = bProxy['company']
-                    if self.checkipused(backupByCity['checkinfo']['query'], self.pva['postlog']) == False:
-                        return True
+                    return True
                 else:
 
                     self.account.post_log(id=self.pva['id'], messasge='city not present backup {extra}'.format(
@@ -173,14 +171,13 @@ class browser:
 
                 if 'checkinfo' in activeByCity:
 
-                    self.proxy_save(p=activeByCity['checkinfo'])
+                    self.proxy_save(px=dProxy, p=activeByCity['checkinfo'])
                     self.PROXY_HOST = activeByCity['host']
                     self.PROXY_PORT = activeByCity['port']
                     self.PROXY_USER = activeByCity['user']
                     self.PROXY_PASS = activeByCity['password']
                     self.proxy_company = aProxy['company']
-                    if self.checkipused(activeByCity['checkinfo']['query'], self.pva['postlog']) == False:
-                        return True
+                    return True
                 else:
 
                     self.account.post_log(id=self.pva['id'], messasge='city not present normal {extra}'.format(
@@ -316,6 +313,7 @@ class browser:
 
     def proxy_save(self, px=None, p=None):
         try:
+            print(px)
 
             self.proxy_city = p["city"]
             self.proxy_region = p['regionName']
@@ -324,6 +322,8 @@ class browser:
             self.proxy_latLon = str(p['lat'])+":"+str(p["lon"])
             self.proxy_isp = p['isp']
             self.proxy_ip = p['query']
+            if px['company'] == 'dichvusocks':
+                self.PROXY_TYPE = 'SOCKS5'
             self.settimezoone(p)
 
             return True
@@ -754,7 +754,7 @@ class browser:
 
 			}
 
-			return "PROXY %s:%s";
+			return "%s %s:%s";
 			}
 		var config = {
 		mode: "pac_script",
@@ -780,7 +780,7 @@ class browser:
 					{urls: ["<all_urls>"]},
 					['blocking']
 		);
-		""" % (self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
+		""" % (self.PROXY_TYPE, self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
         pluginfile = 'proxy_auth_plugin.zip'
         zp = zipfile.ZipFile(pluginfile, 'w')
         zp.writestr("rules.json", rules_json)

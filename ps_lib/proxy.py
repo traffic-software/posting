@@ -103,6 +103,11 @@ class ps_proxy:
             proxyinfo['user'] = self.package_key
             proxyinfo['port'] = random.randrange(9000, 9299)
 
+        if proxyinfo['company'] == 'dichvusocks':
+
+            proxyinfo['host'] = proxyinfo['host']
+            proxyinfo['port'] = proxyinfo['port']
+
         return self.proxy_check(proxyinfo, city.title())
 
     def backupProxy(self, location, proxyinfo):
@@ -159,6 +164,8 @@ class ps_proxy:
             d = "{}:{}@{}:{}".format(data['user'],
                                      data['password'], data['host'], data['port'])
             proxie = {"http": "http://"+d, "https": "http://"+d}
+            if data['company'] == 'dichvusocks':
+                proxie = {"http": "socks5://"+d, "https": "socks5://"+d}
 
             url = "http://ip-api.com/json"
             r = requests.get(url, timeout=60, proxies=proxie)
@@ -170,6 +177,10 @@ class ps_proxy:
 
             city = city.replace('_', ' ')
             print(city.lower(), ip['city'].lower())
+
+            if data['company'] == 'dichvusocks':
+                data['checkinfo'] = ip
+                return data
 
             if (city.lower() == ip['city'].lower()) and (self.state.lower() == ip['region'].lower()):
                 data['checkinfo'] = ip

@@ -42,17 +42,21 @@ def main(account_data, postinfo, packages_id, body_mail):
     account_id = account_data['id']
     worker_acc = accounts()
 
-    # b = browser(account_id, packages_id, proxy_company='soax', proxy_country="UnitedStates",
-    # proxy_user='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5', proxy_pass=account_data['extra'])
-    proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'  # noyon
-    b = browser(account_id, packages_id, proxy_company='proxyhorse', proxy_country="UnitedStates",
-                proxy_user=proxyhorse_pass, proxy_pass=account_data['extra'])
+    b = browser(account_id, pva=account_data)
+    # proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'  # noyon
+    # b = browser(account_id, packages_id, proxy_company='proxyhorse', proxy_country="UnitedStates",
+    #             proxy_user=proxyhorse_pass, proxy_pass=account_data['extra'])
+    # p_pass = "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s" % (
+    #     ''.join(random.choice(string.ascii_letters) for i in range(10)))
+    # b = browser(account_id, packages_id, proxy_company='packetstream',
+    #             proxy_country="UnitedStates", proxy_user='malaknoyn', proxy_pass=p_pass)
     time.sleep(5)
     if b.PROXY_PASS == False:
         b.exit()
         print('proxy condition not fulfilled')
-        worker_acc.ban_3(account_id, 5)
+        # worker_acc.ban_3(account_id, 5)
         time.sleep(10)
+        return False
 
     try:
         b.get_url(account_data['email'])
@@ -68,14 +72,17 @@ def main(account_data, postinfo, packages_id, body_mail):
             '//*[@class="flag-action action"]', 'flag button')
 
         nextpage.click()
-        b.driver.implicitly_wait
-        worker_acc.post_error(account_id, "flag action try")
+
+        worker_acc.post_error(
+            account_id, "flag action try", software_type='clf')
         #title="thanks for flagging!"
         b.wait('//*[@title="thanks for flagging!"]')
         time.sleep(2)
 
-    print('browser close')
+    b.ipinfo_save(software_name='clf')
+
     b.exit()
+    print('browser close')
 
     print('start :', starttime)
     print('end :', datetime.now().strftime("%H:%M:%S"))
@@ -97,6 +104,8 @@ utility = helper()
 headers = {}
 profile_ids = {}
 acc = accounts()
+# print(acc.get_proxy_list())
+# exit()
 post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
     display = Display(visible=0, size=(1024, 768))
@@ -123,15 +132,6 @@ while True:
         time.sleep(60)
         continue
     print('account id : ', one_account['id'])
-    try:
-        error_count = int(one_account['error_count'])
-    except:
-        error_count = 0
-
-    if error_count >= 15:
-        acc.ban_3(one_account['id'], 5)
-        print('flaging try 15  done not flag')
-        continue
 
     if path.isdir('profiles/' + str(one_account['id'])) == True:
         shutil.rmtree('profiles/' + str(one_account['id']))
