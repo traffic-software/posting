@@ -58,11 +58,12 @@ class browser:
             self.PROXY_TYPE = 'http'
 
             # ............Normal rotating proxy......................
-        if self.proxy():
+        if use_proxy:
+            if self.proxy():
 
-            print("done: proxy set")
-            # self.proxy_auth_plugin()
-            self.proxy_auth_plugin_pac_script()
+                print("done: proxy set")
+                # self.proxy_auth_plugin()
+                self.proxy_auth_plugin_pac_script()
 
         if sys.platform in ['Windows', 'win32', 'cygwin']:
             driverUrl = 'chromedriver.exe'
@@ -98,6 +99,12 @@ class browser:
             self.driver.quit()
         except:
             print("browser close")
+
+    def get_proxy_zip(self):
+        if self.proxy_zip == None:
+            return self.get_ipinfo()
+        else:
+            return self.proxy_zip
 
     def __del__(self):
         self.exit()
@@ -310,6 +317,21 @@ class browser:
             print('proxy error', exception)
             time.sleep(5)
             return False
+
+    def get_ipinfo(self):
+
+        try:
+
+            url = "http://ip-api.com/json"
+            timeout = 10
+            r = requests.get(url, timeout=timeout)
+
+            if "zip" in r.text:
+                ip = json.loads(r.text)
+            return ip['zip']
+
+        except (requests.ConnectionError, requests.Timeout,) as exception:
+            return 2200
 
     def proxy_save(self, px=None, p=None):
         try:

@@ -13,7 +13,16 @@
 
 # bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
-import requests,json
+import requests
+import json
+url = "http://ip-api.com/json"
+timeout = 10
+r = requests.get(url, timeout=timeout)
+if "zip" in r.text:
+    ip = json.loads(r.text)
+    return ip['zip']
+
+
 # p_pass= "wifi;us;;;{};".format("ft.+washington")
 # data  = "uyMDe7ALdLkpJmm5:"+p_pass+"@proxy.soax.com:9000"
 
@@ -32,39 +41,39 @@ import requests,json
 # print(r.text)
 
 
-from ps_lib.proxy import ps_proxy
-url = "https://api.proxyhorse.com/client/getconnections.php"
+# from ps_lib.proxy import ps_proxy
+# url = "https://api.proxyhorse.com/client/getconnections.php"
 
-payload = {}
-headers = {
-  'Authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'
-}
+# payload = {}
+# headers = {
+#   'Authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'
+# }
 
-response = requests.request("GET", url, headers=headers, data = payload)
-d = json.loads(response.text.encode('utf8'))
-print(d)
+# response = requests.request("GET", url, headers=headers, data = payload)
+# d = json.loads(response.text.encode('utf8'))
+# print(d)
 
-for i in d['data']:
-    url = "https://api.proxyhorse.com/client/deleteconnection.php"
+# for i in d['data']:
+#     url = "https://api.proxyhorse.com/client/deleteconnection.php"
 
-    payload = {"token": "{}".format(i['token'])}
-    headers = {
-    'authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a',
-    'Content-Type': 'application/json'
-    }
+#     payload = {"token": "{}".format(i['token'])}
+#     headers = {
+#     'authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a',
+#     'Content-Type': 'application/json'
+#     }
 
-    response = requests.request("DELETE", url, headers=headers, data = json.dumps(payload))
-# psproxy = ps_proxy(company="proxyhorse",key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
-					
-# proxy = psproxy.proxyhorse('NC-Chinquapin')
+#     response = requests.request("DELETE", url, headers=headers, data = json.dumps(payload))
+# # psproxy = ps_proxy(company="proxyhorse",key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
+
+# # proxy = psproxy.proxyhorse('NC-Chinquapin')
 
 
-# post = post()
-# print(post.get_post())
-# account = accounts()
-# print(account.get_account())
-import string
-import random
+# # post = post()
+# # print(post.get_post())
+# # account = accounts()
+# # print(account.get_account())
+# import string
+# import random
 
 
 # ## characters to generate password from
@@ -76,7 +85,7 @@ import random
 
 # 	## shuffling the characters
 # 	random.shuffle(characters)
-	
+
 # 	## picking random characters from the list
 # 	password = []
 # 	for i in range(length):
@@ -90,12 +99,7 @@ import random
 # 	return "".join(password)
 
 
-
-## invoking the function
+# invoking the function
 
 # for i in range(1,10000):
 #     print(generate_random_password())
-
-		
-
-	

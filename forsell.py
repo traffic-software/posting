@@ -57,7 +57,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     popmail.close()
     profile_dir = "{}/profiles/{}".format(bundle_dir, account_id)
 
-    b = browser(account_id, pva=account_data)
+    b = browser(account_id, pva=account_data, use_proxy=False)
     time.sleep(5)
 
     try:
@@ -84,12 +84,13 @@ def main(account_data, postinfo, packages_id, body_mail):
         # b.scroll_like_user(sub_aria)
 
         sub_aria.click()
-    button = b.select_element_xpath(
-        '/html/body/article/section/form/ul/li[4]', 'click on housing offered')
+    # button = b.select_element_xpath('/html/body/article/section/form/ul/li[6]', 'for sale by owner')
+    button = b.select_element_xpath('//*[@value="fso"]', 'for sale by owner')
     # b.scroll_like_user(button)
     button.click()
+
     button = b.select_element_xpath(
-        '//*[@id="new-edit"]/div/label/label[2]/div/span[1]', 'click on apartments / housing for rent')
+        '//*[@id="new-edit"]/div/label/label[2]/div/span[1]', 'for sale by owner sub ')
     # b.scroll_like_user(button)
     button.click()
 
@@ -108,7 +109,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     postal_code = b.select_element_xpath(
         '//*[@id="postal_code"]', 'postal code"]')
     # b.scroll_like_user(postal_code)
-    postal_code.send_keys(b.proxy_zip)
+    postal_code.send_keys(b.get_proxy_zip())
 
     # post body setup
     b_body = b.select_element_xpath('//*[@id="PostingBody"]', 'PostingBody')
@@ -200,13 +201,12 @@ def main(account_data, postinfo, packages_id, body_mail):
     # b.scroll_like_user(nextpage)
     nextpage.click()
     # no pass click
-
-    nextpage = b.select_element_xpath(
-        '//*[@id="leafletForm"]/button', 'go from map page')
-    b.scroll_like_user(nextpage)
-    nextpage.click()
     if 's=geoverify=' in b.current_url():
-
+        nextpage = b.select_element_xpath(
+            '//*[@id="leafletForm"]', 'go from map page')
+        # b.scroll_like_user(nextpage)
+        nextpage.submit()
+    if 's=geoverify=' in b.current_url():
         sub_aria = b.select_element_xpath('//*[@name="area_change_ok"]')
         sub_aria.click()
     nextpage = b.select_element_xpath(
