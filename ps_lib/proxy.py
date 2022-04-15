@@ -104,9 +104,23 @@ class ps_proxy:
             proxyinfo['port'] = random.randrange(9000, 9299)
 
         if proxyinfo['company'] == 'dichvusocks':
+            city = self.city
 
             proxyinfo['host'] = proxyinfo['host']
             proxyinfo['port'] = proxyinfo['port']
+        if proxyinfo['company'] == 'proxyhorse':
+            city = self.city
+            proxy = self.proxyhorse(location=location, pva_id=self.pva_id)
+
+            final_proxy = proxy.get('data', proxy)
+            if final_proxy:
+                proxyinfo['host'] = final_proxy['ip']
+                proxyinfo['port'] = final_proxy['port']
+                proxyinfo['password'] = final_proxy['password']
+                proxyinfo['user'] = final_proxy['login']
+
+            else:
+                print(final_proxy)
 
         return self.proxy_check(proxyinfo, city.title())
 
@@ -130,6 +144,19 @@ class ps_proxy:
             proxyinfo['password'] = password
             proxyinfo['user'] = self.package_key
             proxyinfo['port'] = random.randrange(9000, 9299)
+        if proxyinfo['company'] == 'proxyhorse':
+            city = self.city
+            proxy = self.proxyhorse(location=location, pva_id=self.pva_id)
+
+            final_proxy = proxy.get('data', proxy)
+            if final_proxy:
+                proxyinfo['host'] = final_proxy['ip']
+                proxyinfo['port'] = final_proxy['port']
+                proxyinfo['password'] = final_proxy['password']
+                proxyinfo['user'] = final_proxy['login']
+
+            else:
+                print(final_proxy)
 
         return self.proxy_check(proxyinfo, city.title())
 
@@ -156,6 +183,19 @@ class ps_proxy:
                 state.replace(' ', '+'))
             proxyinfo['user'] = self.package_key
             proxyinfo['port'] = random.randrange(9000, 9299)
+        if proxyinfo['company'] == 'proxyhorse':
+            city = self.city
+            proxy = self.proxyhorse(location=location, pva_id=self.pva_id)
+
+            final_proxy = proxy.get('data', proxy)
+            if final_proxy:
+                proxyinfo['host'] = final_proxy['ip']
+                proxyinfo['port'] = final_proxy['port']
+                proxyinfo['password'] = final_proxy['password']
+                proxyinfo['user'] = final_proxy['login']
+
+            else:
+                print(final_proxy)
 
         return self.proxy_state_check(data=proxyinfo, state=state.lower())
 
@@ -169,7 +209,7 @@ class ps_proxy:
 
             url = "http://ip-api.com/json"
             r = requests.get(url, timeout=60, proxies=proxie)
-            print(r.text)
+
             if r.status_code in [400, 407, 500, 502, 522, 525]:
                 return data
 
@@ -274,12 +314,12 @@ class ps_proxy:
         url = "https://api.proxyhorse.com/client/changeconnection.php"
 
         payload = self.proxy_payload(token=token)
-        print('change payload', payload)
+        print('change ip location ')
 
         r = requests.post(url, headers=self.proxy_headers(),
                           data=json.dumps(payload))
         d = json.loads(r.text.encode('utf8'))
-        print(d)
+
         print("Change location")
         proxy = self.get_connecton(token=token)
 
@@ -302,7 +342,7 @@ class ps_proxy:
         if token:
             url = "https://api.proxyhorse.com/client/getconnections.php"
             payload = {'token': token}
-            print('get_connecton payload', payload)
+            print('get_connecton payload')
             response = requests.get(url, headers=self.proxy_headers(
             ), data=json.dumps(payload))
             t = json.loads(response.text.encode('utf8'))
@@ -351,11 +391,11 @@ class ps_proxy:
     def get_ip(self, token=False):
         url = "https://api.proxyhorse.com/client/getconnectionip.php"
         payload = {'token': token}
-        print('get_ip payload', payload)
+        print('get_ip')
         response = requests.post(url, headers=self.proxy_headers(
         ), data=json.dumps(payload))
         t = json.loads(response.text.encode('utf8'))
-        print(t)
+
         ip = t['data']
 
         if "United States" == ip['country'] and self.city == ip['city']:

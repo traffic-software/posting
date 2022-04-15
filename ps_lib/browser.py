@@ -42,6 +42,7 @@ class browser:
         self.proxy_company = 'proxyrotator'
         self.pva = pva
         self.account_id = pofileLocation
+        self.use_proxy = use_proxy
         warnings.filterwarnings('ignore')
         # ................account.....................................
         self.account = accounts()
@@ -50,18 +51,18 @@ class browser:
         # https://peter.sh/experiments/chromium-command-line-switches/
         ####################proxy user##############
 
-        if use_proxy:
+        if self.use_proxy:
             self.PROXY_USER = False  # username
             self.PROXY_PASS = False  # password
             self.PROXY_HOST = False
             self.PROXY_PORT = False
-            self.PROXY_TYPE = 'http'
+            self.PROXY_TYPE = 'PROXY'
 
             # ............Normal rotating proxy......................
-        if use_proxy:
-            if self.proxy():
+        if self.proxy():
 
-                print("done: proxy set")
+            print("done: proxy set")
+            if self.use_proxy:
                 # self.proxy_auth_plugin()
                 self.proxy_auth_plugin_pac_script()
 
@@ -191,7 +192,8 @@ class browser:
                         extra=self.pva['extra']))
                     print('city not present')
             else:
-                print('you not set backup proxy')
+                self.use_proxy = False
+                print('you not set proxy')
 
             # ............packetstream.io......................
 

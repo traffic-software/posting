@@ -55,7 +55,6 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     popmail.messages('robot@craigslist.org')
     popmail.close()
-    profile_dir = "{}/profiles/{}".format(bundle_dir, account_id)
 
     b = browser(account_id, pva=account_data, use_proxy=False)
     time.sleep(5)
@@ -90,7 +89,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     button.click()
 
     button = b.select_element_xpath(
-        '//*[@id="new-edit"]/div/label/label[2]/div/span[1]', 'for sale by owner sub ')
+        '//*[@id="new-edit"]/div/label/label[1]/div/span[1]', 'for sale by owner sub ')
     # b.scroll_like_user(button)
     button.click()
 
@@ -102,7 +101,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     print('b_sub text typing')
     for character in postsub.Spin():
         b_sub.send_keys(character)
-        time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
+        # time.sleep(0.1)
     print('b_sub text typing done')
     # b_sub.send_keys(character)
     # zip code setup
@@ -119,7 +118,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     for character in postbody.with_email(body_mail):
 
         b_body.send_keys(character)
-        time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
+        # time.sleep(0.1)
     print('suby text typing done')
     # b_body.send_keys(postbody.with_email(body_mail))
 

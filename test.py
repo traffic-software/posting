@@ -13,14 +13,17 @@
 
 # bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
+import random
+import string
+from ps_lib.proxy import ps_proxy
 import requests
 import json
 url = "http://ip-api.com/json"
 timeout = 10
-r = requests.get(url, timeout=timeout)
-if "zip" in r.text:
-    ip = json.loads(r.text)
-    return ip['zip']
+# r = requests.get(url, timeout=timeout)
+# if "zip" in r.text:
+#     ip = json.loads(r.text)
+#     return ip['zip']
 
 
 # p_pass= "wifi;us;;;{};".format("ft.+washington")
@@ -41,62 +44,61 @@ if "zip" in r.text:
 # print(r.text)
 
 
-# from ps_lib.proxy import ps_proxy
-# url = "https://api.proxyhorse.com/client/getconnections.php"
+url = "https://api.proxyhorse.com/client/getconnections.php"
 
-# payload = {}
-# headers = {
-#   'Authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a'
-# }
+payload = {}
+headers = {
+    'Authorization': 'Zp1ybaCFsuhb9iPVet04tYuYjFQiHfakuUyT2oJeIeVcLcOOqJ'
+}
 
-# response = requests.request("GET", url, headers=headers, data = payload)
-# d = json.loads(response.text.encode('utf8'))
-# print(d)
+response = requests.request("GET", url, headers=headers, data=payload)
+d = json.loads(response.text.encode('utf8'))
+print(d)
 
-# for i in d['data']:
-#     url = "https://api.proxyhorse.com/client/deleteconnection.php"
+for i in d['data']:
+    url = "https://api.proxyhorse.com/client/deleteconnection.php"
 
-#     payload = {"token": "{}".format(i['token'])}
-#     headers = {
-#     'authorization': 'XLvBLR8zJpsvUkVgQRYO9Lnf514N9a',
-#     'Content-Type': 'application/json'
-#     }
+    payload = {"token": "{}".format(i['token'])}
+    headers = {
+        'authorization': 'Zp1ybaCFsuhb9iPVet04tYuYjFQiHfakuUyT2oJeIeVcLcOOqJ',
+        'Content-Type': 'application/json'
+    }
 
-#     response = requests.request("DELETE", url, headers=headers, data = json.dumps(payload))
-# # psproxy = ps_proxy(company="proxyhorse",key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
+    response = requests.request(
+        "DELETE", url, headers=headers, data=json.dumps(payload))
+psproxy = ps_proxy(company="proxyhorse", key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
 
-# # proxy = psproxy.proxyhorse('NC-Chinquapin')
-
-
-# # post = post()
-# # print(post.get_post())
-# # account = accounts()
-# # print(account.get_account())
-# import string
-# import random
+proxy = psproxy.proxyhorse('NC-Chinquapin')
 
 
-# ## characters to generate password from
-# characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
+# post = post()
+# print(post.get_post())
+# account = accounts()
+# print(account.get_account())
 
-# def generate_random_password():
-# 	## length of password from the user
-# 	length = int(15)
 
-# 	## shuffling the characters
-# 	random.shuffle(characters)
+# characters to generate password from
+characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
 
-# 	## picking random characters from the list
-# 	password = []
-# 	for i in range(length):
-# 		password.append(random.choice(characters))
 
-# 	## shuffling the resultant password
-# 	random.shuffle(password)
+def generate_random_password():
+    # length of password from the user
+    length = int(15)
 
-# 	## converting the list to string
-# 	## printing the list
-# 	return "".join(password)
+    # shuffling the characters
+    random.shuffle(characters)
+
+    # picking random characters from the list
+    password = []
+    for i in range(length):
+        password.append(random.choice(characters))
+
+    # shuffling the resultant password
+    random.shuffle(password)
+
+    # converting the list to string
+    # printing the list
+    return "".join(password)
 
 
 # invoking the function
