@@ -103,7 +103,7 @@ class imap:
 
             if part.get_content_type() == "text/html":
                 body = part.get_payload(decode=True)
-                print('get_body', body)
+
                 return body
 
             else:

@@ -216,7 +216,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         '//*[@id="publish_top"]/button', 'go from publish page')
     # b.scroll_like_user(nextpage)
     nextpage.click()
-    # time.sleep(120)
+    time.sleep(10)
 
     if not pp:
         pop = popacc.split(":")
