@@ -51,7 +51,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         popmail = imap(
             account_id, account_data['email'], account_data['password'])
 
-    popmail.messages('robot@craigslist.org')
+    popmail.messages()
     popmail.close()
     b = browser(account_id, pva=account_data)
     time.sleep(5)
@@ -97,7 +97,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     print('b_sub text typing')
     for character in postsub.Spin():
         b_sub.send_keys(character)
-        # time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
+        time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
     print('b_sub text typing done')
     # b_sub.send_keys(character)
     # zip code setup
@@ -105,6 +105,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         '//*[@id="postal_code"]', 'postal code"]')
     # b.scroll_like_user(postal_code)
     postal_code.send_keys(b.proxy_zip)
+    time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
 
     # post body setup
     b_body = b.select_element_xpath('//*[@id="PostingBody"]', 'PostingBody')
@@ -114,7 +115,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     for character in postbody.with_email(body_mail):
 
         b_body.send_keys(character)
-        # time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
+        time.sleep(random.choice([0.1, 0.2]))
     print('suby text typing done')
     # b_body.send_keys(postbody.with_email(body_mail))
 
@@ -216,6 +217,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     # time.sleep(120)
 
     if not pp:
+        pop = popacc.split(":")
         popmail = imap(account_id, pop[0], pop[1])
     else:
         popmail = imap(
@@ -232,7 +234,7 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         counter = counter+1
 
-        popmail.messages('robot@craigslist.org')
+        popmail.messages()
         links = popmail.get_link(
             ['craigslist.org/pass', 'craigslist.org/login/onetime'])
 
@@ -303,7 +305,7 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     print('post done')
     print('browser close')
-    b.ipinfo_save(software_name='clf')
+    b.ipinfo_save(software_name='housing')
 
     b.exit()
     popmail.close()

@@ -60,7 +60,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     time.sleep(5)
 
     try:
-        b.get_url('https://geo.craigslist.org')
+        b.get_url('https://melbourne.craigslist.org')
     except:
         b.exit()
 
