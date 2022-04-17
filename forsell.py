@@ -56,7 +56,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     popmail.messages()
     popmail.close()
 
-    b = browser(account_id, pva=account_data, use_proxy=False)
+    b = browser(account_id, pva=account_data, image_bock=False)
     time.sleep(5)
 
     try:
@@ -208,6 +208,14 @@ def main(account_data, postinfo, packages_id, body_mail):
     if 's=geoverify=' in b.current_url():
         sub_aria = b.select_element_xpath('//*[@name="area_change_ok"]')
         sub_aria.click()
+     # image upload prosess start
+    image1 = b.select_element_xpath(
+        '//*[@id="plupload"]', 'image option 1')
+    # b.scroll_like_user(nextpage)
+
+    # image upload prosess end
+    time_sleep = b.upload_multiple(image1, account_id)
+    time.sleep(time_sleep)
     nextpage = b.select_element_xpath(
         '/html/body/article/section/form/button', 'go from image page')
     # b.scroll_like_user(nextpage)

@@ -1,4 +1,5 @@
 from email.policy import default
+import imp
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -19,6 +20,8 @@ from ps_lib.timezone import t
 from ps_lib.userAgent import l
 from sys import exit
 import sys
+if sys.platform in ['Windows', 'win32', 'cygwin']:
+    import pyautogui
 import zipfile
 import warnings
 import random
@@ -28,7 +31,7 @@ import string
 class browser:
     account_id = None
 
-    def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None):
+    def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None, image_bock=True):
 
         self.proxy_country = "IT"
         self.proxy_city = None
@@ -43,6 +46,7 @@ class browser:
         self.pva = pva
         self.account_id = pofileLocation
         self.use_proxy = use_proxy
+        self.image_bock = image_bock
         warnings.filterwarnings('ignore')
         # ................account.....................................
         self.account = accounts()
@@ -65,6 +69,8 @@ class browser:
             if self.use_proxy:
                 # self.proxy_auth_plugin()
                 self.proxy_auth_plugin_pac_script()
+            else:
+                self.PROXY_PASS = False
 
         if sys.platform in ['Windows', 'win32', 'cygwin']:
             driverUrl = 'chromedriver.exe'
@@ -193,7 +199,6 @@ class browser:
                     print('city not present')
             else:
                 self.use_proxy = False
-                print('you not set proxy')
 
             # ............packetstream.io......................
 
@@ -419,7 +424,7 @@ class browser:
 
         return self.driver.find_elements_by_css_selector(selector)
 
-    def select_element_xpath(self, selector, mesasage="genarl work", type=1, valu=None):
+    def select_element_xpath(self, selector, mesasage="genarl work", type=1, valu=None, wait=1):
         # print(self.current_url())
         co = 0
         element = False
@@ -437,6 +442,7 @@ class browser:
                 if co > 10:
                     break
                 print("waiting for : ", mesasage)
+                time.sleep(wait)
                 if type == 2 and co == 1:
                     self.refresh()
         if element == False:
@@ -447,6 +453,32 @@ class browser:
             self.account.post_error(self.account_id, message=mesasage)
             self.exit()
         return element
+
+    def upload_multiple(self, element, profile_id):
+        try:
+            sleep_time = 5
+
+            imge_dir = os.getcwd() + "\img\{}".format(profile_id)
+            if os.path.exists(imge_dir):
+                for i in os.listdir(imge_dir):
+                    if i.find('.') > 1:
+                        element.click()
+                        time.sleep(4)
+                        # path of File
+                        pyautogui.write(r""+imge_dir+"\{}".format(i))
+                        pyautogui.press('enter')
+                        sleep_time += 5
+            else:
+                for i in os.listdir(os.getcwd() + "\img"):
+                    if i.find('.') > 1:
+                        element.click()
+                        time.sleep(4)
+                        pyautogui.write(r""+os.getcwd() + "\img\{}".format(i))
+                        pyautogui.press('enter')
+                        sleep_time += 5
+        except OSError:
+            pass
+        return sleep_time
 
     def try_xpath(self, selector, mesasage="genarl work"):
         try:
@@ -633,9 +665,10 @@ class browser:
         return self.driver.current_url
 
     def wait(self, x):
+
         try:
-            wait = WebDriverWait(self.driver, 10)
-            return wait.until(EC.element_to_be_clickable((By.XPATH, x)))
+            wait = WebDriverWait(self.driver, 30)
+            return wait.until(EC.presence_of_all_elements_located((By.XPATH, x)))
         except:
             self.exit()
             print("wait")
@@ -739,6 +772,14 @@ class browser:
 				"condition": {"urlFilter": "png)", "resourceTypes": ["image"] }
 			}
 		]"""
+        block_rules_json = """[
+			{
+				"id": 1,
+				"priority": 1,
+				"action": { "type": "block" },
+				"condition": {"urlFilter": "avif", "resourceTypes": ["image"] }
+			}
+		]"""
         manifest_json = """
 		{
 			"version": "1.0.0",
@@ -807,7 +848,11 @@ class browser:
 		""" % (self.PROXY_TYPE, self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
         pluginfile = 'proxy_auth_plugin.zip'
         zp = zipfile.ZipFile(pluginfile, 'w')
-        zp.writestr("rules.json", rules_json)
+        if self.image_bock:
+            zp.writestr("rules.json", rules_json)
+        else:
+            zp.writestr("rules.json", block_rules_json)
+
         zp.writestr("manifest.json", manifest_json)
 
         zp.writestr("background.js", background_js)

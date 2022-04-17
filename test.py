@@ -13,11 +13,34 @@
 
 # bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
-import random
-import string
-from ps_lib.proxy import ps_proxy
-import requests
 import json
+from numpy import number
+import requests
+from ps_lib.proxy import ps_proxy
+import string
+import random
+import os
+
+
+def upload_multiple(number=12546):
+    try:
+        imge_dir = os.getcwd() + "\img\{}".format(number)
+        if os.path.exists(imge_dir):
+            for i in os.listdir(imge_dir):
+
+                if i.find('.') > 1:
+                    print(i)
+                # os.remove(os.path.join(app_path, img))
+        else:
+            for i in os.listdir(os.getcwd() + "\img"):
+                if i.find('.') > 1:
+                    print(i)
+    except OSError:
+        pass
+
+
+delete_all()
+exit()
 url = "http://ip-api.com/json"
 timeout = 10
 # r = requests.get(url, timeout=timeout)

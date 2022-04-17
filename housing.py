@@ -22,6 +22,7 @@ from ps_lib.ps_str import ps_str
 from ps_lib.imap import imap
 from selenium.webdriver.common.keys import Keys
 import os
+import pyautogui
 
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
@@ -53,8 +54,14 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     popmail.messages()
     popmail.close()
-    b = browser(account_id, pva=account_data)
+    b = browser(account_id, pva=account_data, image_bock=False)
     time.sleep(5)
+    if b.PROXY_PASS == False:
+        b.exit()
+        print('proxy condition not fulfilled')
+        # worker_acc.ban_3(account_id, 5)
+        time.sleep(10)
+        return False
 
     try:
         b.get_url('https://geo.craigslist.org')
@@ -105,7 +112,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         '//*[@id="postal_code"]', 'postal code"]')
     # b.scroll_like_user(postal_code)
     postal_code.send_keys(b.proxy_zip)
-    time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
+    # time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
 
     # post body setup
     b_body = b.select_element_xpath('//*[@id="PostingBody"]', 'PostingBody')
@@ -115,7 +122,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     for character in postbody.with_email(body_mail):
 
         b_body.send_keys(character)
-        time.sleep(random.choice([0.1, 0.2]))
+        # time.sleep(random.choice([0.1, 0.2]))
     print('suby text typing done')
     # b_body.send_keys(postbody.with_email(body_mail))
 
@@ -197,15 +204,28 @@ def main(account_data, postinfo, packages_id, body_mail):
     # b.scroll_like_user(nextpage)
     nextpage.click()
     # no pass click
+    if 's=geoverify=' in b.current_url():
 
+        sub_aria = b.select_element_xpath('//*[@name="area_change_ok"]')
+        sub_aria.click()
     nextpage = b.select_element_xpath(
         '//*[@id="leafletForm"]/button', 'go from map page')
     # b.scroll_like_user(nextpage)
+
     nextpage.click()
     if 's=geoverify=' in b.current_url():
 
         sub_aria = b.select_element_xpath('//*[@name="area_change_ok"]')
         sub_aria.click()
+
+     # image upload prosess start
+    image1 = b.select_element_xpath(
+        '//*[@id="plupload"]', 'image option 1')
+    # b.scroll_like_user(nextpage)
+
+    # image upload prosess end
+    time_sleep = b.upload_multiple(image1, account_id)
+    time.sleep(time_sleep)
     nextpage = b.select_element_xpath(
         '/html/body/article/section/form/button', 'go from image page')
     # b.scroll_like_user(nextpage)
