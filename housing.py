@@ -99,43 +99,66 @@ def main(account_data, postinfo, packages_id, body_mail):
     # Posting Title setup
     b_sub = b.select_element_xpath('//*[@id="PostingTitle"]', 'PostingTitle')
     # b.scroll_like_user(b_sub)
-    post = postinfo.get_post()
-    postsub = ps_str(post['data1'])
+
+    postsub = ps_str(postinfo.getdata('data1'))
     print('b_sub text typing')
     for character in postsub.Spin():
         b_sub.send_keys(character)
         time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
     print('b_sub text typing done')
     # b_sub.send_keys(character)
+    # city or neighborhood setup
+    city = b.select_element_xpath(
+        '//*[@id="geographic_area"]', 'postal code"]')
+    # b.scroll_like_user(postal_code)
+    neighborhood = b.proxy_city if postinfo.getdata(
+        'data3') == "" else postinfo.getdata('data3')
+    city.send_keys(neighborhood)
     # zip code setup
     postal_code = b.select_element_xpath(
         '//*[@id="postal_code"]', 'postal code"]')
     # b.scroll_like_user(postal_code)
-    postal_code.send_keys(b.proxy_zip)
+    postcode = b.proxy_zip if postinfo.getdata(
+        'data2') == "" else postinfo.getdata('data2')
+    postal_code.send_keys(postcode)
     # time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
 
     # post body setup
     b_body = b.select_element_xpath('//*[@id="PostingBody"]', 'PostingBody')
     # b.scroll_like_user(b_body)
-    postbody = ps_str(post['data4'])
+    postbody = ps_str(postinfo.getdata('data4'))
     print('body text typing')
     for character in postbody.with_email(body_mail):
 
         b_body.send_keys(character)
-        # time.sleep(random.choice([0.1, 0.2]))
-    print('suby text typing done')
+        time.sleep(random.choice([0.1, 0.2]))
+    print('price text typing done')
     # b_body.send_keys(postbody.with_email(body_mail))
 
     # price setup
     b_price = b.select_element_xpath(
         '//*[@id="new-edit"]/div/fieldset[1]/div/div[1]/label[1]/label/input', 'price set')
     # b.scroll_like_user(b_price)
-    b_price.send_keys(postinfo.price)
+    price = postinfo.price if postinfo.getdata(
+        'data11') == "" else postinfo.getdata('data11')
+    b_price.send_keys(price)
+    # sqft setup
+    sqft = b.select_element_xpath(
+        '//*[@name="surface_area"]', 'size in sqft set')
+    sqft.clear()
+    # b.scroll_like_user(b_price)
+    type = [1000, 900, 800, 600]
+    one_type = random.choice(type)
+    sizein_sqft = one_type if postinfo.getdata(
+        'data12') == "" else postinfo.getdata('data12')
+    sqft.send_keys(sizein_sqft)
 
     # housing type setup
     try:
         type = [1, 4, 5, 6]
         one_type = random.choice(type)
+        one_type = one_type if postinfo.getdata(
+            'data6') == "" else postinfo.getdata('data6')
 
         append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
         ju = str('$("#ui-id-1"){}'.format(append))
@@ -148,8 +171,10 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     # laundry setup
     try:
-        one_type = 1
-        append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
+        laundry = 1
+        laundry = laundry if postinfo.getdata(
+            'data6') == "" else postinfo.getdata('data6')
+        append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(laundry))
         ju = str('$("#ui-id-2"){}'.format(append))
 
         b.script_run('$("#ui-id-2").empty();', message='laundry empty')
@@ -160,10 +185,13 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     # parking setup
     try:
-        type = [1, 2]
-        one_type = random.choice(type)
+        parking = [1, 2]
 
-        append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
+        parking = random.choice(parking)
+        parking = parking if postinfo.getdata(
+            'data8') == "" else postinfo.getdata('data8')
+
+        append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(parking))
         ju = str('$("#ui-id-3"){}'.format(append))
 
         b.script_run('$("#ui-id-3").empty();', message='parking empty')
@@ -173,9 +201,11 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     # bedrooms setup
     try:
+        bedrooms = postinfo.bed if postinfo.getdata(
+            'data9') == "" else postinfo.getdata('data9')
 
         append = '.append("<option value=\'{}\' selected>any</option>");'.format(
-            str(postinfo.bed))
+            str(bedrooms))
         ju = str('$("#ui-id-4"){}'.format(append))
 
         b.script_run('$("#ui-id-4").empty();', message='bedrooms empty')
@@ -185,8 +215,10 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     # bathrooms setup
     try:
+        bathrooms = postinfo.bat if postinfo.getdata(
+            'data10') == "" else postinfo.getdata('data10')
         append = '.append("<option value=\'{}\' selected>any</option>");'.format(
-            str(postinfo.bat))
+            str(bathrooms))
         ju = str('$("#ui-id-5"){}'.format(append))
 
         b.script_run('$("#ui-id-5").empty();', message='bathrooms empty')
@@ -194,11 +226,21 @@ def main(account_data, postinfo, packages_id, body_mail):
     except Exception as e:
         print('bathrooms error', e)
 
-    # email setup
-    # time.sleep(2000)
+    # show address click
+    street = False if postinfo.getdata(
+        'data13') == "" else postinfo.getdata('data13')
+    if street:
+        show_address_ok = b.select_element_xpath(
+            '//*[@name="show_address_ok"]', 'show address click')
+        show_address_ok.click()
+        b_street = b.select_element_xpath(
+            '//*[@name="xstreet0"]', 'street')
+        b_street.send_keys(street)
 
+    # email setup
     b_email = b.select_element_xpath('//*[@name="FromEMail"]', 'select email')
     # b.scroll_like_user(b_email)
+
     b_email.send_keys(account_data['email'])
     nextpage = b.select_element_xpath('//*[@name="go"]', 'go next page')
     # b.scroll_like_user(nextpage)
@@ -363,12 +405,16 @@ while True:
         time.sleep(60)
         continue
     one_account = acc.get_account()
-
-    postinfo = post.get_post()
-    body_mail = None
-    if one_account == None or postinfo == None:
-        print('post or account not find for worker')
+    if one_account == None:
+        print('account not find for worker')
         time.sleep(60)
+        continue
+    postinfo = post.get_post(one_account['id'])
+    body_mail = None
+    if postinfo == None:
+
+        print('post not find for worker')
+        time.sleep(10)
         continue
     print('account last use time is : ', one_account['last_updates'])
 
