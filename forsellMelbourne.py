@@ -110,6 +110,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         '//*[@id="postal_code"]', 'postal code"]')
     # b.scroll_like_user(postal_code)
     postal_code.send_keys(b.get_proxy_zip())
+    postal_code.send_keys('3000')
 
     # post body setup
     b_body = b.select_element_xpath('//*[@id="PostingBody"]', 'PostingBody')

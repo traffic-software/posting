@@ -41,17 +41,13 @@ def main(account_data, postinfo, packages_id, body_mail):
     # print(account_data)
     account_id = account_data['id']
     worker_acc = accounts()
+    use_proxy = False
 
-    b = browser(account_id, pva=account_data)
-    # proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'  # noyon
-    # b = browser(account_id, packages_id, proxy_company='proxyhorse', proxy_country="UnitedStates",
-    #             proxy_user=proxyhorse_pass, proxy_pass=account_data['extra'])
-    # p_pass = "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s" % (
-    #     ''.join(random.choice(string.ascii_letters) for i in range(10)))
-    # b = browser(account_id, packages_id, proxy_company='packetstream',
-    #             proxy_country="UnitedStates", proxy_user='malaknoyn', proxy_pass=p_pass)
+    b = browser(account_id, pva=account_data,
+                use_proxy=False, headless=True)
+
     time.sleep(5)
-    if b.PROXY_PASS == False:
+    if b.PROXY_PASS == False and use_proxy == True:
         b.exit()
         print('proxy condition not fulfilled')
         # worker_acc.ban_3(account_id, 5)
@@ -69,7 +65,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     else:
 
         nextpage = b.select_element_xpath(
-            '//*[@class="flag-action action"]', 'flag button')
+            '//*[@class="flag-action action"]', 'flaging try')
 
         nextpage.click()
 

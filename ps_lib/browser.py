@@ -31,7 +31,7 @@ import string
 class browser:
     account_id = None
 
-    def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None, image_bock=True):
+    def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None, image_bock=True, headless=False):
 
         self.proxy_country = "IT"
         self.proxy_city = None
@@ -54,7 +54,7 @@ class browser:
         self.options = webdriver.ChromeOptions()
         # https://peter.sh/experiments/chromium-command-line-switches/
         ####################proxy user##############
-
+        self.PROXY_PASS = False  # password
         if self.use_proxy:
             self.PROXY_USER = False  # username
             self.PROXY_PASS = False  # password
@@ -90,6 +90,9 @@ class browser:
         self.options.add_experimental_option("useAutomationExtension", False)
         self.options.add_experimental_option(
             "excludeSwitches", ["enable-automation"])
+        if headless:
+            self.options.add_argument('--headless')
+            self.options.add_argument('--disable-gpu')
 
         # self.options.add_argument("--lang=it-IT")
         self.options.add_argument("--no-sandbox")
