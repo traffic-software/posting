@@ -13,118 +13,71 @@
 
 # bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
+from itertools import count
 import json
 from numpy import number
 import requests
-from ps_lib.proxy import ps_proxy
+# from ps_lib.proxy import ps_proxy
 import string
 import random
 import os
 
 
-def upload_multiple(number=12546):
-    try:
-        imge_dir = os.getcwd() + "\img\{}".format(number)
-        if os.path.exists(imge_dir):
-            for i in os.listdir(imge_dir):
-
-                if i.find('.') > 1:
-                    print(i)
-                # os.remove(os.path.join(app_path, img))
-        else:
-            for i in os.listdir(os.getcwd() + "\img"):
-                if i.find('.') > 1:
-                    print(i)
-    except OSError:
-        pass
-
-
-delete_all()
-exit()
-url = "http://ip-api.com/json"
-timeout = 10
-# r = requests.get(url, timeout=timeout)
-# if "zip" in r.text:
-#     ip = json.loads(r.text)
-#     return ip['zip']
-
-
-# p_pass= "wifi;us;;;{};".format("ft.+washington")
-# data  = "uyMDe7ALdLkpJmm5:"+p_pass+"@proxy.soax.com:9000"
-
-# proxie = {"http": "http://"+data,"https": "http://"+data}
-# url = 'https://soax.com/api/get-country-cities?api_key=HzoxSzpE1Y_zJf5Y&package_key=uyMDe7ALdLkpJmm5&country_iso=us&conn_type=wifi&region=nevada'
-# # https://soax.com/api/get-country-cities?api_key=<api_key>&package_key=<package_key>&country_iso=<country_iso>&conn_type=<conn_type>[&provider=<provider_name>[&region=<region_name>]]
+# url = "https://geo.craigslist.org"
 # timeout = 10
-# proxy_payload ={
-#     'api_key':'HzoxSzpE1Y_zJf5Y',
-#     'package_key':'uyMDe7ALdLkpJmm5',
-#     'country_iso':'us',
-#     'conn_type':'wifi'
-# }
-# r = requests.get(url, timeout=timeout,data=proxy_payload)
-# # r = requests.get(url, timeout=timeout)
+# proxie = {"http": "http://932eba933076a67fc7ee3b4a29664b52:f02769a4fcbcb32d1d436ad3da91b227@199.189.86.111:9500",
+#           "https": "http://932eba933076a67fc7ee3b4a29664b52:f02769a4fcbcb32d1d436ad3da91b227@199.189.86.111:9500"}
+# r = requests.get(url, proxies=proxie)
+# print(r.status_code)
 # print(r.text)
+def proxy_check(data):
+    try:
+        d = "{}:{}@{}:{}".format(data['user'],
+                                 data['password'], data['ip'], data['port'])
+        proxie = {"http": "http://"+d, "https": "http://"+d}
+        # if data['type'] == 'nouser':
+        # proxie = {"http": "http://"+data, "https": "http://"+data}
+
+        url = "http://ip-api.com/json"
+        r = requests.get(url, timeout=10, proxies=proxie)
+
+        if r.status_code in [400, 407, 500, 502, 522, 525]:
+            print('status_code {0}'.format(r.status_code))
+
+            return r.status_code
+
+        ip = json.loads(r.text)
+        print(ip)
+
+        return ip
+
+    except Exception as e:
+        print(e)
+# .............proxyrotator.com................
 
 
-url = "https://api.proxyhorse.com/client/getconnections.php"
+# proxy_check('103.47.66.154:8080')
+# exit()
+url = 'http://falcon.proxyrotator.com:51337'
+params = dict(
+    apiKey='hEQPUdGan7BjCw4X8rtxkTzFMNYH392c',
+    userAgent='true',
+    country='US',
+    get='true',
+    # connectionType='Residential'
+)
+counter = 1
+while True:
+    counter = counter+1
+    print(counter)
 
-payload = {}
-headers = {
-    'Authorization': 'Zp1ybaCFsuhb9iPVet04tYuYjFQiHfakuUyT2oJeIeVcLcOOqJ'
-}
+    resp = requests.get(url, params=params, timeout=3)
 
-response = requests.request("GET", url, headers=headers, data=payload)
-d = json.loads(response.text.encode('utf8'))
-print(d)
-
-for i in d['data']:
-    url = "https://api.proxyhorse.com/client/deleteconnection.php"
-
-    payload = {"token": "{}".format(i['token'])}
-    headers = {
-        'authorization': 'Zp1ybaCFsuhb9iPVet04tYuYjFQiHfakuUyT2oJeIeVcLcOOqJ',
-        'Content-Type': 'application/json'
-    }
-
-    response = requests.request(
-        "DELETE", url, headers=headers, data=json.dumps(payload))
-psproxy = ps_proxy(company="proxyhorse", key='mEOcvdgnggj4xhIIuxNFMT7S7oJGNM')
-
-proxy = psproxy.proxyhorse('NC-Chinquapin')
+    data = json.loads(resp.text)
+    data['user'] = '932eba933076a67fc7ee3b4a29664b52'
+    data['password'] = 'f02769a4fcbcb32d1d436ad3da91b227'
+    proxy_check(data)
 
 
-# post = post()
-# print(post.get_post())
-# account = accounts()
-# print(account.get_account())
-
-
-# characters to generate password from
-characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
-
-
-def generate_random_password():
-    # length of password from the user
-    length = int(15)
-
-    # shuffling the characters
-    random.shuffle(characters)
-
-    # picking random characters from the list
-    password = []
-    for i in range(length):
-        password.append(random.choice(characters))
-
-    # shuffling the resultant password
-    random.shuffle(password)
-
-    # converting the list to string
-    # printing the list
-    return "".join(password)
-
-
-# invoking the function
-
-# for i in range(1,10000):
-#     print(generate_random_password())
+# .............pubproxy.com......................
+# url = 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT'

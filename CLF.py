@@ -41,13 +41,12 @@ def main(account_data, postinfo, packages_id, body_mail):
     # print(account_data)
     account_id = account_data['id']
     worker_acc = accounts()
-    use_proxy = False
+    use_proxy = True
 
-    b = browser(account_id, pva=account_data,
-                use_proxy=False, headless=True)
+    b = browser(account_id, pva=account_data)
 
     time.sleep(5)
-    if b.PROXY_PASS == False and use_proxy == True:
+    if b.PROXY_PASS == False and b.use_proxy == True:
         b.exit()
         print('proxy condition not fulfilled')
         # worker_acc.ban_3(account_id, 5)
@@ -64,10 +63,14 @@ def main(account_data, postinfo, packages_id, body_mail):
         worker_acc.ban_3(account_id, status=3)
     else:
 
-        nextpage = b.select_element_xpath(
+        hidenbutton = b.select_element_xpath(
+            '//*[@class="banish-unbanish action"]', 'hiden try')
+
+        hidenbutton.click()
+        flagbutton = b.select_element_xpath(
             '//*[@class="flag-action action"]', 'flaging try')
 
-        nextpage.click()
+        flagbutton.click()
 
         worker_acc.post_error(
             account_id, "flag action try", software_type='clf')
