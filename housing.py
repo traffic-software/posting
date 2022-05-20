@@ -104,7 +104,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     print('b_sub text typing')
     for character in postsub.Spin():
         b_sub.send_keys(character)
-        time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
+        # time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
     print('b_sub text typing done')
     # b_sub.send_keys(character)
     # city or neighborhood setup
@@ -128,10 +128,11 @@ def main(account_data, postinfo, packages_id, body_mail):
     # b.scroll_like_user(b_body)
     postbody = ps_str(postinfo.getdata('data4'))
     print('body text typing')
-    for character in postbody.with_email(body_mail):
+    b_body.send_keys(postbody.with_email(body_mail))
+    # for character in postbody.with_email(body_mail):
 
-        b_body.send_keys(character)
-        time.sleep(random.choice([0.1, 0.2]))
+    #     b_body.send_keys(character)
+    #     # time.sleep(random.choice([0.1, 0.2]))
     print('price text typing done')
     # b_body.send_keys(postbody.with_email(body_mail))
 
@@ -225,6 +226,16 @@ def main(account_data, postinfo, packages_id, body_mail):
         b.script_run(ju, message='bathrooms append')
     except Exception as e:
         print('bathrooms error', e)
+    # rent period setup
+    try:
+
+        append = '.append("<option value=\'3\' selected>any</option>");'
+        ju = str('$("#ui-id-6"){}'.format(append))
+
+        b.script_run('$("#ui-id-6").empty();', message='rent period empty')
+        b.script_run(ju, message='rent period append')
+    except Exception as e:
+        print('rent period error', e)
 
     # show address click
     street = False if postinfo.getdata(
