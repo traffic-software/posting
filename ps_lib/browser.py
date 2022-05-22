@@ -1,5 +1,6 @@
 from email.policy import default
 import imp
+from logging import exception
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,14 +11,17 @@ from selenium.webdriver.support.ui import Select
 from selenium import webdriver
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
-import json
-import requests
-import os
-import time
 from ps_lib.ps_str import ps_str
 from ps_lib.proxy import ps_proxy
 from ps_lib.timezone import t
 from ps_lib.userAgent import l
+
+
+import json
+import requests
+import os
+import time
+
 from sys import exit
 import sys
 if sys.platform in ['Windows', 'win32', 'cygwin']:
@@ -453,6 +457,49 @@ class browser:
             print("element not find : ", mesasage)
             if type == 2:
                 mesasage = mesasage + self.check_error(valu)
+            self.account.post_error(self.account_id, message=mesasage)
+            time.sleep(120)
+            self.exit()
+        return element
+
+    def element_xpath(self, elements, selector, mesasage="genarl work"):
+        # print(self.current_url())
+        co = 0
+        element = False
+        try:
+            element = elements.find_element_by_xpath(selector)
+            if element.is_displayed() and element.is_enabled():
+                print("elements done : ", mesasage)
+
+        except:
+
+            print("elements waiting for : ", mesasage)
+
+        if element == False:
+
+            print("element not find : ", mesasage)
+
+            self.account.post_error(self.account_id, message=mesasage)
+            self.exit()
+        return element
+
+    def elements_xpath(self, elements, selector, mesasage="genarl work"):
+        # print(self.current_url())
+        co = 0
+        element = False
+        try:
+            element = elements.find_elements_by_xpath(selector)
+
+            print("elements done : ", mesasage)
+
+        except:
+
+            print("elements waiting for : ", mesasage)
+
+        if element == False:
+
+            print("element not find : ", mesasage)
+
             self.account.post_error(self.account_id, message=mesasage)
             self.exit()
         return element

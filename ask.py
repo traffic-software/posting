@@ -8,6 +8,7 @@ import string
 import fnmatch
 import sys
 from os import path
+from weakref import proxy
 from pyvirtualdisplay import Display
 from datetime import datetime
 import smtp
@@ -40,38 +41,53 @@ def main(account_data, postinfo, packages_id, body_mail):
     print("account id: ", account_id)
     worker_acc = accounts()
     settings = table()
-    popacc = settings.pop_verify()
+    # popacc = settings.pop_verify()
 
-    if "yes" == settings.pva_verify():
-        str(input("type any key to start make pva : "))
-    pp = "pva_pop" == popacc
-    if not pp:
-        pop = popacc.split(":")
-        popmail = imap(account_id, pop[0], pop[1])
-    else:
-        popmail = imap(
-            account_id, account_data['email'], account_data['password'])
+    # if "yes" == settings.pva_verify():
+    #     str(input("type any key to start make pva : "))
+    # pp = "pva_pop" == popacc
+    # if not pp:
+    #     pop = popacc.split(":")
+    #     popmail = imap(account_id, pop[0], pop[1])
+    # else:
+    #     popmail = imap(
+    #         account_id, account_data['email'], account_data['password'])
 
-    popmail.messages()
-    popmail.close()
-    b = browser(account_id, pva=account_data, image_bock=False)
+    # popmail.messages()
+    # popmail.close()
+    b = browser(account_id, pva=account_data,
+                image_bock=False, use_proxy=False)
     time.sleep(5)
-    if b.PROXY_PASS == False:
-        b.exit()
-        print('proxy condition not fulfilled')
-        # worker_acc.ban_3(account_id, 5)
-        time.sleep(10)
-        return False
+    # if b.PROXY_PASS == False:
+    #     b.exit()
+    #     print('proxy condition not fulfilled')
+    #     # worker_acc.ban_3(account_id, 5)
+    #     time.sleep(10)
+    #     return False
 
     try:
-        b.get_url('https://geo.craigslist.org')
+        b.get_url('https://www.google.com/search?q=google+adsense')
     except:
         b.exit()
+    # time.sleep(240)
+    # q = b.select_element_xpath(
+    #     '//*[@name="q"]', 'q')
+    # q.send_keys(character)
 
-    button = b.select_element_xpath('//*[@id="post"]', 'click new post')
-    # b.scroll_like_user(button)
-    # time.sleep(random.choice([1,2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]))
-    button.click()
+    center_col = b.select_element_xpath(
+        '//*[@id="center_col"]', 'center_col')
+    # print(center_col.get_attribute('innerHTML'))
+    # loing tail keyowrd
+
+    arg = b.element_xpath(center_col, '//*[@id="botstuff"]', 'botstuff')
+    keywords = arg.find_elements_by_tag_name("a")
+
+    print(len(keywords))
+    for item in keywords:
+        print(item.text)
+
+    time.sleep(240)
+    exit()
 
     # https://post.craigslist.org/k/sib7px0t7BGflPX08yY-RA/Qdjqi?s=subarea
     if 'subarea' in b.current_url():
