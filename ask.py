@@ -41,20 +41,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     print("account id: ", account_id)
     worker_acc = accounts()
     settings = table()
-    # popacc = settings.pop_verify()
 
-    # if "yes" == settings.pva_verify():
-    #     str(input("type any key to start make pva : "))
-    # pp = "pva_pop" == popacc
-    # if not pp:
-    #     pop = popacc.split(":")
-    #     popmail = imap(account_id, pop[0], pop[1])
-    # else:
-    #     popmail = imap(
-    #         account_id, account_data['email'], account_data['password'])
-
-    # popmail.messages()
-    # popmail.close()
     b = browser(account_id, pva=account_data,
                 image_bock=False, use_proxy=False)
     time.sleep(5)
@@ -73,20 +60,87 @@ def main(account_data, postinfo, packages_id, body_mail):
     # q = b.select_element_xpath(
     #     '//*[@name="q"]', 'q')
     # q.send_keys(character)
+    time.sleep(10)
 
     center_col = b.select_element_xpath(
         '//*[@id="center_col"]', 'center_col')
-    # print(center_col.get_attribute('innerHTML'))
+
+    # RELATED_QUESTION
+
+    get_new_faqs = b.elements_xpath(
+        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs')
+    for item in get_new_faqs:
+        try:
+            item.click()
+            # print(i.get_attribute('innerHTML'))
+            time.sleep(1)
+
+        except:
+            print("Element is not clickable")
+    get_new_faqs2 = b.elements_xpath(
+        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs')
+    count = 0
+    for item in get_new_faqs:
+        try:
+            count = count+1
+            item.click()
+            # print(i.get_attribute('innerHTML'))
+            time.sleep(1)
+            if 4 < count:
+                break
+
+        except:
+            print("Element is not clickable")
+
+    faqs = b.elements_xpath(
+        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs')
+    print(len(faqs))
+    related_question = []
+
+    for item in faqs:
+
+        # print(item.get_attribute('innerHTML'))
+
+        # description
+        try:
+            description = item.find_element_by_css_selector(
+                '[data-attrid="wa:/description"]')
+            description = description.get_attribute('innerHTML')
+        except:
+            description = 'no description'
+
+        # link = b.element_xpath(
+        #     item, '//*[starts-with(@href,"http")]', 'link')
+        try:
+            link = item.find_element_by_css_selector(
+                'a:not([href*="google.com/search"])')
+            link = link.get_attribute('href')
+        except:
+            link = 'no link'
+        try:
+            faq = item.find_element_by_css_selector('div[id^="exacc_"]')
+            faq = faq.text
+        except:
+            faq = 'not faq'
+
+        question = {
+            'ans': description,
+            'link': link,
+            'question': faq
+        }
+        related_question.append(question)
+
     # loing tail keyowrd
 
     arg = b.element_xpath(center_col, '//*[@id="botstuff"]', 'botstuff')
     keywords = arg.find_elements_by_tag_name("a")
-
-    print(len(keywords))
+    related_keywords = []
     for item in keywords:
-        print(item.text)
-
-    time.sleep(240)
+        related_keywords.append(item.text)
+    print('related_question')
+    print(related_question)
+    print("related_keywords")
+    print(related_keywords)
     exit()
 
     # https://post.craigslist.org/k/sib7px0t7BGflPX08yY-RA/Qdjqi?s=subarea
@@ -407,7 +461,7 @@ setup = table()
 setup.token_verify()
 setup.pop_verify()
 
-#w = int(input('how much worker you need? '))
+# w = int(input('how much worker you need? '))
 # packages_id = input('proxy info by a line : ')
 packages_id = '317345'
 

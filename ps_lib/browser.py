@@ -349,7 +349,7 @@ class browser:
 
     def proxy_save(self, px=None, p=None):
         try:
-            print(px)
+            
 
             self.proxy_city = p["city"]
             self.proxy_region = p['regionName']
@@ -473,11 +473,12 @@ class browser:
 
         except:
 
-            print("elements waiting for : ", mesasage)
+            print("element waiting for : ", mesasage)
 
         if element == False:
 
             print("element not find : ", mesasage)
+            time.sleep(120)
 
             self.account.post_error(self.account_id, message=mesasage)
             self.exit()
@@ -497,6 +498,7 @@ class browser:
             print("elements waiting for : ", mesasage)
 
         if element == False:
+            time.sleep(120)
 
             print("element not find : ", mesasage)
 
