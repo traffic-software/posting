@@ -1,4 +1,5 @@
 import sqlite3
+import json
 import os
 import time
 import requests
@@ -24,6 +25,33 @@ class accounts:
             print("error", r.json()['message'])
             return None
         return r.json()["data"]
+
+    def get_token(self, account):
+        url = '{url}/api/login'.format(url=account['extra'])
+
+        r = requests.post(
+            url, params={'email': account['email'], 'password': account['password'], 'device_name': 'ask'})
+
+        return r.text
+
+    def get_ask_keyword(self, account, access_token):
+        url = '{url}/api/keyword'.format(url=account['extra'])
+
+        r = requests.get(url, headers={'Content-Type': 'application/json',
+                                       'Authorization': 'Bearer {}'.format(access_token)})
+
+        print(r.json())
+        return r.json()
+
+    def save_data(self, account, access_token, data):
+        url = '{url}/api/keyword'.format(url=account['extra'])
+
+        r = requests.post(url, headers={'Content-Type': 'application/json',
+                                        'Authorization': 'Bearer {}'.format(access_token)},
+                          data=json.dumps(data))
+
+        # print(r.text)
+        return True
 
     def get_proxy_list(self):
         url = 'https://{host}/api/v1/post/account/proxy/{token}'.format(

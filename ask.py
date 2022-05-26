@@ -24,6 +24,7 @@ from ps_lib.imap import imap
 from selenium.webdriver.common.keys import Keys
 import os
 import pyautogui
+import re
 
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
@@ -41,9 +42,10 @@ def main(account_data, postinfo, packages_id, body_mail):
     print("account id: ", account_id)
     worker_acc = accounts()
     settings = table()
+    worker_token = worker_acc.get_token(account_data)
+    worker_keyword = worker_acc.get_ask_keyword(account_data, worker_token)
 
-    b = browser(account_id, pva=account_data,
-                image_bock=False, use_proxy=False)
+    b = browser(account_id, pva=account_data)
     time.sleep(5)
     # if b.PROXY_PASS == False:
     #     b.exit()
@@ -53,7 +55,9 @@ def main(account_data, postinfo, packages_id, body_mail):
     #     return False
 
     try:
-        b.get_url('https://www.google.com/search?q=google+adsense')
+
+        b.get_url('https://www.google.com/search?q={q}'.format(
+            q=worker_keyword['keyword'].replace(' ', '+')))
     except:
         b.exit()
     # time.sleep(240)
@@ -62,8 +66,19 @@ def main(account_data, postinfo, packages_id, body_mail):
     # q.send_keys(character)
     time.sleep(10)
 
-    center_col = b.select_element_xpath(
-        '//*[@id="center_col"]', 'center_col')
+    try:
+        center_col = b.select_element_xpath(
+            '//*[@id="center_col"]', 'center_col')
+    except:
+        b.exit()
+        exit()
+    # loing tail keyowrd
+
+    arg = b.element_xpath(center_col, '//*[@id="botstuff"]', 'botstuff')
+    keywords = arg.find_elements_by_tag_name("a")
+    related_keywords = []
+    for item in keywords:
+        related_keywords.append(item.text)
 
     # RELATED_QUESTION
 
@@ -78,23 +93,23 @@ def main(account_data, postinfo, packages_id, body_mail):
         except:
             print("Element is not clickable")
     get_new_faqs2 = b.elements_xpath(
-        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs')
-    count = 0
-    for item in get_new_faqs:
+        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs2')
+    count = len(get_new_faqs2)
+    for item in reversed(list(get_new_faqs2)):
         try:
-            count = count+1
-            item.click()
-            # print(i.get_attribute('innerHTML'))
-            time.sleep(1)
-            if 4 < count:
+            count = count-1
+            if (len(get_new_faqs)+1) > count:
                 break
+            item.click()
+            time.sleep(1)
+            # print(i.get_attribute('innerHTML'))
 
         except:
             print("Element is not clickable")
 
     faqs = b.elements_xpath(
-        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs')
-    print(len(faqs))
+        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs3')
+    len(faqs)
     related_question = []
 
     for item in faqs:
@@ -124,23 +139,19 @@ def main(account_data, postinfo, packages_id, body_mail):
             faq = 'not faq'
 
         question = {
-            'ans': description,
+            'ans': re.sub('<[^<]+?>', '', description),
             'link': link,
-            'question': faq
+            'question': re.sub('<[^<]+?>', '', faq)
         }
+
         related_question.append(question)
 
-    # loing tail keyowrd
-
-    arg = b.element_xpath(center_col, '//*[@id="botstuff"]', 'botstuff')
-    keywords = arg.find_elements_by_tag_name("a")
-    related_keywords = []
-    for item in keywords:
-        related_keywords.append(item.text)
-    print('related_question')
-    print(related_question)
-    print("related_keywords")
-    print(related_keywords)
+    # print('related_question')
+    # print(related_question)
+    # print("related_keywords")
+    # print(related_keywords)
+    worker_acc.save_data(account_data, worker_token, {"parent_id": worker_keyword['id'],
+                         "keywords": related_keywords, "question": related_question})
     exit()
 
     # https://post.craigslist.org/k/sib7px0t7BGflPX08yY-RA/Qdjqi?s=subarea

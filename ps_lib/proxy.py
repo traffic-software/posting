@@ -88,10 +88,18 @@ class ps_proxy:
 
     def firstProxy(self, location, proxyinfo):
         proxy_loction = location.split("-")
-        self.state = proxy_loction[0].upper()
-        self.city = proxy_loction[1].lower()
+
+        try:
+            self.state = proxy_loction[0].upper()
+            self.city = proxy_loction[1].lower()
+
+        except:
+            self.state = 'any'
+            self.city = 'any'
+
         letters = string.ascii_lowercase
         city = "any"
+        print(proxyinfo)
 
         if proxyinfo['company'] == 'oxylabs':
             city = self.city.replace(' ', '_')
@@ -112,8 +120,10 @@ class ps_proxy:
 
             proxyinfo['host'] = proxyinfo['host']
             proxyinfo['port'] = proxyinfo['port']
-        if proxyinfo['company'] == 'proxyhorse':
+        if proxyinfo['company'] == 'http':
             city = self.city
+        if proxyinfo['company'] == 'proxyhorse':
+            city = city
             proxy = self.proxyhorse(location=location, pva_id=self.pva_id)
 
             final_proxy = proxy.get('data', proxy)
@@ -208,21 +218,24 @@ class ps_proxy:
             d = "{}:{}@{}:{}".format(data['user'],
                                      data['password'], data['host'], data['port'])
             proxie = {"http": "http://"+d, "https": "http://"+d}
-            if data['company'] == 'dichvusocks':
+            if data['company'] == 'dichvusocks' or data['company'] == 'socks5':
                 proxie = {"http": "socks5://"+d, "https": "socks5://"+d}
 
             url = "http://ip-api.com/json"
+            
             r = requests.get(url, timeout=60, proxies=proxie)
 
             if r.status_code in [400, 407, 500, 502, 522, 525]:
                 return data
 
             ip = json.loads(r.text)
+            print(ip)
 
             city = city.replace('_', ' ')
             print(city.lower(), ip['city'].lower())
 
-            if data['company'] == 'dichvusocks':
+            if data['company'] == 'dichvusocks' or data['company'] == 'http':
+                print(ip)
                 data['checkinfo'] = ip
                 return data
 

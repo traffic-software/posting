@@ -136,6 +136,7 @@ class browser:
         try:
 
             proxyinfo = self.account.get_proxy_list()
+
             #............. check for use defaultProxy.............#
             dProxy = proxyinfo['defaultProxy']
 
@@ -349,7 +350,6 @@ class browser:
 
     def proxy_save(self, px=None, p=None):
         try:
-            
 
             self.proxy_city = p["city"]
             self.proxy_region = p['regionName']
@@ -458,7 +458,7 @@ class browser:
             if type == 2:
                 mesasage = mesasage + self.check_error(valu)
             self.account.post_error(self.account_id, message=mesasage)
-            time.sleep(120)
+
             self.exit()
         return element
 
@@ -478,7 +478,6 @@ class browser:
         if element == False:
 
             print("element not find : ", mesasage)
-            time.sleep(120)
 
             self.account.post_error(self.account_id, message=mesasage)
             self.exit()
@@ -498,7 +497,6 @@ class browser:
             print("elements waiting for : ", mesasage)
 
         if element == False:
-            time.sleep(120)
 
             print("element not find : ", mesasage)
 
@@ -864,7 +862,6 @@ class browser:
         background_js = """
 		function FindProxyForURL(url, host) {
 			if (url.search("GTM")>"1" ||
-			url.search("google")>"1" ||
 			url.search("GTM")>"1" ||
 			url.search("GTM")>"1") {
 				return 'DIRECT';
