@@ -358,7 +358,7 @@ class browser:
             self.proxy_latLon = str(p['lat'])+":"+str(p["lon"])
             self.proxy_isp = p['isp']
             self.proxy_ip = p['query']
-            if px['company'] == 'dichvusocks':
+            if px['company'] == 'dichvusocks' or px['company'] == 'socks5':
                 self.PROXY_TYPE = 'SOCKS5'
             self.settimezoone(p)
 

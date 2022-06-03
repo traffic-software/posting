@@ -15,22 +15,26 @@
 # from pynput.mouse import Button, Controller
 from itertools import count
 import json
-from browser import browser
-from numpy import number
 import requests
 # from ps_lib.proxy import ps_proxy
 import string
 import random
 import os
-browser()
 
-# url = "https://geo.craigslist.org"
-# timeout = 10
-# proxie = {"http": "http://932eba933076a67fc7ee3b4a29664b52:f02769a4fcbcb32d1d436ad3da91b227@199.189.86.111:9500",
-#           "https": "http://932eba933076a67fc7ee3b4a29664b52:f02769a4fcbcb32d1d436ad3da91b227@199.189.86.111:9500"}
-# r = requests.get(url, proxies=proxie)
-# print(r.status_code)
-# print(r.text)
+url = "https://api.openai.com/v1/engines/text-davinci-002/completions"
+timeout = 10
+data = {
+    "prompt": "Does Windows 11 need antivirus?",
+    "temperature": 0.3,
+    "max_tokens": 150,
+    "top_p": 1,
+    "frequency_penalty": 0,
+    "presence_penalty": 0
+}
+r = requests.post(url, data=json.dumps(data), headers={'Content-Type': 'application/json',
+                                                       'Authorization': 'Bearer {}'.format('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')})
+
+print(r.text)
 # def proxy_check(data):
 #     try:
 #         d = "{}:{}@{}:{}".format(data['user'],

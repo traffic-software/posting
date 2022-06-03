@@ -64,7 +64,6 @@ def main(account_data, postinfo, packages_id, body_mail):
     # q = b.select_element_xpath(
     #     '//*[@name="q"]', 'q')
     # q.send_keys(character)
-    time.sleep(10)
 
     try:
         center_col = b.select_element_xpath(
@@ -88,7 +87,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         try:
             item.click()
             # print(i.get_attribute('innerHTML'))
-            time.sleep(1)
+            time.sleep(2)
 
         except:
             print("Element is not clickable")
@@ -101,14 +100,29 @@ def main(account_data, postinfo, packages_id, body_mail):
             if (len(get_new_faqs)+1) > count:
                 break
             item.click()
-            time.sleep(1)
+            time.sleep(2)
+            # print(i.get_attribute('innerHTML'))
+
+        except:
+            print("Element is not clickable")
+    get_new_faqs3 = b.elements_xpath(
+        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs3')
+    count = len(get_new_faqs3)
+    for item in reversed(list(get_new_faqs3)):
+        try:
+            count = count-1
+            if (len(get_new_faqs2)+5) > count:
+                break
+            item.click()
+            time.sleep(2)
             # print(i.get_attribute('innerHTML'))
 
         except:
             print("Element is not clickable")
 
+    time.sleep(5)
     faqs = b.elements_xpath(
-        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs3')
+        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs4')
     len(faqs)
     related_question = []
 
