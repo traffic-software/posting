@@ -50,7 +50,7 @@ class accounts:
                                         'Authorization': 'Bearer {}'.format(access_token)},
                           data=json.dumps(data))
 
-        # print(r.text)
+        print(r.text)
         return True
 
     def get_proxy_list(self):
