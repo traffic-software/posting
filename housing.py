@@ -1,3 +1,4 @@
+from ast import Not
 from email.policy import SMTP
 from re import sub
 import threading
@@ -39,6 +40,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     account_id = account_data['id']
     print("account id: ", account_id)
     worker_acc = accounts()
+
     settings = table()
     popacc = settings.pop_verify()
 
@@ -62,9 +64,18 @@ def main(account_data, postinfo, packages_id, body_mail):
         # worker_acc.ban_3(account_id, 5)
         time.sleep(10)
         return False
+    acc_post_datas = False
+    if account_data['post_data'] is not None:
+        acc_post_datas = account_data['post_data'].split("-")
+    else:
+        print('acc post data is none')
 
     try:
-        b.get_url('https://geo.craigslist.org')
+        url = 'https://geo.craigslist.org'
+        if acc_post_datas:
+            url = 'https://'+acc_post_datas[0]
+
+        b.get_url(url)
     except:
         b.exit()
 
@@ -107,20 +118,35 @@ def main(account_data, postinfo, packages_id, body_mail):
         # time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
     print('b_sub text typing done')
     # b_sub.send_keys(character)
-    # city or neighborhood setup
+    #  city or neighborhood setup
     city = b.select_element_xpath(
-        '//*[@id="geographic_area"]', 'postal code"]')
+        '//*[@id="geographic_area"]', 'neighborhood"]')
     # b.scroll_like_user(postal_code)
     neighborhood = b.proxy_city if postinfo.getdata(
         'data3') == "" else postinfo.getdata('data3')
+
+    if acc_post_datas:
+
+        neighborhood = acc_post_datas[2] if len(
+            acc_post_datas) > 2 else neighborhood
     city.send_keys(neighborhood)
+
     # zip code setup
-    postal_code = b.select_element_xpath(
-        '//*[@id="postal_code"]', 'postal code"]')
-    # b.scroll_like_user(postal_code)
-    postcode = b.proxy_zip if postinfo.getdata(
-        'data2') == "" else postinfo.getdata('data2')
-    postal_code.send_keys(postcode)
+
+    try:
+        postal_code = b.select_element_xpath(
+            '//*[@id="postal_code"]', 'postal code"]')
+        # b.scroll_like_user(postal_code)
+        postcode = b.proxy_zip if postinfo.getdata(
+            'data2') == "" else postinfo.getdata('data2')
+        acc_post_datas = account_data['post_data'].split("-")
+        if acc_post_datas:
+            postcode = acc_post_datas[1] if len(
+                acc_post_datas) > 1 else postcode
+        postal_code.send_keys(postcode)
+    except:
+        pass
+
     # time.sleep(random.choice([0.1, 0.3, 0.2, 0.4, 0.5]))
 
     # post body setup
@@ -143,6 +169,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     price = postinfo.price if postinfo.getdata(
         'data11') == "" else postinfo.getdata('data11')
     b_price.send_keys(price)
+    print('data11 price set {0}'.format(price))
     # sqft setup
     sqft = b.select_element_xpath(
         '//*[@name="surface_area"]', 'size in sqft set')
@@ -153,8 +180,10 @@ def main(account_data, postinfo, packages_id, body_mail):
     sizein_sqft = one_type if postinfo.getdata(
         'data12') == "" else postinfo.getdata('data12')
     sqft.send_keys(sizein_sqft)
+    print('data12 size in sqft set {0}'.format(sizein_sqft))
 
     # housing type setup
+    # time.sleep(1000)
     try:
         type = [1, 4, 5, 6]
         one_type = random.choice(type)
@@ -162,10 +191,11 @@ def main(account_data, postinfo, packages_id, body_mail):
             'data6') == "" else postinfo.getdata('data6')
 
         append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(one_type))
-        ju = str('$("#ui-id-1"){}'.format(append))
+        ju = str('$("#ui-id-2"){}'.format(append))
 
-        b.script_run('$("#ui-id-1").empty();', message='housing_type empty')
+        b.script_run('$("#ui-id-2").empty();', message='housing_type empty')
         b.script_run(ju, message='housing_type append')
+        print('data6 housing type setup set {0}'.format(one_type))
 
     except Exception as e:
         print('housing_type error', e)
@@ -174,13 +204,13 @@ def main(account_data, postinfo, packages_id, body_mail):
     try:
         laundry = 1
         laundry = laundry if postinfo.getdata(
-            'data6') == "" else postinfo.getdata('data6')
+            'data7') == "" else postinfo.getdata('data7')
         append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(laundry))
-        ju = str('$("#ui-id-2"){}'.format(append))
+        ju = str('$("#ui-id-3"){}'.format(append))
 
-        b.script_run('$("#ui-id-2").empty();', message='laundry empty')
+        b.script_run('$("#ui-id-3").empty();', message='laundry empty')
         b.script_run(ju, message='laundry append')
-        # b.select_dropdown('#ui-id-2',1)
+        print('data6 laundry append set {0}'.format(laundry))
     except Exception as e:
         print('laundry error', e)
 
@@ -193,10 +223,11 @@ def main(account_data, postinfo, packages_id, body_mail):
             'data8') == "" else postinfo.getdata('data8')
 
         append = '.append("<option value=\'{}\' selected>any</option>");'.format(str(parking))
-        ju = str('$("#ui-id-3"){}'.format(append))
+        ju = str('$("#ui-id-4"){}'.format(append))
 
-        b.script_run('$("#ui-id-3").empty();', message='parking empty')
+        b.script_run('$("#ui-id-4").empty();', message='parking empty')
         b.script_run(ju, message='parking append')
+        print('data8 parking empty set {0}'.format(parking))
     except Exception as e:
         print('parking error', e)
 
@@ -207,10 +238,11 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         append = '.append("<option value=\'{}\' selected>any</option>");'.format(
             str(bedrooms))
-        ju = str('$("#ui-id-4"){}'.format(append))
+        ju = str('$("#ui-id-5"){}'.format(append))
 
-        b.script_run('$("#ui-id-4").empty();', message='bedrooms empty')
+        b.script_run('$("#ui-id-5").empty();', message='bedrooms empty')
         b.script_run(ju, message='bedrooms append')
+        print('data9 bedrooms set {0}'.format(bedrooms))
     except Exception as e:
         print('bedrooms error', e)
 
@@ -220,20 +252,22 @@ def main(account_data, postinfo, packages_id, body_mail):
             'data10') == "" else postinfo.getdata('data10')
         append = '.append("<option value=\'{}\' selected>any</option>");'.format(
             str(bathrooms))
-        ju = str('$("#ui-id-5"){}'.format(append))
+        ju = str('$("#ui-id-6"){}'.format(append))
 
-        b.script_run('$("#ui-id-5").empty();', message='bathrooms empty')
+        b.script_run('$("#ui-id-6").empty();', message='bathrooms empty')
         b.script_run(ju, message='bathrooms append')
+        print('data10` bathrooms set {0}'.format(bathrooms))
     except Exception as e:
         print('bathrooms error', e)
     # rent period setup
     try:
 
         append = '.append("<option value=\'3\' selected>any</option>");'
-        ju = str('$("#ui-id-6"){}'.format(append))
+        ju = str('$("#ui-id-1"){}'.format(append))
 
-        b.script_run('$("#ui-id-6").empty();', message='rent period empty')
+        b.script_run('$("#ui-id-1").empty();', message='rent period empty')
         b.script_run(ju, message='rent period append')
+        print('data10` period set {0}'.format(append))
     except Exception as e:
         print('rent period error', e)
 
@@ -283,10 +317,12 @@ def main(account_data, postinfo, packages_id, body_mail):
         '/html/body/article/section/form/button', 'go from image page')
     # b.scroll_like_user(nextpage)
     nextpage.click()
+    time.sleep(120)
     nextpage = b.select_element_xpath(
         '//*[@id="publish_top"]/button', 'go from publish page')
     # b.scroll_like_user(nextpage)
     nextpage.click()
+    time.sleep(120)
     time.sleep(10)
 
     if not pp:
