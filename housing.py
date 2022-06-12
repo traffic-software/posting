@@ -317,13 +317,13 @@ def main(account_data, postinfo, packages_id, body_mail):
         '/html/body/article/section/form/button', 'go from image page')
     # b.scroll_like_user(nextpage)
     nextpage.click()
-    time.sleep(120)
+    # time.sleep(120)
     nextpage = b.select_element_xpath(
         '//*[@id="publish_top"]/button', 'go from publish page')
     # b.scroll_like_user(nextpage)
     nextpage.click()
-    time.sleep(120)
-    time.sleep(10)
+    # time.sleep(120)
+    time.sleep(2)
 
     if not pp:
         pop = popacc.split(":")
