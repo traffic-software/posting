@@ -23,7 +23,7 @@ from ps_lib.ps_str import ps_str
 from ps_lib.imap import imap
 from selenium.webdriver.common.keys import Keys
 import os
-import pyautogui
+# import pyautogui
 import re
 
 abspath = os.path.abspath(__file__)
@@ -82,24 +82,28 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     # RELATED_QUESTION
 
-    get_new_faqs = b.elements_xpath(
-        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs')
+    # get_new_faqs = b.elements_xpath(center_col, '//*[starts-with(@class,"related-question-pair")]', 'faqs')
+    get_new_faqs = center_col.find_elements_by_css_selector(
+        '.related-question-pair')
+
     for item in get_new_faqs:
         try:
             item.click()
-            # print(i.get_attribute('innerHTML'))
+            print('faqs')
             time.sleep(2)
 
         except:
             print("Element is not clickable")
-    get_new_faqs2 = b.elements_xpath(
-        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs2')
+    get_new_faqs2 = center_col.find_elements_by_css_selector(
+        '.related-question-pair')
     count = len(get_new_faqs2)
     for item in reversed(list(get_new_faqs2)):
         try:
             count = count-1
             if (len(get_new_faqs)+1) > count:
                 break
+            print('faqs2')
+            print(count)
             item.click()
             time.sleep(2)
             # print(i.get_attribute('innerHTML'))
@@ -122,8 +126,8 @@ def main(account_data, postinfo, packages_id, body_mail):
             # print("Element is not clickable")
 
     time.sleep(5)
-    faqs = b.elements_xpath(
-        center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs4')
+    faqs = center_col.find_elements_by_css_selector(
+        '.related-question-pair')
     len(faqs)
     related_question = []
 
