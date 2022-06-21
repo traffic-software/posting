@@ -8,6 +8,6 @@ __pycache__
 .spec
 *.tar
 *.zip
-data/*.db
+ps_lib/*.db
 
 

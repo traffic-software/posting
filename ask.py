@@ -182,16 +182,11 @@ def main(account_data, postinfo, packages_id, body_mail):
 
 setup = table()
 setup.token_verify()
-setup.pop_verify()
-
-# w = int(input('how much worker you need? '))
-# packages_id = input('proxy info by a line : ')
 packages_id = '317345'
 
-# worker = w + 1
 worker = 2
 # ........................start worker....................
-open('active.txt', "w+")
+
 utility = helper()
 headers = {}
 profile_ids = {}
@@ -200,10 +195,8 @@ post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
     display = Display(visible=0, size=(1024, 768))
     display.start()
-# x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
-# x.start()
+
 while True:
-    # utility.network_check()
     if setup.token_off():
         print('software off now but reply checking runing')
         time.sleep(60)

@@ -63,7 +63,7 @@ sudo update-grub
 docker login
 ............update............
 docker build . -t clf:proxy
-docker tag clf:proxy malaknoyn/clf:proxy
+docker tag clf:Ask malaknoyn/clf:Ask
 sudo supervisorctl status
 sudo supervisorctl stop  all
 docker container rm -f $(docker ps -a -q)
