@@ -21,7 +21,7 @@ import string
 import random
 import os
 
-url = "https://api.openai.com/v1/engines/text-davinci-002/completions"
+url = "https://stackoverflow.com/questions/90178/make-a-div-fill-the-height-of-the-remaining-screen-space?rq=1"
 timeout = 10
 data = {
     "prompt": "Does Windows 11 need antivirus?",
@@ -31,10 +31,10 @@ data = {
     "frequency_penalty": 0,
     "presence_penalty": 0
 }
-r = requests.post(url, data=json.dumps(data), headers={'Content-Type': 'application/json',
-                                                       'Authorization': 'Bearer {}'.format('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')})
+r = requests.post(url)
 
-print(r.text)
+with open("response1.html", "w") as f:
+    f.write(r.text)
 # def proxy_check(data):
 #     try:
 #         d = "{}:{}@{}:{}".format(data['user'],
