@@ -25,7 +25,21 @@ class accounts:
             return None
         return r.json()["data"]
 
-    def get_account_for_lead_find(self):
+
+<< << << < HEAD
+== == == =
+   def get_proxy_list(self):
+        url = 'https://{host}/api/v1/post/account/proxy/{token}'.format(
+            host=self.software.host_verify(), token=self.software.software_token())
+
+        r = requests.get(url)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()
+
+>>>>>> > cl
+   def get_account_for_lead_find(self):
         url = 'https://{host}/api/v1/post/account/rendom/{token}'.format(
             host=self.software.host_verify(), token=self.software.software_token())
 
@@ -76,11 +90,11 @@ class accounts:
             return None
         return r.json()
 
-    def post_error(self, id, message="default messge",software_type='clf'):
+    def post_error(self, id, message="default messge", software_type='clf'):
         url = 'https://{host}/api/v1/post/account/posterror/{token}/{id}'.format(
             host=self.software.host_verify(), token=self.software.software_token(), id=id)
 
-        params = {'data': message,'software_type':software_type}
+        params = {'data': message, 'software_type': software_type}
         r = requests.get(url, params=params)
         if "error" in r.json():
             print("error", r.json()['message'])

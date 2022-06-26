@@ -13,16 +13,22 @@ class post:
         self.bed = random.choice([1, 2, 3])
         self.bat = 0
         self.price = 3
+        self.fullpost = None
         self.set_utility()
 
-    def get_post(self):
+    def get_post(self, id=False):
+        params = {'nodata': id}
+        if id:
+            params = {'id': id}
         url = 'https://{host}/api/v1/post/new/{token}'.format(
             host=self.software.host_verify(), token=self.software.software_token())
-        r = requests.get(url)
+        r = requests.get(url, params=params)
 
         if "error" in r.json():
             print("error", r.json()['message'])
             return None
+        self.fullpost = r.json()["data"]
+
         return r.json()["data"]
 
     def set_utility(self):
@@ -36,6 +42,16 @@ class post:
         elif self.bed == 3:
             self.bat = random.choice([1, 2, 3])
             self.price = random.choice([700, 730, 750, 770, 800])
+
+    def getdata1(self):
+
+        if 'data1' in self.fullpost:
+            return self.fullpost['data1']
+
+    def getdata(self, dataname):
+
+        if dataname in self.fullpost:
+            return self.fullpost[dataname]
 
     def get_body_mail(self):
 

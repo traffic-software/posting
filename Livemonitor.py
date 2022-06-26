@@ -41,22 +41,17 @@ def main(account_data, postinfo, packages_id, body_mail):
     # print(account_data)
     account_id = account_data['id']
     worker_acc = accounts()
+    use_proxy = True
 
-    b = browser(account_id, packages_id, proxy_company='soax', proxy_country="UnitedStates",
-                proxy_user='HzoxSzpE1Y_zJf5Y-uyMDe7ALdLkpJmm5', proxy_pass=account_data['extra'])
-    proxyhorse_pass = 'mEOcvdgnggj4xhIIuxNFMT7S7oJGNM'  # noyon
-    # b = browser(account_id, packages_id, proxy_company='proxyhorse', proxy_country="UnitedStates",
-    #             proxy_user=proxyhorse_pass, proxy_pass=account_data['extra'])
-    # p_pass = "4mdloQgXxS8lcB3J_country-UnitedStates_session-%s" % (
-    #     ''.join(random.choice(string.ascii_letters) for i in range(10)))
-    # b = browser(account_id, packages_id, proxy_company='packetstream',
-    #             proxy_country="UnitedStates", proxy_user='malaknoyn', proxy_pass=p_pass)
+    b = browser(account_id, pva=account_data)
+
     time.sleep(5)
-    if b.PROXY_PASS == False:
+    if b.PROXY_PASS == False and b.use_proxy == True:
         b.exit()
         print('proxy condition not fulfilled')
         # worker_acc.ban_3(account_id, 5)
         time.sleep(10)
+        return False
 
     try:
         b.get_url(account_data['email'])
@@ -78,8 +73,10 @@ def main(account_data, postinfo, packages_id, body_mail):
         # b.wait('//*[@title="thanks for flagging!"]')
     time.sleep(10)
 
-    print('browser close')
+    b.ipinfo_save(software_name='livemonitor')
+
     b.exit()
+    print('browser close')
 
     print('start :', starttime)
     print('end :', datetime.now().strftime("%H:%M:%S"))
@@ -101,6 +98,8 @@ utility = helper()
 headers = {}
 profile_ids = {}
 acc = accounts()
+# print(acc.get_proxy_list())
+# exit()
 post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
     display = Display(visible=0, size=(1024, 768))
@@ -116,7 +115,7 @@ while True:
     utility.network_check()
     if setup.token_off():
         print('software off now but reply checking runing')
-        time.sleep(60)
+        time.sleep(15)
         continue
     one_account = acc.get_account()
 
@@ -124,7 +123,7 @@ while True:
     body_mail = None
     if one_account == None or postinfo == None:
         print('post or account not find for worker')
-        time.sleep(60)
+        time.sleep(15)
         continue
     print('account id : ', one_account['id'])
 
