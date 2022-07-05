@@ -312,7 +312,7 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     # image upload prosess end
     time_sleep = b.upload_multiple(image1, account_id)
-    time.sleep(time_sleep)
+    # time.sleep(time_sleep)
     nextpage = b.select_element_xpath(
         '/html/body/article/section/form/button', 'go from image page')
     # b.scroll_like_user(nextpage)
@@ -449,12 +449,12 @@ while True:
     # utility.network_check()
     if setup.token_off():
         print('software off now but reply checking runing')
-        time.sleep(60)
+        time.sleep(10)
         continue
     one_account = acc.get_account()
     if one_account == None:
         print('account not find for worker')
-        time.sleep(60)
+        time.sleep(10)
         continue
     postinfo = post.get_post(one_account['id'])
     body_mail = None

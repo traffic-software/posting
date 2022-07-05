@@ -396,7 +396,8 @@ class browser:
         if sys.platform in ['Windows', 'win32', 'cygwin']:
             for ti in t:
                 if self.proxy_timezone in ti['utc']:
-                    os.system("tzutil /s \"{}\"".format(ti['value']))
+                    # os.system("tzutil /s \"{}\"".format(ti['value']))
+                    pass
         newTime = time.strftime('%X %x %Z')
         print('old time: ', oldTime, "new time: ",
               newTime, 'timezone: ', p["timezone"])
@@ -471,6 +472,7 @@ class browser:
                         pyautogui.write(r""+imge_dir+"\{}".format(i))
                         pyautogui.press('enter')
                         sleep_time += 5
+                        time.sleep(10)
             else:
                 for i in os.listdir(os.getcwd() + "\img"):
                     if i.find('.') > 1:
@@ -479,6 +481,7 @@ class browser:
                         pyautogui.write(r""+os.getcwd() + "\img\{}".format(i))
                         pyautogui.press('enter')
                         sleep_time += 5
+                        time.sleep(10)
         except OSError:
             pass
         return sleep_time
