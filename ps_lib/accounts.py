@@ -25,10 +25,7 @@ class accounts:
             return None
         return r.json()["data"]
 
-
-<< << << < HEAD
-== == == =
-   def get_proxy_list(self):
+    def get_proxy_list(self):
         url = 'https://{host}/api/v1/post/account/proxy/{token}'.format(
             host=self.software.host_verify(), token=self.software.software_token())
 
@@ -38,8 +35,7 @@ class accounts:
             return None
         return r.json()
 
->>>>>> > cl
-   def get_account_for_lead_find(self):
+    def get_account_for_lead_find(self):
         url = 'https://{host}/api/v1/post/account/rendom/{token}'.format(
             host=self.software.host_verify(), token=self.software.software_token())
 
