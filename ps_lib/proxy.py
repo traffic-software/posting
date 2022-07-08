@@ -224,14 +224,17 @@ class ps_proxy:
             url = "http://ip-api.com/json"
 
             r = requests.get(url, timeout=60, proxies=proxie)
+            r.text
 
             if r.status_code in [400, 407, 500, 502, 522, 525]:
+
                 return data
 
             ip = json.loads(r.text)
 
             city = city.replace('_', ' ')
             print(city.lower(), ip['city'].lower())
+            print(ip)
 
             if data['company'] == 'dichvusocks' or data['company'] == 'http' or data['company'] == 'socks5':
 

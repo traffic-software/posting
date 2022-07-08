@@ -54,7 +54,8 @@ def main(account_data, postinfo, packages_id, body_mail):
         return False
 
     try:
-        b.get_url(account_data['email'])
+        b.get_url('https://google.com')
+        # b.get_url(account_data['email'])
     except:
         b.exit()
 
