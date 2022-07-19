@@ -291,16 +291,20 @@ def main(account_data, postinfo, packages_id, body_mail):
     # b.scroll_like_user(nextpage)
     nextpage.click()
     # no pass click
-    if 's=geoverify=' in b.current_url():
+    # time.sleep(120)
+    print(b.current_url())
+    if 's=rentcheck' in b.current_url():
 
-        sub_aria = b.select_element_xpath('//*[@name="area_change_ok"]')
-        sub_aria.click()
+        rentcheck = b.select_element_xpath(
+            '//*[@id="new-edit"]/div/div[2]/button')
+        rentcheck.click()
+
     nextpage = b.select_element_xpath(
         '//*[@id="leafletForm"]/button', 'go from map page')
     # b.scroll_like_user(nextpage)
 
     nextpage.click()
-    if 's=geoverify=' in b.current_url():
+    if 's=geoverify' in b.current_url():
 
         sub_aria = b.select_element_xpath('//*[@name="area_change_ok"]')
         sub_aria.click()
