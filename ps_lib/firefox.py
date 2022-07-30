@@ -1,3 +1,4 @@
+from jinja2 import pass_eval_context
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -24,9 +25,11 @@ import zipfile
 import warnings
 import random
 import string
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
 
 
-class browser:
+class firefoxBrowser:
     account_id = None
 
     def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None, image_bock=True, headless=False):
@@ -48,9 +51,6 @@ class browser:
         warnings.filterwarnings('ignore')
         # ................account.....................................
         self.account = accounts()
-        # ......................Chrome..............................
-        self.options = webdriver.ChromeOptions()
-        # https://peter.sh/experiments/chromium-command-line-switches/
         ####################proxy user##############
         self.PROXY_PASS = False  # password
         if self.use_proxy:
@@ -58,49 +58,43 @@ class browser:
             self.PROXY_PASS = False  # password
             self.PROXY_HOST = False
             self.PROXY_PORT = False
-            self.PROXY_TYPE = 'PROXY'
+            self.PROXY_TYPE = 'http'
 
             # ............Normal rotating proxy......................
+
+            self.options = Options()
+            self.options.set_preference('xpinstall.signatures.required', False)
+
         if self.proxy():
 
             print("done: proxy set")
-            if self.use_proxy:
-                # self.proxy_auth_plugin()
-                self.proxy_auth_plugin_pac_script()
-            else:
-                self.PROXY_PASS = False
 
-        if sys.platform in ['Windows', 'win32', 'cygwin']:
-            driverUrl = 'chromedriver.exe'
         else:
-            driverUrl = '/usr/bin/chromedriver'
+            self.PROXY_PASS = False
 
         self.a = random.choice(l)
 
-        self.options.add_argument(f'user-agent={self.a}')
+        self.options.set_preference("general.useragent.override", str(self.a))
         print('user set')
 
-        if sys.platform not in ['Windows', 'win32', 'cygwin']:
-
-            self.options.add_argument("--disable-dev-shm-usage")
-        self.options.add_argument("--disable-infobars")
-        self.options.add_argument("start-maximized")
-        self.options.add_experimental_option("useAutomationExtension", False)
-        self.options.add_experimental_option(
-            "excludeSwitches", ["enable-automation"])
-        if headless:
-            self.options.add_argument('--headless')
-            self.options.add_argument('--disable-gpu')
-
-        # self.options.add_argument("--lang=it-IT")
-        self.options.add_argument("--no-sandbox")
         if profile_dir:
-            self.options.add_argument("--user-data-dir={}".format(profile_dir))
+            self.options.profile(dname+'\\profiles\\'+str(profile_dir))
 
         else:
-            self.options.add_argument("--use-temporary-user-data-dir")
+            # letters = string.ascii_lowercase
+            # prifileid = ''.join(random.choice(letters) for i in range(10))
 
-        self.driver = webdriver.Chrome(driverUrl, chrome_options=self.options)
+            # print(dname)
+
+            # self.options.profile(dname+'\\profiles\\'+str(prifileid))
+            pass
+
+        firefox_dev_binary = FirefoxBinary(
+            r'C:\\Program Files\\Firefox Developer Edition\\firefox.exe')
+        self.driver = webdriver.Firefox(
+            firefox_binary=firefox_dev_binary, options=self.options)
+        if self.use_proxy:
+            self.driver.install_addon(self.proxy_auth_plugin_pac_script())
 
     def exit(self):
         try:
@@ -200,87 +194,6 @@ class browser:
                     print('city not present')
             else:
                 self.use_proxy = False
-
-            # ............packetstream.io......................
-
-            # if self.proxy_company == "packetstream":
-            #     self.PROXY_HOST = "proxy.packetstream.io"
-            #     self.PROXY_PORT = 31112
-            #     proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
-            # ............https://dashboard.soax.com/......................
-            # if self.proxy_company == "soax":
-
-            #     psproxy = ps_proxy(company="soax", key=self.PROXY_USER)
-            #     soax = psproxy.proxysoax(self.PROXY_PASS)
-            #     if soax:
-
-            #         self.PROXY_USER = soax['login']
-            #         self.PROXY_PASS = soax['password']
-            #         self.PROXY_HOST = soax['ip']
-            #         self.PROXY_PORT = soax['port']
-            #         proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
-            #     else:
-            #         self.PROXY_PASS = False
-            #         proxy = "%s:%s" % ("proxy.soax.com", 9000)
-
-            # ............rsocks.net......................
-            # if self.proxy_company == "rsocks":
-
-            #     headers = {
-            #         'X-Auth-ID': '107841',
-            #         'X-Auth-Key': '3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
-            #     }
-            #     resp = requests.post(
-            #         'https://rsocks.net/api/v1/file/get-proxy', headers=headers, timeout=1)
-
-            #     data = json.loads(resp.text)
-
-            #     # data = random.choice(data['packages'])
-            #     print(data['packages'])
-            #     # proxy = rendomip=random.choice(data['ips'])
-            #     data = data['packages'][self.packages_id]['ips']
-
-            #     proxy = rendomip = random.choice(data)
-                # ............proxyhorse.com......................
-
-            # if self.proxy_company == "proxyhorse":
-
-            #     psproxy = ps_proxy(company="proxyhorse",
-            #                        key=self.PROXY_USER)
-
-            #     pva_id = None
-            #     if self.other_city == None:
-            #         pva_id = self.account_id
-            #     proxy = psproxy.proxyhorse(
-            #         location=self.PROXY_PASS, pva_id=pva_id)
-            #     self.PROXY_PASS = False
-
-            #     if proxy:
-
-            #         self.PROXY_HOST = proxy['ip']
-            #         self.PROXY_PORT = proxy['port']
-            #         self.PROXY_USER = proxy['login']
-            #         self.PROXY_PASS = proxy['password']
-            #     proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
-
-                # .............proxyrotator.com................
-
-            # if self.proxy_company == "proxyrotator":
-            #     url = 'http://falcon.proxyrotator.com:51337'
-            #     params = dict(
-            #         apiKey='TX2DLoKZVd6peF8fuJ59wqsyQgc4CGnv',
-            #         userAgent='true',
-            #         country=self.proxy_country,
-            #         get='true',
-            #         connectionType='Residential'
-            #     )
-            #     resp = requests.get(url, params=params, timeout=3)
-
-            #     data = json.loads(resp.text)
-            #     proxy = data['proxy']
-
-                # .............pubproxy.com......................
-                # url = 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT'
 
         except (requests.ConnectionError, requests.Timeout) as exception:
             print('plz check your internet connection')
@@ -695,169 +608,87 @@ class browser:
 
     # proxy plugin
 
-    def proxy_auth_plugin(self):
-
-        manifest_json = """
-		{
-			"version": "1.0.0",
-			"manifest_version": 2,
-			"name": "Chrome Proxy",
-			"permissions": [
-				"proxy",
-				"tabs",
-				"unlimitedStorage",
-				"storage",
-				"<all_urls>",
-				"webRequest",
-				"webRequestBlocking"
-			],
-			"background": {
-				"scripts": ["background.js"]
-			},
-			"minimum_chrome_version":"22.0.0"
-		}
-		"""
-
-        background_js = """
-		var config = {
-				mode: "fixed_servers",
-				rules: {
-				singleProxy: {
-					scheme: "%s",
-					host: "%s",
-					port: parseInt(%s)
-				},
-				bypassList: ["localhost"]
-				}
-			};
-
-		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
-
-		function callbackFn(details) {
-			return {
-				authCredentials: {
-					username: "%s",
-					password: "%s"
-				}
-			};
-		}
-
-		chrome.webRequest.onAuthRequired.addListener(
-					callbackFn,
-					{urls: ["<all_urls>"]},
-					['blocking']
-		);
-		""" % (self.PROXY_TYPE, self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
-        pluginfile = 'proxy_auth_plugin.zip'
-        zp = zipfile.ZipFile(pluginfile, 'w')
-        zp.writestr("manifest.json", manifest_json)
-        zp.writestr("background.js", background_js)
-        self.options.add_extension(pluginfile)
-
     def proxy_auth_plugin_pac_script(self):
 
-        rules_json = """[
-			{
-				"id": 1,
-				"priority": 1,
-				"action": { "type": "block" },
-				"condition": {"urlFilter": "jpeg", "resourceTypes": ["image"] }
-			},
-			{
-				"id": 2,
-				"priority": 2,
-				"action": { "type": "block" },
-				"condition": {"urlFilter": "jpg", "resourceTypes": ["image"] }
-			},
-			{
-				"id": 3,
-				"priority": 3,
-				"action": { "type": "block" },
-				"condition": {"urlFilter": "png)", "resourceTypes": ["image"] }
-			}
-		]"""
-        block_rules_json = """[
-			{
-				"id": 1,
-				"priority": 1,
-				"action": { "type": "block" },
-				"condition": {"urlFilter": "avif", "resourceTypes": ["image"] }
-			}
-		]"""
-        manifest_json = """
-		{
-			"version": "1.0.0",
-			"manifest_version": 2,
-			"name": "Chrome Proxy",
-			"declarative_net_request": {
-				"rule_resources": [{
-				"id": "ruleset_1",
-				"enabled": true,
-				"path": "rules.json"
-				}]
-			},
-			"permissions": [
-				"proxy",
-				"tabs",
-				"unlimitedStorage",
-				"storage",
-				"<all_urls>",
-				"webRequest",
-				"webRequestBlocking",
-				"declarativeNetRequest"
-			],
-			"background": {
-				"scripts": ["background.js"]
-			},
-			"minimum_chrome_version":"22.0.0"
-		}
-		"""
+        manifest_json = """{
+  "name": "My Firefox Proxy",
+  "version": "1.0.0b",
+  "manifest_version": 2,
+  "permissions": [
+    "browsingData",
+    "proxy",
+    "storage",
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "downloads",
+    "notifications",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "myproxy@example.org"
+    }
+  }
+}
+        
+        """
 
-        background_js = """
-		function FindProxyForURL(url, host) {
-			if (url.search("GTM")>"1" ||
-			url.search("google")>"1" ||
-			url.search("GTM")>"1" ||
-			url.search("GTM")>"1") {
-				return 'DIRECT';
+        background_js = """var proxy_type = "%s";
+var proxy_host = "%s";
+var proxy_port = %s;
 
-			}
+var config = {
+    mode: "fixed_servers",
+    rules: {
+        singleProxy: {
+            scheme: proxy_type,
+            host: proxy_host,
+            port: proxy_port
+        },
+        bypassList: []
+    }
+};
 
-			return "%s %s:%s";
-			}
-		var config = {
-		mode: "pac_script",
-		pacScript: {
-			data:FindProxyForURL.toString(),
-    		mandatory: true
-			}
-		};
 
-		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
+function proxyRequest(request_data) {
+    return {
+        type: proxy_type,
+        host: proxy_host,
+        port: proxy_port
+    };
+}
 
-		function callbackFn(details) {
-			return {
-				authCredentials: {
-					username: "%s",
-					password: "%s"
-				}
-			};
-		}
+browser.proxy.settings.set({ value: config, scope: "regular" }, function () { ; });
 
-		chrome.webRequest.onAuthRequired.addListener(
-					callbackFn,
-					{urls: ["<all_urls>"]},
-					['blocking']
-		);
+function callbackFn(details) {
+    return {
+        authCredentials: {
+            username: "%s",
+            password: "%s"
+        }
+    };
+}
+
+browser.webRequest.onAuthRequired.addListener(
+    callbackFn,
+    { urls: ["<all_urls>"] },
+    ['blocking']
+);
+
+browser.proxy.onRequest.addListener(proxyRequest, { urls: ["<all_urls>"] });
 		""" % (self.PROXY_TYPE, self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
         pluginfile = 'proxy_auth_plugin.zip'
         zp = zipfile.ZipFile(pluginfile, 'w')
-        if self.image_bock:
-            zp.writestr("rules.json", rules_json)
-        else:
-            zp.writestr("rules.json", block_rules_json)
 
         zp.writestr("manifest.json", manifest_json)
 
         zp.writestr("background.js", background_js)
-        self.options.add_extension(pluginfile)
+        proxyfilepath = dname.replace('ps_lib', '')+"proxy_auth_plugin.zip"
+        print(proxyfilepath)
+        time.sleep(1)
+
+        return proxyfilepath

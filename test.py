@@ -21,7 +21,9 @@ import requests
 import string
 import random
 import os
-
+bundle_dir = os.path.abspath(os.path.dirname(__file__))
+print(bundle_dir)
+print(os.path.dirname(os.path.abspath(__file__))+"\manifest.zip")
 
 # url = "https://geo.craigslist.org"
 # timeout = 10
@@ -30,6 +32,8 @@ import os
 # r = requests.get(url, proxies=proxie)
 # print(r.status_code)
 # print(r.text)
+
+
 def proxy_check(data):
     try:
         d = "{}:{}@{}:{}".format(data['user'],
