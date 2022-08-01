@@ -50,7 +50,13 @@ def main(account_data, postinfo, packages_id, body_mail):
         # b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
     except:
         b.exit()
-    time.sleep(60)
+
+    new = b.select_element_xpath(
+        '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div/div/div[1]/div/button/span')
+    new.click()
+    new = b.select_element_xpath(
+        '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div/div/div[2]/div/ul/li[1]/span[2]')
+    new.click()
 
     firstName = b.select_element('[id="firstName"]')
     name = account_data['post_data'].split("-")
@@ -66,6 +72,10 @@ def main(account_data, postinfo, packages_id, body_mail):
         time.sleep(1)
     username = b.select_element('[id="username"]')
     print('username typing')
+    time.sleep(3)
+    if b.try_select_element('button[data-username]'):
+        ConfirmUsername = b.select_element('button[data-username]')
+        ConfirmUsername.click()
     for character in account_data['password']:
         username.send_keys(character)
         time.sleep(1)
@@ -78,7 +88,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     for character in account_data['extra']:
         ConfirmPasswd.send_keys(character)
         time.sleep(1)
-    time.sleep(3)
+
     if b.try_select_element('button[data-username]'):
         ConfirmUsername = b.select_element('button[data-username]')
         ConfirmUsername.click()

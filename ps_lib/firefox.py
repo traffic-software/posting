@@ -281,7 +281,7 @@ class firefoxBrowser:
             self.proxy_isp = p['isp']
             self.proxy_ip = p['query']
             if px['company'] == 'dichvusocks':
-                self.PROXY_TYPE = 'SOCKS5'
+                self.PROXY_TYPE = 'socks'
             self.settimezoone(p)
 
             return True
