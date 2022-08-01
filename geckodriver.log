@@ -2181,3 +2181,161 @@ console.warn: LoginRecipes: "Falling back to a synchronous message for: https://
 [Parent 3376, Main Thread] WARNING: ContentParent: id=1e2ddb6fd00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
 [Parent 3376, Main Thread] WARNING: ContentParent: id=1e2db894d00 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
 [Parent 3376, Main Thread] WARNING: ContentParent: id=1e2db894d00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+1659364016236	geckodriver	INFO	Listening on 127.0.0.1:51769
+1659364019290	mozrunner::runner	INFO	Running command: "C:\\\\Program Files\\\\Firefox Developer Edition\\\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileFgC7cV"
+1659364021862	Marionette	INFO	Marionette enabled
+1659364021879	Marionette	INFO	Listening on port 51779
+1659364023193	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: chrome://browser/content/tabbrowser.js, line 5318: TypeError: can't access property "isOriginatingBrowser", this.PictureInPicture is undefined
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileFgC7cV\\search.json.mozlz4", (void 0)))
+JavaScript error: resource:///modules/CustomizableUI.jsm, line 4097: Error: Area not yet restored
+JavaScript error: resource:///modules/CustomizableUI.jsm, line 4097: Error: Area not yet restored
+JavaScript error: resource:///modules/CustomizableUI.jsm, line 4097: Error: Area not yet restored
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://accounts.google.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://accounts.google.com."
+1659364206686	Marionette	INFO	Stopped listening on port 51779
+JavaScript error: resource:///modules/CustomizableUI.jsm, line 4839: TypeError: can't access property "getElementsByAttribute", aWindow.gNavToolbox.palette is undefined
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14becc300 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14becc300 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14beceb00 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14beceb00 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14beca500 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14beca500 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e148440100 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e148440100 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e1491c1a00 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e1491c1a00 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14beceb00 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14beceb00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14beca500 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14beca500 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e148440100 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e148440100 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e1491c1a00 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e1491c1a00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14becc300 - ShutDownProcess: Shutdown already pending.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1815
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14becc300 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12648, Main Thread] WARNING: ContentParent: id=1e14becc300 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+1659376115902	geckodriver	INFO	Listening on 127.0.0.1:59554
+1659376118911	mozrunner::runner	INFO	Running command: "C:\\\\Program Files\\\\Firefox Developer Edition\\\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileW8JbVc"
+1659376121855	Marionette	INFO	Marionette enabled
+1659376121871	Marionette	INFO	Listening on port 59562
+1659376123589	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileW8JbVc\\search.json.mozlz4", (void 0)))
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://accounts.google.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://accounts.google.com."
+JavaScript warning: https://accounts.google.com/ServiceLogin?service=mail&passive=1209600&osid=1&continue=https://mail.google.com/mail/u/0/&followup=https://mail.google.com/mail/u/0/&emr=1 line 2 > eval line 2996 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1659376146996	Marionette	INFO	Stopped listening on port 59562
+console.warn: "Async method failed in safeAsyncMethod" (new Error("Connection closed, pending request to server0.conn0.windowGlobal6442450945/customhighlighter74, type hide failed\n\nRequest stack:\nrequest@resource://devtools/shared/protocol/Front.js:293:14\ngenerateRequestMethods/</frontProto[name]@resource://devtools/shared/protocol/Front/FrontClassWithSpec.js:49:19\nhide@resource://devtools/client/fronts/highlighters.js:32:18\nexports.safeAsyncMethod/<@resource://devtools/shared/async-utils.js:61:25\nhideHighlighterType@resource://devtools/client/inspector/shared/highlighters-overlay.js:640:23\nexports.safeAsyncMethod/<@resource://devtools/shared/async-utils.js:61:25\n_hideBoxModel@resource://devtools/client/inspector/markup/markup.js:731:40\n_onMouseOut@resource://devtools/client/inspector/markup/markup.js:699:16\nobserve@resource://gre/modules/AsyncShutdown.jsm:576:16\nGeckoDriver.prototype.quit@chrome://remote/content/marionette/driver.js:2831:22\ndespatch@chrome://remote/content/marionette/server.js:304:40\nexecute@chrome://remote/content/marionette/server.js:277:16\nonPacket/<@chrome://remote/content/marionette/server.js:250:20\nonPacket@chrome://remote/content/marionette/server.js:251:9\n_onJSONObjectReady/<@chrome://remote/content/marionette/transport.js:502:20\n", "resource://devtools/shared/protocol/Front.js", 107))
+JavaScript error: , line 0: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e8033fb800 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e8033fb800 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e804b4d200 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e804b4d200 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e8033fae00 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e8033fae00 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e801105e00 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e801105e00 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e80119f900 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e80119f900 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e8033fae00 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e8033fae00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e801105e00 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e801105e00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e80119f900 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e80119f900 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e804b4d200 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e804b4d200 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 12336, IPC I/O Parent] WARNING: DuplicateHandle failed for handle 0 in TransferHandles: file /builds/worker/checkouts/gecko/ipc/chromium/src/chrome/common/ipc_channel_win.cc:723
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e8033fb800 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 12336, Main Thread] WARNING: ContentParent: id=1e8033fb800 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+1659376204140	geckodriver	INFO	Listening on 127.0.0.1:59653
+1659376207157	mozrunner::runner	INFO	Running command: "C:\\\\Program Files\\\\Firefox Developer Edition\\\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileM2Gnqz"
+1659376208259	Marionette	INFO	Marionette enabled
+1659376208276	Marionette	INFO	Listening on port 59661
+1659376209182	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: chrome://browser/content/tabbrowser.js, line 5318: TypeError: can't access property "isOriginatingBrowser", this.PictureInPicture is undefined
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileM2Gnqz\\search.json.mozlz4", (void 0)))
+JavaScript error: resource:///modules/CustomizableUI.jsm, line 4097: Error: Area not yet restored
+JavaScript error: resource:///modules/CustomizableUI.jsm, line 4097: Error: Area not yet restored
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://accounts.google.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://accounts.google.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://accounts.google.com."
+JavaScript warning: https://accounts.google.com/ServiceLogin?service=mail&passive=1209600&osid=1&continue=https://mail.google.com/mail/u/0/&followup=https://mail.google.com/mail/u/0/&emr=1 line 2 > eval line 7099 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: resource:///modules/CustomizableUI.jsm, line 4097: Error: Area not yet restored
+console.error: "Error while calling actor 'inspector's method 'getHighlighterByType'" "Component returned failure code: 0x80040111 (NS_ERROR_NOT_AVAILABLE) [nsIDOMWindowUtils.getScrollbarSize]"
+console.error: ({})
+JavaScript error: resource://devtools/client/fronts/inspector.js, line 157: Error: The target doesn't support creating highlighters by types or BoxModelHighlighter is unknown
+JavaScript error: resource://devtools/client/fronts/inspector.js, line 157: Error: The target doesn't support creating highlighters by types or BoxModelHighlighter is unknown
+1659376291029	Marionette	INFO	Stopped listening on port 59661
+JavaScript error: resource:///modules/CustomizableUI.jsm, line 4839: TypeError: can't access property "getElementsByAttribute", aWindow.gNavToolbox.palette is undefined
+JavaScript error: , line 0: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: , line 0: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: , line 0: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1d6c800 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1d6c800 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1db8000 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1db8000 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1db8f00 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1db8f00 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276bdc0fa00 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276bdc0fa00 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1d6c300 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1d6c300 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1db8000 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1db8000 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1db8f00 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1db8f00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276bdc0fa00 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276bdc0fa00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1d6c300 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1d6c300 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 7968, IPC I/O Parent] WARNING: DuplicateHandle failed for handle 0 in TransferHandles: file /builds/worker/checkouts/gecko/ipc/chromium/src/chrome/common/ipc_channel_win.cc:723
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1d6c800 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 7968, Main Thread] WARNING: ContentParent: id=276c1d6c800 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+1659376386839	geckodriver	INFO	Listening on 127.0.0.1:59725
+1659376389891	mozrunner::runner	INFO	Running command: "C:\\\\Program Files\\\\Firefox Developer Edition\\\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofile8CVwmn"
+1659376394754	Marionette	INFO	Marionette enabled
+1659376394840	Marionette	INFO	Listening on port 59737
+1659376396118	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: chrome://browser/content/tabbrowser.js, line 5318: TypeError: can't access property "isOriginatingBrowser", this.PictureInPicture is undefined
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofile8CVwmn\\search.json.mozlz4", (void 0)))
+JavaScript error: resource:///modules/CustomizableUI.jsm, line 4097: Error: Area not yet restored
+1659376475770	geckodriver	INFO	Listening on 127.0.0.1:59799
+1659376478872	mozrunner::runner	INFO	Running command: "C:\\\\Program Files\\\\Firefox Developer Edition\\\\firefox.exe" "--marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofilercYPSe"
+1659376481571	Marionette	INFO	Marionette enabled
+1659376481624	Marionette	INFO	Listening on port 59809
+1659376483363	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofilercYPSe\\search.json.mozlz4", (void 0)))
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://accounts.google.com."
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://accounts.google.com."
+JavaScript warning: https://accounts.google.com/ServiceLogin?service=mail&passive=1209600&osid=1&continue=https://mail.google.com/mail/u/0/&followup=https://mail.google.com/mail/u/0/&emr=1 line 2 > eval line 5131 > eval line 1 > eval line 1 > eval, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+1659376565680	Marionette	INFO	Stopped listening on port 59809
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55dd00 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55dd00 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55d300 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55d300 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55ec00 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55ec00 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271eac9900 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271eac9900 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2272262c100 - BlockShutdown: CanSend.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3595
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2272262c100 - ShutDownProcess: Sent shutdown message.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1799
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55ec00 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55ec00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271eac9900 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271eac9900 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2272262c100 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2272262c100 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55d300 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55d300 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55dd00 - ShutDownProcess: Closing channel.: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:1834
+[Parent 15252, Main Thread] WARNING: ContentParent: id=2271f55dd00 - RemoveShutdownBlockers: file /builds/worker/checkouts/gecko/dom/ipc/ContentParent.cpp:3697

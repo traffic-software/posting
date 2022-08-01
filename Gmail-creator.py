@@ -46,9 +46,11 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     try:
 
-        b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
+        b.get_url('https://gmail.com')
+        # b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
     except:
         b.exit()
+    time.sleep(60)
 
     firstName = b.select_element('[id="firstName"]')
     name = account_data['post_data'].split("-")
@@ -85,14 +87,11 @@ def main(account_data, postinfo, packages_id, body_mail):
         '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
     nextpage.click()
     view_container = b.select_element('div[id="view_container"]')
-    try:
+    if view_container.find_element_by_css_selector('[id="phoneNumberId"]'):
+        print('varify need')
+    else:
+        print('others option')
 
-        if view_container.find_element_by_css_selector('[id="phoneNumberId"]'):
-            print('varify need')
-        else:
-            print('other page')
-            time.sleep(200)
-    except:
         time.sleep(200)
 
     worker_acc.post_error(
