@@ -36,7 +36,7 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     b = firefoxBrowser(account_id, pva=account_data)
 
-    time.sleep(5)
+    time.sleep(1)
     if b.PROXY_PASS == False and b.use_proxy == True:
         b.exit()
         print('proxy condition not fulfilled')
@@ -45,32 +45,62 @@ def main(account_data, postinfo, packages_id, body_mail):
         return False
 
     try:
-        time.sleep(200)
-        b.get_url('https://mail.google.com/mail/&ogbl')
+
+        b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
     except:
         b.exit()
 
-    if b.try_xpath("//*[contains(text(),'posting has been flagged')]"):
-        print('This posting has been flagged for removal')
-        worker_acc.ban_3(account_id, status=3)
-    else:
+    firstName = b.select_element('[id="firstName"]')
+    name = account_data['post_data'].split("-")
 
-        hidenbutton = b.select_element_xpath(
-            '//*[@class="banish-unbanish action"]', 'hiden try')
+    print('first name typing')
+    for character in name[0]:
+        firstName.send_keys(character)
+        time.sleep(1)
+    lastName = b.select_element('[id="lastName"]')
+    print('last name typing')
+    for character in name[1]:
+        lastName.send_keys(character)
+        time.sleep(1)
+    username = b.select_element('[id="username"]')
+    print('username typing')
+    for character in account_data['password']:
+        username.send_keys(character)
+        time.sleep(1)
+    Passwd = b.select_element('[name="Passwd"]')
+    print('Passwd typing')
+    for character in account_data['extra']:
+        Passwd.send_keys(character)
+        time.sleep(1)
+    ConfirmPasswd = b.select_element('[name="ConfirmPasswd"]')
+    for character in account_data['extra']:
+        ConfirmPasswd.send_keys(character)
+        time.sleep(1)
+    time.sleep(3)
+    if b.try_select_element('button[data-username]'):
+        ConfirmUsername = b.select_element('button[data-username]')
+        ConfirmUsername.click()
 
-        hidenbutton.click()
-        flagbutton = b.select_element_xpath(
-            '//*[@class="flag-action action"]', 'flaging try')
+    nextpage = b.select_element_xpath(
+        '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
+    nextpage.click()
+    view_container = b.select_element('div[id="view_container"]')
+    try:
 
-        flagbutton.click()
+        if view_container.find_element_by_css_selector('[id="phoneNumberId"]'):
+            print('varify need')
+        else:
+            print('other page')
+            time.sleep(200)
+    except:
+        time.sleep(200)
 
-        worker_acc.post_error(
-            account_id, "flag action try", software_type='clf')
-        #title="thanks for flagging!"
-        b.wait('//*[@title="thanks for flagging!"]')
-        time.sleep(2)
+    worker_acc.post_error(
+        account_id, "action try", software_type='GmailCreator')
+    #title="thanks for flagging!"
+    # b.wait('//*[@title="thanks for flagging!"]')
 
-    b.ipinfo_save(software_name='clf')
+    b.ipinfo_save(software_name='gmail creator')
 
     b.exit()
     print('browser close')
@@ -129,4 +159,4 @@ while True:
 
     print('main')
     main(one_account, post, packages_id, body_mail)
-    time.sleep(10)
+    time.sleep(1)

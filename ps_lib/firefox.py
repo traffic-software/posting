@@ -81,12 +81,27 @@ class firefoxBrowser:
             self.options.profile(dname+'\\profiles\\'+str(profile_dir))
 
         else:
-            # letters = string.ascii_lowercase
-            # prifileid = ''.join(random.choice(letters) for i in range(10))
+            letters = string.ascii_lowercase
+            prifileid = ''.join(random.choice(letters) for i in range(10))
 
-            # print(dname)
+            print(dname)
+            os.makedirs(dname.replace(
+                'ps_lib', '')+'\\profiles\\'+str(prifileid), exist_ok=True)
+            # fp = webdriver.FirefoxProfile()
+            self.options.set_preference('profile', dname.replace(
+                'ps_lib', '')+'\\profiles\\'+str(prifileid))
 
-            # self.options.profile(dname+'\\profiles\\'+str(prifileid))
+            caps = {
+
+                "os": "OS X",
+                "osVersion": "Monterey",
+                "buildName": "firefoxprofile- python",
+                "sessionName": "firefoxprofile- python",
+                "browserName": "Firefox",
+            }
+            # self.options.set_capability('bstack:options', caps)
+
+            # self.options.profile(dname.replace('ps_lib', '')+'\\profiles\\'+str(prifileid))
             pass
 
         firefox_dev_binary = FirefoxBinary(
@@ -307,7 +322,7 @@ class firefoxBrowser:
         if sys.platform in ['Windows', 'win32', 'cygwin']:
             for ti in t:
                 if self.proxy_timezone in ti['utc']:
-                    # os.system("tzutil /s \"{}\"".format(ti['value']))
+                    os.system("tzutil /s \"{}\"".format(ti['value']))
                     pass
         newTime = time.strftime('%X %x %Z')
         print('old time: ', oldTime, "new time: ",
@@ -333,6 +348,17 @@ class firefoxBrowser:
 
             self.exit()
             exit()
+        return element
+
+    def try_select_element(self, selector):
+        try:
+            element = self.driver.find_element_by_css_selector(selector)
+            if element.is_displayed() and element.is_enabled():
+                element = True
+
+        except:
+            element = False
+
         return element
 
     def select_elements(self, selector):

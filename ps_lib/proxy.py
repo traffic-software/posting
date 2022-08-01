@@ -98,7 +98,6 @@ class ps_proxy:
 
         letters = string.ascii_lowercase
         city = "any"
-        print(proxyinfo)
 
         if proxyinfo['company'] == 'oxylabs':
             city = self.city.replace(' ', '_')
@@ -213,6 +212,7 @@ class ps_proxy:
         return self.proxy_state_check(data=proxyinfo, state=state.lower())
 
     def proxy_check(self, data, city):
+        print('start proxe check')
         try:
             d = "{}:{}@{}:{}".format(data['user'],
                                      data['password'], data['host'], data['port'])
@@ -222,10 +222,11 @@ class ps_proxy:
 
             url = "http://ip-api.com/json"
 
-            r = requests.get(url, timeout=60, proxies=proxie)
-            r.text
+            r = requests.get(url, timeout=10, proxies=proxie)
+            print(r.status_code)
 
             if r.status_code in [400, 407, 500, 502, 522, 525]:
+                print(r.status_code)
 
                 return data
 
