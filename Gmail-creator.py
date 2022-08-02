@@ -72,22 +72,23 @@ def main(account_data, postinfo, packages_id, body_mail):
         time.sleep(1)
     username = b.select_element('[id="username"]')
     print('username typing')
-    time.sleep(3)
+
+    for character in name[0]+name[1]:
+        username.send_keys(character)
+        time.sleep(1)
+    time.sleep(5)
     if b.try_select_element('button[data-username]'):
         ConfirmUsername = b.select_element('button[data-username]')
         ConfirmUsername.click()
-    for character in account_data['password']:
-        username.send_keys(character)
-        time.sleep(1)
     Passwd = b.select_element('[name="Passwd"]')
     print('Passwd typing')
     for character in account_data['extra']:
         Passwd.send_keys(character)
-        time.sleep(1)
+        time.sleep(2)
     ConfirmPasswd = b.select_element('[name="ConfirmPasswd"]')
     for character in account_data['extra']:
         ConfirmPasswd.send_keys(character)
-        time.sleep(1)
+        time.sleep(2)
 
     if b.try_select_element('button[data-username]'):
         ConfirmUsername = b.select_element('button[data-username]')
@@ -96,13 +97,27 @@ def main(account_data, postinfo, packages_id, body_mail):
     nextpage = b.select_element_xpath(
         '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
     nextpage.click()
-    view_container = b.select_element('div[id="view_container"]')
-    if view_container.find_element_by_css_selector('[id="phoneNumberId"]'):
-        print('varify need')
-    else:
-        print('others option')
 
+    newgmail = b.select_element('[data-profile-identifier]')
+    if newgmail:
+        gmail = newgmail.get_attribute("data-email")
+        recoveryEmail = b.select_element('[name="recoveryEmail"]')
+        recoveryEmail.send_keys(account_data['email'])
+
+        day = b.select_element('[name="day"]')
+        day.send_keys(23)
+        month = b.select_dropdown('[id="month"]', '11')
+        year = b.select_element('[name="year"]')
+        year.send_keys(1990)
+
+        gender = b.select_dropdown('[id="gender"]', '2')
+        button = b.select_element('[type="button"]')
+        button.click()
+        print('others option')
         time.sleep(200)
+    else:
+
+        print('varify need')
 
     worker_acc.post_error(
         account_id, "action try", software_type='GmailCreator')
