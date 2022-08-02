@@ -424,6 +424,17 @@ class browser:
             exit()
         return element
 
+    def try_select_element(self, selector):
+        try:
+            element = self.driver.find_element_by_css_selector(selector)
+            if element.is_displayed() and element.is_enabled():
+                element = True
+
+        except:
+            element = False
+
+        return element
+
     def select_elements(self, selector):
 
         return self.driver.find_elements_by_css_selector(selector)
