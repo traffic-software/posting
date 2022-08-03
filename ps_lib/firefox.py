@@ -104,8 +104,9 @@ class firefoxBrowser:
             # self.options.profile(dname.replace('ps_lib', '')+'\\profiles\\'+str(prifileid))
             pass
 
+        # firefox_dev_binary = FirefoxBinary(r'C:\\Program Files\\Firefox Developer Edition\\firefox.exe')
         firefox_dev_binary = FirefoxBinary(
-            r'C:\\Program Files\\Firefox Developer Edition\\firefox.exe')
+            r'C:\\Program Files\\Firefox Nightly\\firefox.exe')
         self.driver = webdriver.Firefox(
             firefox_binary=firefox_dev_binary, options=self.options)
         if self.use_proxy:

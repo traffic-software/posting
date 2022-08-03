@@ -5,7 +5,7 @@ from os import path
 from pyvirtualdisplay import Display
 from datetime import datetime
 from ps_lib.firefox import firefoxBrowser
-from ps_lib.browser import browser
+# from ps_lib.browser import browser
 from ps_lib.accounts import accounts
 from ps_lib.helper import helper
 from ps_lib.ps_setup import table
@@ -35,7 +35,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     worker_acc = accounts()
     use_proxy = True
 
-    b = browser(account_id, pva=account_data)
+    b = firefoxBrowser(account_id, pva=account_data)
     # b = firefoxBrowser(account_id, pva=account_data)
 
     time.sleep(1)
