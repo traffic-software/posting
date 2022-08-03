@@ -690,6 +690,15 @@ class browser:
             self.exit()
             print("wait")
 
+    def wait_css(self, x):
+
+        try:
+            wait = WebDriverWait(self.driver, 30)
+            return wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, x)))
+        except:
+            self.exit()
+            print("wait")
+
     def link_save(self, link):
         with open('links.txt', 'a') as file:
             file.write(link+"\n")
