@@ -409,7 +409,7 @@ class browser:
             try:
                 element = self.driver.find_element_by_css_selector(selector)
                 if element.is_displayed():
-                    print("element ", selector)
+                    # print("element ", selector)
                     break
             except:
                 co = co+1
@@ -428,7 +428,8 @@ class browser:
         try:
             element = self.driver.find_element_by_css_selector(selector)
             if element.is_displayed() and element.is_enabled():
-                element = True
+                # print('try_select_element')
+                pass
 
         except:
             element = False
@@ -693,11 +694,14 @@ class browser:
     def wait_css(self, x):
 
         try:
+            print('wait css')
             wait = WebDriverWait(self.driver, 30)
-            return wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, x)))
+            return wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, x)))
+
         except:
-            self.exit()
+
             print("wait")
+        return False
 
     def link_save(self, link):
         with open('links.txt', 'a') as file:

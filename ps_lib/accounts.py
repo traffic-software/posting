@@ -6,6 +6,7 @@ from sys import exit
 from ps_lib.ps_setup import table
 from datetime import datetime
 from datetime import timedelta
+import json
 
 
 class accounts:
@@ -24,6 +25,35 @@ class accounts:
             print("error", r.json()['message'])
             return None
         return r.json()["data"]
+
+    def save_account(self, data='no data', soft_token=False):
+        if soft_token == False:
+            token = self.software.software_token()
+        else:
+            token = soft_token
+
+        url = 'https://{host}/api/v1/post/account/save/{token}'.format(
+            host=self.software.host_verify(), token=token)
+
+        r = requests.post(url, json={'data': data})
+        if "error" in r.json():
+            print("error", r.json())
+            return None
+        return r.json()
+    def update_account(self, data='no data',id=None, soft_token=False):
+        if soft_token == False:
+            token = self.software.software_token()
+        else:
+            token = soft_token
+
+        url = 'https://{host}/api/v1/post/account/update/{token}'.format(
+            host=self.software.host_verify(), token=token)
+
+        r = requests.post(url, json={'data': data,'id':id})
+        if "error" in r.json():
+            print("error", r.json())
+            return None
+        return r.json()
 
     def get_proxy_list(self):
         url = 'https://{host}/api/v1/post/account/proxy/{token}'.format(

