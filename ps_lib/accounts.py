@@ -20,7 +20,11 @@ class accounts:
         url = 'https://{host}/api/v1/post/account/{token}'.format(
             host=self.software.host_verify(), token=self.software.software_token())
 
-        r = requests.get(url)
+        try:
+            r = requests.get(url,timeout=15)
+        except:
+            print('network requst timeout in 15')
+            return None
         if "error" in r.json():
             print("error", r.json()['message'])
             return None

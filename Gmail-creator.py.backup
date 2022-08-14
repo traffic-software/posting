@@ -1,16 +1,12 @@
-# from pynput.mouse import Button, Controller
-from turtle import back
-from pynput.keyboard import Key, Controller
 import time
-import random
 import shutil
 import sys
 from os import path
 from pyvirtualdisplay import Display
 from datetime import datetime
 from ps_lib.firefox import firefoxBrowser
-from ps_lib.browser import browser
-from ps_lib.uc import ucbrowser
+# from ps_lib.browser import browser
+# from ps_lib.uc import ucbrowser
 from ps_lib.accounts import accounts
 from ps_lib.helper import helper
 from ps_lib.ps_setup import table
@@ -27,8 +23,7 @@ os.chdir(dname)
 bundle_dir = path.abspath(path.dirname(__file__))
 os.path.dirname(os.path.abspath(__file__))
 
-keyboard = Controller()
-# keyboard.type(str(258956856))
+# from pynput.mouse import Button, Controller
 
 
 def main(account_data, postinfo, packages_id, body_mail):
@@ -41,9 +36,8 @@ def main(account_data, postinfo, packages_id, body_mail):
     worker_acc = accounts()
     use_proxy = True
 
-    # b = browser(account_id, pva=account_data)
-    # b = firefoxBrowser(account_id, pva=account_data)
-    b = ucbrowser(account_id, pva=account_data)
+    # b = ucbrowser(account_id, pva=account_data)
+    b = firefoxBrowser(account_id, pva=account_data)
 
     time.sleep(1)
     if b.PROXY_PASS == False and b.use_proxy == True:
@@ -54,95 +48,86 @@ def main(account_data, postinfo, packages_id, body_mail):
         return False
 
     try:
-        loginurl = 'https://accounts.google.com/signin/v2/identifier'
 
-        b.get_url(loginurl)
+        b.get_url('https://gmail.com')
         # b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
     except:
         b.exit()
-    # time.sleep(120)
-    count = 0
 
-    for no in range(int(account_data['extra']), int(account_data['extra'])+60):
+    new = b.select_element_xpath(
+        '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div/div/div[1]/div/button/span')
+    new.click()
+    new = b.select_element_xpath(
+        '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div/div/div[2]/div/ul/li[1]/span[2]')
+    new.click()
+
+    firstName = b.select_element('[id="firstName"]')
+    name = account_data['post_data'].split("-")
+
+    print('first name typing')
+    for character in name[0]:
+        firstName.send_keys(character)
         time.sleep(1)
+    lastName = b.select_element('[id="lastName"]')
+    print('last name typing')
+    for character in name[1]:
+        lastName.send_keys(character)
+        time.sleep(1)
+    username = b.select_element('[id="username"]')
+    print('username typing')
 
-        # rejeted
-        # https://accounts.google.com/signin/v2/deniedsigninrejected
-        # login page
-        loginurl = 'https://accounts.google.com/signin/v2/identifier'
-        # password page
-        # https://accounts.google.com/signin/v2/challenge/pwd
-        count = count+1
-        print(count)
-        if count % 20 == 1:
-            worker_acc.update_account(data=no, id=account_data['id'])
-            b.get_url(loginurl)
-        if 'signinrejecte' in b.current_url():
+    for character in name[0]+name[1]:
+        username.send_keys(character)
+        time.sleep(1)
+    time.sleep(5)
+    if b.try_select_element('button[data-username]'):
+        ConfirmUsername = b.select_element('button[data-username]')
+        ConfirmUsername.click()
+    Passwd = b.select_element('[name="Passwd"]')
+    print('Passwd typing')
+    for character in account_data['extra']:
+        Passwd.send_keys(character)
+        time.sleep(2)
+    ConfirmPasswd = b.select_element('[name="ConfirmPasswd"]')
+    for character in account_data['extra']:
+        ConfirmPasswd.send_keys(character)
+        time.sleep(2)
 
-            b.get_url(loginurl)
+    if b.try_select_element('button[data-username]'):
+        ConfirmUsername = b.select_element('button[data-username]')
+        ConfirmUsername.click()
 
-        if 'challenge/pwd' in b.current_url():
-            oldNumber = str(no-1)
-            password = b.visibil_element('name', "password")
+    nextpage = b.select_element_xpath(
+        '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
+    nextpage.click()
 
-            mailpass = oldNumber
-            password.clear()
-            password.send_keys(mailpass)
+    newgmail = b.select_element('[data-profile-identifier]')
+    if newgmail:
+        gmail = newgmail.get_attribute("data-email")
+        recoveryEmail = b.select_element('[name="recoveryEmail"]')
+        recoveryEmail.send_keys(account_data['email'])
 
-            passwordNext = b.visibil_element(
-                'css', '[id="passwordNext"] [type="button"]')
-            passwordNext.click()
-            print(mailpass)
-            time.sleep(3)
-            if b.visibil_element('name', "password", wait=10):
-                # print('pssword not match')
-                b.get_url(loginurl)
-                continue
-            else:
-                print('pssword matched')
-                worker_acc.save_account(
-                    data=oldNumber, soft_token=account_data['password'])
-                time.sleep(60)
+        day = b.select_element('[name="day"]')
+        day.send_keys(23)
+        month = b.select_dropdown('[id="month"]', '11')
+        year = b.select_element('[name="year"]')
+        year.send_keys(1990)
 
-        try:
-            imgcapch = b.visibil_element('id', "captchaimg", wait=1)
+        gender = b.select_dropdown('[id="gender"]', '2')
+        button = b.select_element('[type="button"]')
+        button.click()
+        print('others option')
+        time.sleep(200)
+    else:
 
-            if imgcapch.get_attribute('src'):
-                # print('imgcapch')
+        print('varify need')
 
-                b.get_url(loginurl)
+    worker_acc.post_error(
+        account_id, "action try", software_type='GmailCreator')
+    #title="thanks for flagging!"
+    # b.wait('//*[@title="thanks for flagging!"]')
 
-                continue
-        except:
-            pass
-            # print('except imgcapch')
-            # time.sleep(60)
-            # b.get_url(loginurl)
-            # continue
-
-        if 'identifier' in b.current_url():
-            # print('identifier')
-
-            # time.sleep(60)
-            try:
-
-                number = b.visibil_element('name', "identifier")
-                number.clear()
-
-                number.send_keys(0)
-                number.send_keys(no)
-            except:
-                b.get_url(loginurl)
-                continue
-
-        nextpage = b.visibil_element(
-            'css', '#identifierNext button[type="button"]', wait=1)
-        try:
-            nextpage.click()
-        except:
-            continue
-
-    b.ipinfo_save(software_name='gmail checker')
+    b.ipinfo_save(software_name='gmail creator')
 
     b.exit()
     print('browser close')

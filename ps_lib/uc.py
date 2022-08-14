@@ -1,5 +1,4 @@
-from email.policy import default
-import imp
+import undetected_chromedriver as uc
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -7,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
-from selenium import webdriver
+
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
 import json
@@ -18,7 +17,6 @@ from ps_lib.ps_str import ps_str
 from ps_lib.proxy import ps_proxy
 from ps_lib.timezone import t
 from ps_lib.userAgent import l
-from sys import exit
 import sys
 if sys.platform in ['Windows', 'win32', 'cygwin']:
     import pyautogui
@@ -28,7 +26,7 @@ import random
 import string
 
 
-class browser:
+class ucbrowser:
     account_id = None
 
     def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None, image_bock=True, headless=False):
@@ -51,7 +49,7 @@ class browser:
         # ................account.....................................
         self.account = accounts()
         # ......................Chrome..............................
-        self.options = webdriver.ChromeOptions()
+        self.options = uc.ChromeOptions()
         # https://peter.sh/experiments/chromium-command-line-switches/
         ####################proxy user##############
         self.PROXY_PASS = False  # password
@@ -87,16 +85,18 @@ class browser:
             self.options.add_argument("--disable-dev-shm-usage")
             self.options.add_argument("--disable-infobars")
             # self.options.add_argument("start-maximized")
-            self.options.add_experimental_option("useAutomationExtension", False)
-            self.options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            self.options.add_experimental_option(
+                "useAutomationExtension", False)
+            self.options.add_experimental_option(
+                "excludeSwitches", ["enable-automation"])
             # "--disable-web-security", "--user-data-dir=true", "--allow-running-insecure-content"
-            
+
         if headless:
             self.options.add_argument('--headless')
             self.options.add_argument('--disable-gpu')
 
         # self.options.add_argument("--lang=it-IT")
-        self.options.add_argument("--no-sandbox")
+        # self.options.add_argument("--no-sandbox")
         if profile_dir:
             self.options.add_argument("--user-data-dir={}".format(profile_dir))
 
@@ -104,7 +104,8 @@ class browser:
             # self.options.add_argument("--use-temporary-user-data-dir")
             pass
 
-        self.driver = webdriver.Chrome(driverUrl, chrome_options=self.options)
+        self.driver = uc.Chrome(
+            driver_executable_path=driverUrl, options=self.options, use_subprocess=True)
 
     def exit(self):
         try:
@@ -426,11 +427,36 @@ class browser:
             exit()
         return element
 
+    def visibil_element(self, by, selector, wait=30):
+
+        element = False
+        if by == 'name':
+            byselector = By.NAME
+        if by == 'xpath':
+            byselector = By.XPATH
+        if by == 'css':
+            byselector = By.CSS_SELECTOR
+        if by == 'id':
+            byselector = By.ID
+        try:
+
+            element = WebDriverWait(self.driver, wait).until(
+                EC.visibility_of_element_located((byselector, selector)))
+
+        except:
+            element = False
+        if element == False:
+            pass
+            # print("element not find: ", selector)
+
+        return element
+
     def try_select_element(self, selector):
         try:
             element = self.driver.find_element_by_css_selector(selector)
+
             if element.is_displayed() and element.is_enabled():
-                # print('try_select_element')
+                print('try_select_element')
                 pass
 
         except:

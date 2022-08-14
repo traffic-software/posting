@@ -93,7 +93,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                 'css', '[id="passwordNext"] [type="button"]')
             passwordNext.click()
             print(mailpass)
-            time.sleep(3)
+            time.sleep(5)
             if b.visibil_element('name', "password", wait=10):
                 # print('pssword not match')
                 b.get_url(loginurl)

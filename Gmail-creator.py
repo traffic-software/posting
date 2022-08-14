@@ -4,8 +4,9 @@ import sys
 from os import path
 from pyvirtualdisplay import Display
 from datetime import datetime
-from ps_lib.firefox import firefoxBrowser
+# from ps_lib.firefox import firefoxBrowser
 # from ps_lib.browser import browser
+from ps_lib.uc import ucbrowser
 from ps_lib.accounts import accounts
 from ps_lib.helper import helper
 from ps_lib.ps_setup import table
@@ -35,7 +36,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     worker_acc = accounts()
     use_proxy = True
 
-    b = firefoxBrowser(account_id, pva=account_data)
+    b = ucbrowser(account_id, pva=account_data)
     # b = firefoxBrowser(account_id, pva=account_data)
 
     time.sleep(1)
@@ -53,67 +54,67 @@ def main(account_data, postinfo, packages_id, body_mail):
     except:
         b.exit()
 
-    new = b.select_element_xpath(
-        '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div/div/div[1]/div/button/span')
+    new = b.visibil_element('xpath',
+                            '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div/div/div[1]/div/button/span')
     new.click()
-    new = b.select_element_xpath(
-        '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div/div/div[2]/div/ul/li[1]/span[2]')
+    new = b.visibil_element('xpath',
+                            '/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[2]/div/div[2]/div/div/div[2]/div/ul/li[1]/span[2]')
     new.click()
 
-    firstName = b.select_element('[id="firstName"]')
+    firstName = b.visibil_element('id', "firstName")
     name = account_data['post_data'].split("-")
 
     print('first name typing')
     for character in name[0]:
         firstName.send_keys(character)
         time.sleep(1)
-    lastName = b.select_element('[id="lastName"]')
+    lastName = b.visibil_element('id', "lastName")
     print('last name typing')
     for character in name[1]:
         lastName.send_keys(character)
         time.sleep(1)
-    username = b.select_element('[id="username"]')
+    username = b.visibil_element('id', "username")
     print('username typing')
 
     for character in name[0]+name[1]:
         username.send_keys(character)
         time.sleep(1)
     time.sleep(5)
-    if b.try_select_element('button[data-username]'):
-        ConfirmUsername = b.select_element('button[data-username]')
+    if b.visibil_element('css', 'button[data-username]'):
+        ConfirmUsername = b.visibil_element('css', 'button[data-username]')
         ConfirmUsername.click()
-    Passwd = b.select_element('[name="Passwd"]')
+    Passwd = b.visibil_element('css', '[name="Passwd"]')
     print('Passwd typing')
     for character in account_data['extra']:
         Passwd.send_keys(character)
         time.sleep(2)
-    ConfirmPasswd = b.select_element('[name="ConfirmPasswd"]')
+    ConfirmPasswd = b.visibil_element('css', '[name="ConfirmPasswd"]')
     for character in account_data['extra']:
         ConfirmPasswd.send_keys(character)
         time.sleep(2)
 
-    if b.try_select_element('button[data-username]'):
-        ConfirmUsername = b.select_element('button[data-username]')
+    if b.visibil_element('css', 'button[data-username]'):
+        ConfirmUsername = b.visibil_element('css', 'button[data-username]')
         ConfirmUsername.click()
 
-    nextpage = b.select_element_xpath(
-        '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
+    nextpage = b.visibil_element('xpath',
+                                 '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
     nextpage.click()
 
-    newgmail = b.select_element('[data-profile-identifier]')
+    newgmail = b.visibil_element('css', '[data-profile-identifier]')
     if newgmail:
         gmail = newgmail.get_attribute("data-email")
-        recoveryEmail = b.select_element('[name="recoveryEmail"]')
+        recoveryEmail = b.visibil_element('css', '[name="recoveryEmail"]')
         recoveryEmail.send_keys(account_data['email'])
 
-        day = b.select_element('[name="day"]')
+        day = b.visibil_element('css', '[name="day"]')
         day.send_keys(23)
-        month = b.select_dropdown('[id="month"]', '11')
-        year = b.select_element('[name="year"]')
+        month = b.visibil_element('css', '[id="month"]', '11')
+        year = b.visibil_element('css', '[name="year"]')
         year.send_keys(1990)
 
-        gender = b.select_dropdown('[id="gender"]', '2')
-        button = b.select_element('[type="button"]')
+        gender = b.visibil_element('css', '[id="gender"]', '2')
+        button = b.visibil_element('css', '[type="button"]')
         button.click()
         print('others option')
         time.sleep(200)

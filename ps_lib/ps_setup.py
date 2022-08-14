@@ -161,23 +161,28 @@ class table:
 
     def token_verify(self):
         token = self.token_get()
-        if token == None:
-            if sys.platform not in ['Windows', 'win32', 'cygwin']:
-                self.token = os.environ['PS_KEY']
+        try:
+
+            if token == None:
+                if sys.platform not in ['Windows', 'win32', 'cygwin']:
+                    self.token = os.environ['PS_KEY']
+                else:
+                    self.token = str(input("please enter your api_token : "))
+                self.token_save()
+
             else:
-                self.token = str(input("please enter your api_token : "))
-            self.token_save()
+                self.token = token['value']
+            url = 'https://{host}/api/v1/post/info/{token}'.format(
+                host=self.host_get(), token=self.token)
 
-        else:
-            self.token = token['value']
-        url = 'https://{host}/api/v1/post/info/{token}'.format(
-            host=self.host_get(), token=self.token)
+            r = requests.get(url, timeout=15)
+            if "error" in r.json():
 
-        r = requests.get(url)
-        if "error" in r.json():
-
-            print(r.json()['message'])
-            exit()
+                print(r.json()['message'])
+                exit()
+        except:
+            print('network requst timeout in 15')
+            return False
 
         return True
 
