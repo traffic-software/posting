@@ -37,31 +37,45 @@ class accounts:
     def get_ask_keyword(self, account, access_token):
         url = '{url}/api/keyword'.format(url=account['extra'])
 
-        r = requests.get(url, headers={'Content-Type': 'application/json',
-                                       'Authorization': 'Bearer {}'.format(access_token)})
+        try:
 
-        print(r.json())
-        return r.json()
+            r = requests.get(url, headers={'Content-Type': 'application/json',
+                                           'Authorization': 'Bearer {}'.format(access_token)}, timeout=15)
+
+            print(r.json())
+            return r.json()
+        except:
+            print('network request timeout in 15 second')
+        return None
 
     def save_data(self, account, access_token, data):
         url = '{url}/api/keyword'.format(url=account['extra'])
 
-        r = requests.post(url, headers={'Content-Type': 'application/json',
-                                        'Authorization': 'Bearer {}'.format(access_token)},
-                          data=json.dumps(data))
+        try:
 
-        print(r.text)
+            r = requests.post(url, headers={'Content-Type': 'application/json',
+                                            'Authorization': 'Bearer {}'.format(access_token)},
+                              data=json.dumps(data), timeout=15)
+            print(r.text)
+        except:
+            print('network request timeout in 15 second')
+
         return True
 
     def get_proxy_list(self):
         url = 'https://{host}/api/v1/post/account/proxy/{token}'.format(
             host=self.software.host_verify(), token=self.software.software_token())
 
-        r = requests.get(url)
-        if "error" in r.json():
-            print("error", r.json()['message'])
+        try:
+            r = requests.get(url, timeout=15)
+            if "error" in r.json():
+                print("error", r.json()['message'])
+                return None
+            return r.json()
+        except:
+
+            print('network request timeout in 15 second')
             return None
-        return r.json()
 
     def get_account_for_lead_find(self):
         url = 'https://{host}/api/v1/post/account/rendom/{token}'.format(

@@ -83,7 +83,7 @@ class browser:
 
         self.a = random.choice(l)
 
-        self.options.add_argument(f'user-agent={self.a}')
+        # self.options.add_argument(f'user-agent={self.a}')
         print('user set')
 
         if sys.platform not in ['Windows', 'win32', 'cygwin']:
@@ -437,7 +437,7 @@ class browser:
         element = False
         while True:
             try:
-                element = self.driver.find_element_by_xpath(selector)
+                element = self.driver.find_element(By.XPATH, selector)
                 if element.is_displayed() and element.is_enabled():
                     print("done : ", mesasage)
                     if type == 2:
@@ -467,7 +467,8 @@ class browser:
         co = 0
         element = False
         try:
-            element = elements.find_element_by_xpath(selector)
+
+            element = elements.find_element(By.XPATH, selector)
             if element.is_displayed() and element.is_enabled():
                 print("elements done : ", mesasage)
 
@@ -488,7 +489,8 @@ class browser:
         co = 0
         element = False
         try:
-            element = elements.find_elements_by_xpath(selector)
+
+            element = elements.find_elements(By.XPATH, selector)
 
             print("elements done : ", mesasage)
 
@@ -501,6 +503,79 @@ class browser:
             print("element not find : ", mesasage)
 
             self.account.post_error(self.account_id, message=mesasage)
+            self.exit()
+        return element
+
+    def afew(self, elements, selector, mesasage="genarl work", bytype='xpath',try_only=False):
+        # print(self.current_url())
+        co = 0
+        element = False
+        try:
+            if bytype == 'xpath':
+                selectortype = By.XPATH
+            if bytype == 'css':
+                selectortype = By.CSS_SELECTOR
+            if bytype == 'class':
+                selectortype = By.CLASS_NAME
+            if bytype == 'name':
+                selectortype = By.NAME
+            if bytype == 'tag':
+                selectortype = By.TAG_NAME
+            if bytype == 'id':
+                selectortype = By.ID
+
+            element = elements.find_elements(selectortype, selector)
+
+            print("elements done : ", mesasage)
+
+        except:
+
+            print("elements waiting for : ", mesasage)
+        if try_only:
+            return element
+
+        if element == False:
+
+            print("element not find : ", mesasage)
+
+            self.account.post_error(self.account_id, message=mesasage)
+            self.exit()
+        return element
+
+    def one(self, elements, selector, mesasage="genarl work", bytype='xpath',try_only=False):
+        # print(self.current_url())
+        co = 0
+        element = False
+        try:
+            if bytype == 'xpath':
+                selectortype = By.XPATH
+            if bytype == 'css':
+                selectortype = By.CSS_SELECTOR
+            if bytype == 'class':
+                selectortype = By.CLASS_NAME
+            if bytype == 'name':
+                selectortype = By.NAME
+            if bytype == 'tag':
+                selectortype = By.TAG_NAME
+            if bytype == 'id':
+                selectortype = By.ID
+
+            element = elements.find_element(selectortype, selector)
+
+            print("elements done : ", mesasage)
+
+        except:
+
+            print("elements waiting for : ", mesasage)
+
+        if try_only:
+            return element
+        if element == False:
+
+            print("element not find : ", mesasage)
+
+            self.account.post_error(self.account_id, message=mesasage)
+            
             self.exit()
         return element
 
@@ -532,7 +607,7 @@ class browser:
 
     def try_xpath(self, selector, mesasage="genarl work"):
         try:
-            element = self.driver.find_element_by_xpath(selector)
+            element = self.driver.find_element(By.XPATH, selector)
             if element.is_displayed() and element.is_enabled():
                 element = True
 

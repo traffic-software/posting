@@ -43,7 +43,6 @@ def main(account_data, postinfo, packages_id, body_mail):
     worker_acc = accounts()
     settings = table()
     worker_token = worker_acc.get_token(account_data)
-    worker_keyword = worker_acc.get_ask_keyword(account_data, worker_token)
 
     b = browser(account_id, pva=account_data)
     time.sleep(5)
@@ -56,128 +55,130 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     try:
 
-        b.get_url('https://www.google.com/search?q={q}'.format(
-            q=worker_keyword['keyword'].replace(' ', '+')))
+        b.get_url('https://www.google.com')
     except:
         b.exit()
     # time.sleep(240)
-    # q = b.select_element_xpath(
-    #     '//*[@name="q"]', 'q')
-    # q.send_keys(character)
+    while True:
+        worker_keyword = worker_acc.get_ask_keyword(account_data, worker_token)
 
-    try:
-        center_col = b.select_element_xpath(
-            '//*[@id="center_col"]', 'center_col')
-    except:
-        b.exit()
-        return False
+        q = b.select_element_xpath('//input[@name="q"]', 'form')
+        print(q.get_attribute('innerHTML'))
 
-    # loing tail keyowrd
+        if worker_keyword == None:
+            print('no keyword')
+            continue
+        q.clear()
+        for character in worker_keyword['keyword']:
 
-    arg = b.element_xpath(center_col, '//*[@id="botstuff"]', 'botstuff')
-    keywords = arg.find_elements_by_tag_name("a")
-    related_keywords = []
-    for item in keywords:
-        related_keywords.append(item.text)
+            q.send_keys(character)
+            
+        q.send_keys(Keys.ENTER)
+        # time.sleep(120)
 
-    # RELATED_QUESTION
-
-    # get_new_faqs = b.elements_xpath(center_col, '//*[starts-with(@class,"related-question-pair")]', 'faqs')
-    get_new_faqs = center_col.find_elements_by_css_selector(
-        '.related-question-pair')
-
-    for item in get_new_faqs:
         try:
-            item.click()
-            print('faqs')
-            time.sleep(2)
-
+            center_col = b.select_element_xpath(
+                '//*[@id="center_col"]', 'center_col')
         except:
-            print("Element is not clickable")
-    get_new_faqs2 = center_col.find_elements_by_css_selector(
-        '.related-question-pair')
-    count = len(get_new_faqs2)
-    for item in reversed(list(get_new_faqs2)):
-        try:
-            count = count-1
-            if (len(get_new_faqs)+1) > count:
-                break
-            print('faqs2')
-            print(count)
-            item.click()
-            time.sleep(2)
-            # print(i.get_attribute('innerHTML'))
+            b.exit()
+            return False
 
-        except:
-            print("Element is not clickable")
-    # get_new_faqs3 = b.elements_xpath(
-        # center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs3')
-    # count = len(get_new_faqs3)
-    # for item in reversed(list(get_new_faqs3)):
-        # try:
-            # count = count-1
-            # if (len(get_new_faqs2)+5) > count:
-            # break
-            # item.click()
-            # time.sleep(2)
-            # print(i.get_attribute('innerHTML'))
+        # loing tail keyowrd
 
-        # except:
-            # print("Element is not clickable")
+        arg = b.element_xpath(center_col, '//*[@id="botstuff"]', 'botstuff')
+        keywords = b.afew(elements=arg, selector="a", bytype='tag')
+        related_keywords = []
+        for item in keywords:
+            related_keywords.append(item.text)
 
-    time.sleep(5)
-    faqs = center_col.find_elements_by_css_selector(
-        '.related-question-pair')
-    len(faqs)
-    related_question = []
+        # RELATED_QUESTION
 
-    for item in faqs:
+        # get_new_faqs = b.elements_xpath(center_col, '//*[starts-with(@class,"related-question-pair")]', 'faqs')
+        get_new_faqs = b.afew(elements=center_col,
+                              selector='.related-question-pair', bytype='css', try_only=True)
+        # get_new_faqs = center_col.find_elements_by_css_selector('.related-question-pair')
 
-        print('faqs item')
+        for item in get_new_faqs:
+            try:
+                item.click()
+                print('faqs')
+                time.sleep(2)
 
-        # description
-        try:
-            description = item.find_element_by_css_selector(
-                '[data-attrid="wa:/description"]')
-            description = description.get_attribute('innerHTML')
-        except:
-            description = 'no description'
+            except:
+                print("Element is not clickable")
+        # get_new_faqs2 = center_col.find_elements_by_css_selector(
+        get_new_faqs2 = b.afew(elements=center_col,
+                               selector='.related-question-pair', bytype='css', try_only=True)
+        count = len(get_new_faqs2)
+        for item in reversed(list(get_new_faqs2)):
+            try:
+                count = count-1
+                if (len(get_new_faqs)+1) > count:
+                    break
+                print('faqs2')
+                print(count)
+                item.click()
+                time.sleep(2)
 
-        # link = b.element_xpath(
-        #     item, '//*[starts-with(@href,"http")]', 'link')
-        try:
-            link = item.find_element_by_css_selector(
-                'a:not([href*="google.com/search"])')
-            link = link.get_attribute('href')
-        except:
-            link = 'no link'
-        try:
-            faq = item.find_element_by_css_selector('div[id^="exacc_"]')
-            faq = faq.text
-        except:
-            faq = 'not faq'
+            except:
+                print("Element is not clickable")
 
-        question = {
-            'ans': re.sub('<[^<]+?>', '', description),
-            'link': link,
-            'question': re.sub('<[^<]+?>', '', faq)
-        }
+        time.sleep(5)
+        faqs = b.afew(elements=center_col,
+                      selector='.related-question-pair', bytype='css')
+        len(faqs)
+        related_question = []
 
-        related_question.append(question)
+        for item in faqs:
 
-    # print('related_question')
-    # print(related_question)
-    print("related_question")
-    print(len(related_question))
-    worker_acc.save_data(account_data, worker_token, {"parent_id": worker_keyword['id'],
-                         "keywords": related_keywords, "question": related_question})
+            print('faqs item')
 
-    print('post done')
-    print('browser close')
-    b.ipinfo_save(software_name='housing')
+            # description
+            try:
+                description = b.one(elements=item,
+                                    selector='[data-attrid="wa:/description"]', bytype='css', try_only=True)
+                # description = item.find_element_by_css_selector('[data-attrid="wa:/description"]')
+                description = description.get_attribute('innerHTML')
+            except:
+                description = 'no description'
 
-    print('start :', starttime)
-    print('end :', datetime.now().strftime("%H:%M:%S"))
+            # link = b.element_xpath(
+            #     item, '//*[starts-with(@href,"http")]', 'link')
+            try:
+                link = b.one(elements=item,
+                             selector='a: not([href *= "google.com/search"])', bytype='css', try_only=True)
+                link = link.get_attribute('href')
+            except:
+                link = 'no link'
+            try:
+                faq = b.one(elements=item,
+                            selector='div[id^="exacc_"]', bytype='css', try_only=True)
+                faq = faq.text
+            except:
+                faq = 'not faq'
+
+            question = {
+                'ans': re.sub('<[^<]+?>', '', description),
+                'link': link,
+                'question': re.sub('<[^<]+?>', '', faq)
+            }
+
+            related_question.append(question)
+
+        # print('related_question')
+        # print(related_question)
+        print("related_question")
+        print(len(related_question))
+        worker_acc.save_data(account_data, worker_token, {"parent_id": worker_keyword['id'],
+                                                          "keywords": related_keywords, "question": related_question})
+
+        print('post done')
+        print('browser close')
+        b.ipinfo_save(software_name='housing')
+
+        print('start :', starttime)
+        print('end :', datetime.now().strftime("%H:%M:%S"))
+        time.sleep(20)
 
 
 setup = table()

@@ -28,7 +28,7 @@ python3 -c "import os; print(os.environ['PS_PROXY_USER'])"
 python3 bk.py
 reboot
 shutdown -h 0
-docker run --rm -d -it --memory="300m" malaknoyn/clf
+docker run --rm -d -it  clf:Ask --env PS_KEY=r4WkI8g5DEFI
 docker exec -it id /bin/bash
 docker container start id
 docker container restart $(docker ps -a -q)
@@ -62,7 +62,7 @@ sudo update-grub
 
 docker login
 ............update............
-docker build . -t clf:proxy
+docker build . -t clf:Ask
 docker tag clf:Ask malaknoyn/clf:Ask
 sudo supervisorctl status
 sudo supervisorctl stop  all

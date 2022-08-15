@@ -173,7 +173,11 @@ class table:
         url = 'https://{host}/api/v1/post/info/{token}'.format(
             host=self.host_get(), token=self.token)
 
-        r = requests.get(url)
+        try:
+            r = requests.get(url, timeout=15)
+        except:
+            print('network request timeout in 15 second')
+            return None
         if "error" in r.json():
 
             print(r.json()['message'])
