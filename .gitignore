@@ -1,0 +1,11 @@
+dist
+build
+.vscode
+*.tar
+*.zip
+*.db
+__pycache__
+profiles
+docker
+
+
