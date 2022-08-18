@@ -542,7 +542,7 @@ class browser:
             self.exit()
         return element
 
-    def one(self, elements, selector, mesasage="genarl work", bytype='xpath', try_only=False):
+    def find(self,selector, mesasage="genarl work", bytype='xpath',try_only=False):
         # print(self.current_url())
         co = 0
         element = False
@@ -560,13 +560,49 @@ class browser:
             if bytype == 'id':
                 selectortype = By.ID
 
-            element = elements.find_element(selectortype, selector)
+            element = self.driver.find_element(selectortype, selector)
 
-            print("elements done : ", mesasage)
+            print("element done : ", mesasage)
 
         except:
 
-            print("elements waiting for : ", mesasage)
+            print("element waiting for : ", mesasage)
+
+        if try_only:
+            return element
+        if element == False:
+
+            print("element not find : ", mesasage)
+
+            self.account.post_error(self.account_id, message=mesasage)
+
+            self.exit()
+        return element
+    def finds(self,selector, mesasage="genarl work", bytype='xpath',try_only=False):
+        # print(self.current_url())
+        co = 0
+        element = False
+        try:
+            if bytype == 'xpath':
+                selectortype = By.XPATH
+            if bytype == 'css':
+                selectortype = By.CSS_SELECTOR
+            if bytype == 'class':
+                selectortype = By.CLASS_NAME
+            if bytype == 'name':
+                selectortype = By.NAME
+            if bytype == 'tag':
+                selectortype = By.TAG_NAME
+            if bytype == 'id':
+                selectortype = By.ID
+
+            element = self.driver.find_elements(selectortype, selector)
+
+            print("element done : ", mesasage)
+
+        except:
+
+            print("element waiting for : ", mesasage)
 
         if try_only:
             return element
