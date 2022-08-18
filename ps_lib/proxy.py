@@ -122,7 +122,7 @@ class ps_proxy:
             proxyinfo['port'] = proxyinfo['port']
         if proxyinfo['company'] == 'http':
             city = self.city
-        if proxyinfo['company'] == 'packetstream.io':
+        if proxyinfo['company'] == 'packetstream':
             city = self.city
             if '_country' in proxyinfo['password']:
                 location = proxyinfo['password']+'-' + \
@@ -240,7 +240,7 @@ class ps_proxy:
             city = city.replace('_', ' ')
             print(city.lower(), ip['city'].lower())
 
-            if data['company'] == 'dichvusocks' or data['company'] == 'http' or data['company'] == 'socks5' or data['company'] == 'packetstream.io':
+            if data['company'] == 'dichvusocks' or data['company'] == 'http' or data['company'] == 'socks5' or data['company'] == 'packetstream':
 
                 data['checkinfo'] = ip
                 return data
