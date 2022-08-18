@@ -13,13 +13,14 @@
 
 # bundle_dir = path.abspath(path.dirname(__file__))
 # from pynput.mouse import Button, Controller
-from itertools import count
-import json
-import requests
-# from ps_lib.proxy import ps_proxy
-import string
-import random
 import os
+import random
+import string
+import requests
+import json
+from itertools import count
+print('hello worker'.title().replace(' ', ''))
+# from ps_lib.proxy import ps_proxy
 
 url = "https://stackoverflow.com/questions/90178/make-a-div-fill-the-height-of-the-remaining-screen-space?rq=1"
 timeout = 10

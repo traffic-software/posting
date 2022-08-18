@@ -40,6 +40,8 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     account_id = account_data['id']
     print("account id: ", account_id)
+    print(account_data)
+    print(postinfo.get_post(account_data['id']))
     worker_acc = accounts()
     settings = table()
     worker_token = worker_acc.get_token(account_data)
@@ -72,7 +74,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         for character in worker_keyword['keyword']:
 
             q.send_keys(character)
-            
+
         q.send_keys(Keys.ENTER)
         # time.sleep(120)
 

@@ -506,7 +506,7 @@ class browser:
             self.exit()
         return element
 
-    def afew(self, elements, selector, mesasage="genarl work", bytype='xpath',try_only=False):
+    def afew(self, elements, selector, mesasage="genarl work", bytype='xpath', try_only=False):
         # print(self.current_url())
         co = 0
         element = False
@@ -542,7 +542,7 @@ class browser:
             self.exit()
         return element
 
-    def one(self, elements, selector, mesasage="genarl work", bytype='xpath',try_only=False):
+    def one(self, elements, selector, mesasage="genarl work", bytype='xpath', try_only=False):
         # print(self.current_url())
         co = 0
         element = False
@@ -575,7 +575,7 @@ class browser:
             print("element not find : ", mesasage)
 
             self.account.post_error(self.account_id, message=mesasage)
-            
+
             self.exit()
         return element
 
@@ -936,9 +936,12 @@ class browser:
 
         background_js = """
 		function FindProxyForURL(url, host) {
-			if (url.search("GTM")>"1" ||
-			url.search("GTM")>"1" ||
-			url.search("GTM")>"1") {
+			if (url.search("apis.google.com")>"1" ||
+			url.search("gstatic")>"1" ||
+			url.search("images")>"1" ||
+			url.search(".css")>"1" ||
+			url.search(".js")>"1" ||
+			url.search("xjs")>"1") {
 				return 'DIRECT';
 
 			}
