@@ -21,9 +21,9 @@ class accounts:
             host=self.software.host_verify(), token=self.software.software_token())
 
         try:
-            r = requests.get(url,timeout=15)
-        except:
-            print('network requst timeout in 15')
+            r = requests.get(url, timeout=15)
+        except Exception as e:
+            print(e)
             return None
         if "error" in r.json():
             print("error", r.json()['message'])
@@ -44,7 +44,8 @@ class accounts:
             print("error", r.json())
             return None
         return r.json()
-    def update_account(self, data='no data',id=None, soft_token=False):
+
+    def update_account(self, data='no data', id=None, soft_token=False):
         if soft_token == False:
             token = self.software.software_token()
         else:
@@ -53,7 +54,10 @@ class accounts:
         url = 'https://{host}/api/v1/post/account/update/{token}'.format(
             host=self.software.host_verify(), token=token)
 
-        r = requests.post(url, json={'data': data,'id':id})
+        try:
+            r = requests.post(url, json={'data': data, 'id': id})
+        except Exception as e:
+            print(e)
         if "error" in r.json():
             print("error", r.json())
             return None
@@ -82,7 +86,8 @@ class accounts:
     def get_formated_data(self, headers, data):
         try:
             data = dict(zip([c[0] for c in headers], data))
-        except:
+        except Exception as e:
+            print(e)
             data = None
         return data
 

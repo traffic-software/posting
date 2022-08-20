@@ -63,7 +63,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     # time.sleep(120)
     count = 0
 
-    for no in range(int(account_data['extra']), int(account_data['extra'])+60):
+    for no in range(int(account_data['extra']), int(account_data['extra'])+1000):
         time.sleep(1)
 
         # rejeted
@@ -87,12 +87,13 @@ def main(account_data, postinfo, packages_id, body_mail):
 
             mailpass = oldNumber
             password.clear()
+            password.send_keys(account_data['email'])
             password.send_keys(mailpass)
 
             passwordNext = b.visibil_element(
                 'css', '[id="passwordNext"] [type="button"]')
+
             passwordNext.click()
-            print(mailpass)
             time.sleep(3)
             if b.visibil_element('name', "password", wait=10):
                 # print('pssword not match')
@@ -129,7 +130,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                 number = b.visibil_element('name', "identifier")
                 number.clear()
 
-                number.send_keys(0)
+                number.send_keys(account_data['email'])
                 number.send_keys(no)
             except:
                 b.get_url(loginurl)

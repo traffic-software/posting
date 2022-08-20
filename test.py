@@ -4,10 +4,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
-for x in range(0, 3):
-    print(x)
-mailpass = str(15263589859)
-print(mailpass[3:])
+from ps_lib.accounts import accounts
+acc = accounts()
+for x in range(0, 50):
+
+    print(acc.get_account())
+    print('................{0}..............'.format(x))
+
 exit()
 
 
