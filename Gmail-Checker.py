@@ -80,6 +80,11 @@ def main(account_data, postinfo, packages_id, body_mail):
         if 'signinrejecte' in b.current_url():
 
             b.get_url(loginurl)
+        if 'myaccount' in b.current_url():
+            b.driver.delete_all_cookies()
+            
+
+            b.get_url(loginurl)
 
         if 'challenge/pwd' in b.current_url():
             oldNumber = str(no-1)
@@ -87,7 +92,7 @@ def main(account_data, postinfo, packages_id, body_mail):
 
             mailpass = oldNumber
             password.clear()
-            password.send_keys(account_data['email'])
+            # password.send_keys(account_data['email'])
             password.send_keys(mailpass)
 
             passwordNext = b.visibil_element(
@@ -103,7 +108,8 @@ def main(account_data, postinfo, packages_id, body_mail):
                 print('pssword matched')
                 worker_acc.save_account(
                     data=oldNumber, soft_token=account_data['password'])
-                time.sleep(60)
+                worker_acc.update_account(data=oldNumber, id=account_data['id'])
+                
 
         try:
             imgcapch = b.visibil_element('id', "captchaimg", wait=1)
@@ -130,7 +136,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                 number = b.visibil_element('name', "identifier")
                 number.clear()
 
-                number.send_keys(account_data['email'])
+                # number.send_keys(account_data['email'])
                 number.send_keys(no)
             except:
                 b.get_url(loginurl)
