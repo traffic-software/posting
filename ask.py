@@ -71,6 +71,7 @@ def main(account_data, postinfo, packages_id, body_mail):
             print('no keyword')
             continue
         q.clear()
+        print(worker_keyword['keyword'])
         for character in worker_keyword['keyword']:
 
             q.send_keys(character)

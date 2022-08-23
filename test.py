@@ -1,89 +1,223 @@
-# from selenium import webdriver
-
-# options = webdriver.ChromeOptions()
-# options.add_experimental_option("useAutomationExtension", False)
-# options.add_experimental_option("excludeSwitches",["enable-automation"])
-
-# driver_path = 'chromedriver.exe'
-# driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
-# driver.get('https://google.com')
-
-# driver.close()
-# from os import path
-
-# bundle_dir = path.abspath(path.dirname(__file__))
-# from pynput.mouse import Button, Controller
-import os
+from email.policy import SMTP
+from re import sub
+import threading
+import time
+import shutil
 import random
 import string
-import requests
-import json
-from itertools import count
-print('hello worker'.title().replace(' ', ''))
-# from ps_lib.proxy import ps_proxy
+import fnmatch
+import sys
+from os import path
+from weakref import proxy
+from pyvirtualdisplay import Display
+from datetime import datetime
+import smtp
+from ps_lib.browser import browser
+from ps_lib.accounts import accounts
+from ps_lib.psThread import psThread
+from ps_lib.helper import helper
+from ps_lib.ps_setup import table
+from ps_lib.post import post
+from ps_lib.captcha import capcha
+from ps_lib.ps_str import ps_str
+from ps_lib.imap import imap
+from selenium.webdriver.common.keys import Keys
+import os
+# import pyautogui
+import re
 
-url = "https://stackoverflow.com/questions/90178/make-a-div-fill-the-height-of-the-remaining-screen-space?rq=1"
-timeout = 10
-data = {
-    "prompt": "Does Windows 11 need antivirus?",
-    "temperature": 0.3,
-    "max_tokens": 150,
-    "top_p": 1,
-    "frequency_penalty": 0,
-    "presence_penalty": 0
-}
-r = requests.post(url)
-
-with open("response1.html", "w") as f:
-    f.write(r.text)
-# def proxy_check(data):
-#     try:
-#         d = "{}:{}@{}:{}".format(data['user'],
-#                                  data['password'], data['ip'], data['port'])
-#         proxie = {"http": "http://"+d, "https": "http://"+d}
-#         # if data['type'] == 'nouser':
-#         # proxie = {"http": "http://"+data, "https": "http://"+data}
-
-#         url = "http://ip-api.com/json"
-#         r = requests.get(url, timeout=10, proxies=proxie)
-
-#         if r.status_code in [400, 407, 500, 502, 522, 525]:
-#             print('status_code {0}'.format(r.status_code))
-
-#             return r.status_code
-
-#         ip = json.loads(r.text)
-#         print(ip)
-
-#         return ip
-
-#     except Exception as e:
-#         print(e)
-# # .............proxyrotator.com................
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+bundle_dir = path.abspath(path.dirname(__file__))
 
 
-# # proxy_check('103.47.66.154:8080')
-# # exit()
-# url = 'http://falcon.proxyrotator.com:51337'
-# params = dict(
-#     apiKey='hEQPUdGan7BjCw4X8rtxkTzFMNYH392c',
-#     userAgent='true',
-#     country='US',
-#     get='true',
-#     # connectionType='Residential'
-# )
-# counter = 1
-# while True:
-#     counter = counter+1
-#     print(counter)
+def main(account_data, postinfo, packages_id, body_mail):
+    # work start time
+    starttime = datetime.now().strftime("%H:%M:%S")
 
-#     resp = requests.get(url, params=params, timeout=3)
+    print(datetime.now().strftime("%H:%M:%S"))
 
-#     data = json.loads(resp.text)
-#     data['user'] = '932eba933076a67fc7ee3b4a29664b52'
-#     data['password'] = 'f02769a4fcbcb32d1d436ad3da91b227'
-#     proxy_check(data)
+    account_id = account_data['id']
+    print("account id: ", account_id)
+    worker_acc = accounts()
+    settings = table()
+    worker_token = worker_acc.get_token(account_data)
+    worker_keyword = worker_acc.get_ask_keyword(account_data, worker_token)
+
+    b = browser(account_id, pva=account_data)
+    time.sleep(5)
+    # if b.PROXY_PASS == False:
+    #     b.exit()
+    #     print('proxy condition not fulfilled')
+    #     # worker_acc.ban_3(account_id, 5)
+    #     time.sleep(10)
+    #     return False
+
+    try:
+
+        b.get_url('https://www.google.com/search?q={q}'.format(
+            q=worker_keyword['keyword'].replace(' ', '+')))
+    except:
+        b.exit()
+    # time.sleep(240)
+    # q = b.select_element_xpath(
+    #     '//*[@name="q"]', 'q')
+    # q.send_keys(character)
+
+    try:
+        center_col = b.select_element_xpath(
+            '//*[@id="center_col"]', 'center_col')
+    except:
+        b.exit()
+        return False
+
+    # loing tail keyowrd
+
+    arg = b.element_xpath(center_col, '//*[@id="botstuff"]', 'botstuff')
+    keywords = arg.find_elements_by_tag_name("a")
+    related_keywords = []
+    for item in keywords:
+        related_keywords.append(item.text)
+
+    # RELATED_QUESTION
+
+    # get_new_faqs = b.elements_xpath(center_col, '//*[starts-with(@class,"related-question-pair")]', 'faqs')
+    get_new_faqs = center_col.find_elements_by_css_selector(
+        '.related-question-pair')
+
+    for item in get_new_faqs:
+        try:
+            item.click()
+            print('faqs')
+            time.sleep(2)
+
+        except:
+            print("Element is not clickable")
+    get_new_faqs2 = center_col.find_elements_by_css_selector(
+        '.related-question-pair')
+    count = len(get_new_faqs2)
+    for item in reversed(list(get_new_faqs2)):
+        try:
+            count = count-1
+            if (len(get_new_faqs)+1) > count:
+                break
+            print('faqs2')
+            print(count)
+            item.click()
+            time.sleep(2)
+            # print(i.get_attribute('innerHTML'))
+
+        except:
+            print("Element is not clickable")
+    # get_new_faqs3 = b.elements_xpath(
+        # center_col, '//*[starts-with(@id,"RELATED_QUESTION_LINK")]', 'faqs3')
+    # count = len(get_new_faqs3)
+    # for item in reversed(list(get_new_faqs3)):
+        # try:
+            # count = count-1
+            # if (len(get_new_faqs2)+5) > count:
+            # break
+            # item.click()
+            # time.sleep(2)
+            # print(i.get_attribute('innerHTML'))
+
+        # except:
+            # print("Element is not clickable")
+
+    time.sleep(5)
+    faqs = center_col.find_elements_by_css_selector(
+        '.related-question-pair')
+    len(faqs)
+    related_question = []
+
+    for item in faqs:
+
+        print('faqs item')
+
+        # description
+        try:
+            description = item.find_element_by_css_selector(
+                '[data-attrid="wa:/description"]')
+            description = description.get_attribute('innerHTML')
+        except:
+            description = 'no description'
+
+        # link = b.element_xpath(
+        #     item, '//*[starts-with(@href,"http")]', 'link')
+        try:
+            link = item.find_element_by_css_selector(
+                'a:not([href*="google.com/search"])')
+            link = link.get_attribute('href')
+        except:
+            link = 'no link'
+        try:
+            faq = item.find_element_by_css_selector('div[id^="exacc_"]')
+            faq = faq.text
+        except:
+            faq = 'not faq'
+
+        question = {
+            'ans': re.sub('<[^<]+?>', '', description),
+            'link': link,
+            'question': re.sub('<[^<]+?>', '', faq)
+        }
+
+        related_question.append(question)
+
+    # print('related_question')
+    # print(related_question)
+    print("related_question")
+    print(len(related_question))
+    worker_acc.save_data(account_data, worker_token, {"parent_id": worker_keyword['id'],
+                         "keywords": related_keywords, "question": related_question})
+
+    print('post done')
+    print('browser close')
+    b.ipinfo_save(software_name='housing')
+
+    print('start :', starttime)
+    print('end :', datetime.now().strftime("%H:%M:%S"))
 
 
-# .............pubproxy.com......................
-# url = 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT'
+setup = table()
+setup.token_verify()
+packages_id = '317345'
+
+worker = 2
+# ........................start worker....................
+
+utility = helper()
+headers = {}
+profile_ids = {}
+acc = accounts()
+post = post()
+if sys.platform not in ['Windows', 'win32', 'cygwin']:
+    display = Display(visible=0, size=(1024, 768))
+    display.start()
+
+while True:
+    if setup.token_off():
+        print('software off now but reply checking runing')
+        time.sleep(60)
+        continue
+    one_account = acc.get_account()
+    if one_account == None:
+        print('account not find for worker')
+        time.sleep(60)
+        continue
+    postinfo = post.get_post(one_account['id'])
+    body_mail = None
+    if postinfo == None:
+
+        print('post not find for worker')
+        time.sleep(10)
+        continue
+    print('account last use time is : ', one_account['last_updates'])
+
+    if path.isdir('profiles/' + str(one_account['id'])) == True:
+        shutil.rmtree('profiles/' + str(one_account['id']))
+
+    print('main')
+    main(one_account, post, packages_id, body_mail)
+    time.sleep(10)
