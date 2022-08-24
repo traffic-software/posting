@@ -506,7 +506,7 @@ class browser:
             self.exit()
         return element
 
-    def afew(self, elements, selector, mesasage="genarl work", bytype='xpath', try_only=False):
+    def afew(self, elements, selector, mesasage="genarl work", bytype='xpath',try_only=False):
         # print(self.current_url())
         co = 0
         element = False
@@ -541,8 +541,7 @@ class browser:
             self.account.post_error(self.account_id, message=mesasage)
             self.exit()
         return element
-
-    def one(self, elements, selector, mesasage="genarl work", bytype='xpath', try_only=False):
+    def one(self, elements, selector, mesasage="genarl work", bytype='xpath',try_only=False):
         # print(self.current_url())
         co = 0
         element = False
@@ -575,7 +574,79 @@ class browser:
             print("element not find : ", mesasage)
 
             self.account.post_error(self.account_id, message=mesasage)
+            
+            self.exit()
+        return element
+    def find(self,selector, mesasage="genarl work", bytype='xpath',try_only=False):
+        # print(self.current_url())
+        co = 0
+        element = False
+        try:
+            if bytype == 'xpath':
+                selectortype = By.XPATH
+            if bytype == 'css':
+                selectortype = By.CSS_SELECTOR
+            if bytype == 'class':
+                selectortype = By.CLASS_NAME
+            if bytype == 'name':
+                selectortype = By.NAME
+            if bytype == 'tag':
+                selectortype = By.TAG_NAME
+            if bytype == 'id':
+                selectortype = By.ID
 
+            element = self.driver.find_element(selectortype, selector)
+
+            print("element done : ", mesasage)
+
+        except:
+
+            print("element waiting for : ", mesasage)
+
+        if try_only:
+            return element
+        if element == False:
+
+            print("element not find : ", mesasage)
+
+            self.account.post_error(self.account_id, message=mesasage)
+            
+            self.exit()
+        return element
+    def finds(self,selector, mesasage="genarl work", bytype='xpath',try_only=False):
+        # print(self.current_url())
+        co = 0
+        element = False
+        try:
+            if bytype == 'xpath':
+                selectortype = By.XPATH
+            if bytype == 'css':
+                selectortype = By.CSS_SELECTOR
+            if bytype == 'class':
+                selectortype = By.CLASS_NAME
+            if bytype == 'name':
+                selectortype = By.NAME
+            if bytype == 'tag':
+                selectortype = By.TAG_NAME
+            if bytype == 'id':
+                selectortype = By.ID
+
+            element = self.driver.find_elements(selectortype, selector)
+
+            print("element done : ", mesasage)
+
+        except:
+
+            print("element waiting for : ", mesasage)
+
+        if try_only:
+            return element
+        if element == False:
+
+            print("element not find : ", mesasage)
+
+            self.account.post_error(self.account_id, message=mesasage)
+            
             self.exit()
         return element
 
@@ -851,9 +922,7 @@ class browser:
 				bypassList: ["localhost"]
 				}
 			};
-
 		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
-
 		function callbackFn(details) {
 			return {
 				authCredentials: {
@@ -862,7 +931,6 @@ class browser:
 				}
 			};
 		}
-
 		chrome.webRequest.onAuthRequired.addListener(
 					callbackFn,
 					{urls: ["<all_urls>"]},
@@ -939,13 +1007,12 @@ class browser:
 			if (url.search("apis.google.com")>"1" ||
 			url.search("gstatic")>"1" ||
 			url.search("images")>"1" ||
-			url.search(".css")>"1" ||
-			url.search(".js")>"1" ||
+			url.search("public/uploads")>"1" ||
+			url.search("favicon.png")>"1" ||
+			url.search("public/assets")>"1" ||
 			url.search("xjs")>"1") {
 				return 'DIRECT';
-
 			}
-
 			return "%s %s:%s";
 			}
 		var config = {
@@ -955,9 +1022,7 @@ class browser:
     		mandatory: true
 			}
 		};
-
 		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
-
 		function callbackFn(details) {
 			return {
 				authCredentials: {
@@ -966,7 +1031,6 @@ class browser:
 				}
 			};
 		}
-
 		chrome.webRequest.onAuthRequired.addListener(
 					callbackFn,
 					{urls: ["<all_urls>"]},
