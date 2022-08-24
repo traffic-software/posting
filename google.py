@@ -68,7 +68,7 @@ def scrolling(b):
 def nextclick(b,tragetdomain):
 
 
-    target_site_link = b.finds("//div[@class='single-content2']//a[contains(@href,'https://{}')]".format(tragetdomain),'intarnal links')
+    target_site_link = b.finds("//div[@class='single-content2']//a[contains(@href,'https://')]",'intarnal links')
     randon_link = random.choice(target_site_link)
     b.driver.get(randon_link.get_attribute('href'))
     # randon_link.click()
@@ -176,10 +176,11 @@ def main(account_data, postinfo, packages_id, body_mail):
             next_page_link = b.find('//*[@id="pnnext"]','google next page','xpath')
             if next_page_link:
                 next_page_link.click()
+    worker_acc.post_done(account_data['id'],account_data['email'])
             
     print('post done')
     print('browser close')
-    b.ipinfo_save(software_name='housing')
+    b.ipinfo_save(software_name='CoreAiSite-'+str(workerTimeOut)+'M')
 
     print('start :', starttime)
     print('end :', datetime.now().strftime("%H:%M:%S"))
