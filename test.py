@@ -1,25 +1,24 @@
-# from selenium import webdriver
-
-# options = webdriver.ChromeOptions()
-# options.add_experimental_option("useAutomationExtension", False)
-# options.add_experimental_option("excludeSwitches",["enable-automation"])
-
-# driver_path = 'chromedriver.exe'
-# driver = webdriver.Chrome(executable_path=driver_path, chrome_options=options)
-# driver.get('https://google.com')
-
-# driver.close()
-# from os import path
-
-# bundle_dir = path.abspath(path.dirname(__file__))
-# from pynput.mouse import Button, Controller
-import os
-import random
-import string
-import requests
-import json
 from itertools import count
-print('hello worker'.title().replace(' ', ''))
+import json
+import requests
+import string
+import random
+[
+    {
+    'domain': '.linkedin.com',
+ 'expiry': 1661095827,
+  'httpOnly': False,
+   'name': 'lidc',
+    'path': '/',
+     'sameSite': 'None',
+      'secure': True,
+       'value': '"b=TB41:s=T:r=T:a=T:p=T:g=3507:u=1:x=1:i=1661080956:t=1661095827:v=2:sig=AQHYS6qFjVq2KQcmcZRTy4wxSF81acIE"'
+},
+ {'domain': '.linkedin.com', 'expiry': 1663672898, 'httpOnly': False, 'name': 'lms_ads', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': 'AQFrrvb6EhuhkgAAAYLAIw98-KjflGVFLwinKWiUdL1UXtnECrcskayBwKh1zDjl-0gqpwWqdP7OcQWgjyoq2BLTdFis7LFI'},
+ {'domain': '.linkedin.com', 'expiry': 1663672955, 'httpOnly': False, 'name': 'UserMatchHistory', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': 'AQIFYYjYXBnrwAAAAYLAI-wXseX5E1NBv_iwfAs8A8xIAnOr8HZd27p-AlZzXQwWpK8MJQUHlIry8VzYAZ8WsQUs559fLMcJN3_QhHhXRhdENx1ADFH5cfU0ypKRG_KCIffPnHJpFWIGG680mi9ZoGjvvRpNTrrHPt4f5Sft0IXtxUZhSxbSGV52FLAOPCHLi0jisLdWL4V_ajFs_DzRWdnCKwBrj08tQpI-JhLzczt5xnI14UjPrvdCNH5VhQBpZNBamvni-Wgo2NZwYHb7RWLvt4uQ1HlDNH85sOI'}, {'domain': '.linkedin.com', 'expiry': 1663672898, 'httpOnly': False, 'name': 'AnalyticsSyncHistory', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': 'AQIC4XYGQGiyhwAAAYLAIw5qUILJoG8uNKbdVunqfT42TRaDF3VAqRHUqv1VQE8j6xknSULZ4-QYNo2uTKVEgQ'}, {'domain': '.linkedin.com', 'expiry': 1668856898, 'httpOnly': False, 'name': '_guid', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': '8254fe70-effe-4b10-aa03-3744f9eaadc7'}, {'domain': '.linkedin.com', 'expiry': 1668856955, 'httpOnly': False, 'name': 'li_sugr', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': 'bbf677c5-ef2f-4a96-8249-d3d0d9926083'}, {'domain': '.www.linkedin.com', 'expiry': 1692616890, 'httpOnly': True, 'name': 'bscookie', 'path': '/', 'sameSite': 'None', 'secure': True, 'value': '"v=1&20220821112130d9c128ae-065d-42ce-8fff-df2de5bb8d58AQHbmvBuF7AmPoZ2e7Kalf-RuDbbYYrS"'
+ }
+ ]
+ print('hello worker'.title().replace(' ', ''))
 # from ps_lib.proxy import ps_proxy
 
 url = "https://stackoverflow.com/questions/90178/make-a-div-fill-the-height-of-the-remaining-screen-space?rq=1"

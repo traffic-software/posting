@@ -302,6 +302,7 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     print('browser close')
     b.ipinfo_save(software_name='google')
+    print(b.driver.get_cookies())
 
     print('start :', starttime)
     print('end :', datetime.now().strftime("%H:%M:%S"))

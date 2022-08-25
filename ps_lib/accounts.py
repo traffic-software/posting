@@ -116,6 +116,26 @@ class accounts:
             print("error", r.json()['message'])
             return None
         return r.json()
+    def save_cookie(self, id, messasge='post done'):
+        url = 'https://{host}/api/v1/post/account/postdone/{token}/{id}'.format(
+            host=self.software.host_verify(), token=self.software.software_token(), id=id)
+
+        params = {'data': messasge}
+        r = requests.get(url, params=params)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()
+    def get_cookie(self, id, messasge='post done'):
+        url = 'https://{host}/api/v1/post/account/postdone/{token}/{id}'.format(
+            host=self.software.host_verify(), token=self.software.software_token(), id=id)
+
+        params = {'data': messasge}
+        r = requests.get(url, params=params)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()
 
     def post_log(self, id, messasge='post log'):
         url = 'https://{host}/api/v1/post/account/postlog/{token}/{id}'.format(
