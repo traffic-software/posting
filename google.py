@@ -43,17 +43,6 @@ def checkTimeOut(starttime,workerTimeOut=5):
         return True
 
 
-
-
-
-
-
-
-
-
-
-
-
 def scrolling(b):
     total_height = int(b.driver.execute_script(
     "return document.body.scrollHeight"))
@@ -90,22 +79,6 @@ def target_site(b,tragetdomain):
         nextclick(b,tragetdomain)
         scrolling(b)
 
-        # comment_text_area = b.find("//div[@class='comment-form wow fadeIn animated']//textarea",'coment_area','xpath')
-        # comment_text_area.send_keys("Hi! I am new in here.")
-
-        # comment_text_area_name = b.find("//div[@class='comment-form wow fadeIn animated']//input[@name='name']")
-        # comment_text_area_name.send_keys("SM Samrat")
-
-        # comment_text_area_email = b.find("//div[@class='comment-form wow fadeIn animated']//input[@name='email']")
-
-        # comment_text_area_email.send_keys("SM@gmail.com")
-
-        # comment_text_area_website = b.find("//div[@class='comment-form wow fadeIn animated']//input[@name='website']")
-        # comment_text_area_website.send_keys("samrat.com")
-
-        # comment_text_area_post_comment = b.find("//div[@class='comment-form wow fadeIn animated']//button")
-        # comment_text_area_post_comment.click()
-
         target_site(b,tragetdomain)
 
     time.sleep(2)
@@ -115,6 +88,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     # work start time
     global starttime
 
+    message=""
     starttime = datetime.now()
     print(account_data)
     postinfo = postinfo.get_post(account_data['id'])
@@ -150,11 +124,16 @@ def main(account_data, postinfo, packages_id, body_mail):
     # time.sleep(240)
     google = b.find("//input[@class='gLFyf gsfi']",'google link')
     # time.sleep(150)
-    google.send_keys(account_data['email'])
-    google.send_keys(Keys.ENTER)
+    try:
+        
+        google.send_keys(account_data['email'])
+        google.send_keys(Keys.ENTER)
+    except:
+        return True
     avarage_position = int(account_data['post_data'] +str(50))
     page = round((avarage_position)/10,2)
     runing_page = 0
+    worker_acc.ban_3(account_data['id'])
     while True:
         target_link= False
         target_link = b.find("//a[contains(@href,'https://{}')]".format(account_data['password']),'traget link',try_only=True)
@@ -175,12 +154,22 @@ def main(account_data, postinfo, packages_id, body_mail):
                 break
             next_page_link = b.find('//*[@id="pnnext"]','google next page','xpath')
             if next_page_link:
+                time.sleep(5)
                 next_page_link.click()
-    worker_acc.post_done(account_data['id'],account_data['email'])
+            else:
+                message='not find in extar page 10'
+                break
+                
+                
+                
+    if 'not find' in message:
+        worker_acc.ban_3(account_data['id'])
+    else:
+        worker_acc.post_done(account_data['id'],account_data['email'])
             
     print('post done')
     print('browser close')
-    b.ipinfo_save(software_name='CoreAiSite-'+str(workerTimeOut)+'M')
+    b.ipinfo_save(software_name='CoreAiSite-'+str(workerTimeOut)+'M'+message)
 
     print('start :', starttime)
     print('end :', datetime.now().strftime("%H:%M:%S"))
