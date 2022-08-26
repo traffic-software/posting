@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(['Gmail-Checker.py'],
-             pathex=['E:\\traffic softwar\\adpost'],
+             pathex=['E:\\traffic softwar\\posting'],
              binaries=[],
              datas=[],
              hiddenimports=[],

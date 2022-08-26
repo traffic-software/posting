@@ -6,9 +6,13 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 from ps_lib.accounts import accounts
 acc = accounts()
-for x in range(0, 50):
+account_data=acc.get_account()
+for x in range(0, 5):
 
-    print(acc.get_account())
+    # if account_data['extra'][0:1]==0:
+        
+        
+    print(00+int(account_data['extra'])-x)
     print('................{0}..............'.format(x))
 
 exit()
