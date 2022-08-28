@@ -68,7 +68,7 @@ sudo supervisorctl status
 sudo supervisorctl stop  all
 docker container rm -f $(docker ps -a -q)
 docker image rm -f $(docker images -a -q)
-docker image pull malaknoyn/clf:Ask
+docker image pull malaknoyn/clf:renking
 sudo supervisorctl restart all
 docker ps
 ............update............

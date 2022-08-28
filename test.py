@@ -25,7 +25,10 @@ from selenium.webdriver.common.keys import Keys
 import os
 # import pyautogui
 import re
-
+for i in range(1, 200, 40):
+    print(i)
+print(random.choice([2,3,1]))
+exit()
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
