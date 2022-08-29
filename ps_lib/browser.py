@@ -71,7 +71,7 @@ class browser:
 
             print("done: proxy set")
             if self.use_proxy:
-                # self.proxy_auth_plugin()
+                
                 self.proxy_auth_plugin_pac_script()
             else:
                 self.PROXY_PASS = False
@@ -886,62 +886,6 @@ class browser:
             print('error: ', message, e)
 
     # proxy plugin
-
-    def proxy_auth_plugin(self):
-
-        manifest_json = """
-		{
-			"version": "1.0.0",
-			"manifest_version": 2,
-			"name": "Chrome Proxy",
-			"permissions": [
-				"proxy",
-				"tabs",
-				"unlimitedStorage",
-				"storage",
-				"<all_urls>",
-				"webRequest",
-				"webRequestBlocking"
-			],
-			"background": {
-				"scripts": ["background.js"]
-			},
-			"minimum_chrome_version":"22.0.0"
-		}
-		"""
-
-        background_js = """
-		var config = {
-				mode: "fixed_servers",
-				rules: {
-				singleProxy: {
-					scheme: "%s",
-					host: "%s",
-					port: parseInt(%s)
-				},
-				bypassList: ["localhost"]
-				}
-			};
-		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
-		function callbackFn(details) {
-			return {
-				authCredentials: {
-					username: "%s",
-					password: "%s"
-				}
-			};
-		}
-		chrome.webRequest.onAuthRequired.addListener(
-					callbackFn,
-					{urls: ["<all_urls>"]},
-					['blocking']
-		);
-		""" % (self.PROXY_TYPE, self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
-        pluginfile = 'proxy_auth_plugin.zip'
-        zp = zipfile.ZipFile(pluginfile, 'w')
-        zp.writestr("manifest.json", manifest_json)
-        zp.writestr("background.js", background_js)
-        self.options.add_extension(pluginfile)
 
     def proxy_auth_plugin_pac_script(self):
 
