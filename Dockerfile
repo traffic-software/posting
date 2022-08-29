@@ -36,7 +36,9 @@ RUN python3 -m pip install chardet
 RUN python3 -m pip install PyEmailTools
 RUN python3 -m pip install pyvirtualdisplay
 RUN python3 -m pip install fake-useragent
+RUN python3 -m pip install pynput
 
+RUN export DISPLAY=:1.0
 RUN apt-get install -y net-tools 
 ADD . /mydir/
 # prossess meneger

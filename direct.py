@@ -4,7 +4,7 @@ import shutil
 import random
 import sys
 from os import path
-from pynput.keyboard import Key, Controller
+# from pynput.keyboard import Key, Controller
 from pyvirtualdisplay import Display
 from datetime import datetime
 from ps_lib.browser import browser
@@ -43,20 +43,20 @@ def checkTimeOut(starttime,workerTimeOut=5):
     if workerTimeOut<ruinngtime:
         return True
 
-keyboard = Controller()
+# keyboard = Controller()
 def topScroling(countTop):
     for i in range(1, countTop, 1):
         
         print('press up key')
-        keyboard.press(Key.up)
-        keyboard.release(Key.up)
+        # keyboard.press(Key.up)
+        # keyboard.release(Key.up)
     
 def downScroling(countTop):
     for i in range(1, countTop, 1):
         
         print('press down key')
-        keyboard.press(Key.down)
-        keyboard.release(Key.down)
+        # keyboard.press(Key.down)
+        # keyboard.release(Key.down)
     
 def scrolling(b):
     total_height = int(b.driver.execute_script(
@@ -68,30 +68,31 @@ def scrolling(b):
     
 
 
-    for i in range(1, round(total), 80):
+    for i in range(1, round(total), 2):
     
-        scrollBar = int(b.driver.execute_script("return window.scrollY"))
-        print(total_height)
-        print(scrollBar)
-        time.sleep(random.choice([3,4,5,6,10,8]))
-        if scrollBar < round(total):
-            if random.choice([20,21,23,22, 3, 4, 5,6,10,8,15,13,12,17])<22:
+        # scrollBar = int(b.driver.execute_script("return window.scrollY"))
+        # print(total_height)
+        # print(scrollBar)
+        # time.sleep(random.choice([3,4,5,6,10,8]))
+        # if scrollBar < round(total):
+        #     if random.choice([20,21,23,22, 3, 4, 5,6,10,8,15,13,12,17])<22:
                 
-                downScroling(random.choice([20,21,23,22, 3, 4, 5,6,10,8,15,13,12,17]))
+        #         downScroling(random.choice([20,21,23,22, 3, 4, 5,6,10,8,15,13,12,17]))
             
             
-            else:
-                topScroling(random.choice([2, 3, 4, 5,6]))
-                if random.choice([2, 3, 4, 5,6])==2:
-                    break
-        else:
-            break
+        #     else:
+        #         topScroling(random.choice([2, 3, 4, 5,6]))
+        #         if random.choice([2, 3, 4, 5,6])==2:
+        #             break
+        # else:
+        #     break
                 
             
             
             
             
-        # b.driver.execute_script("window.scrollTo(0, {});".format(i))
+        time.sleep(0.02)
+        b.driver.execute_script("window.scrollTo(0, {});".format(i))
         # mouse.scroll(0, total)
 def nextclick(b,parent):
 

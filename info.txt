@@ -62,7 +62,7 @@ sudo update-grub
 
 docker login
 ............update............
-docker build . -t clf:Ask
+docker build . -t clf:direct
 docker tag clf:Ask malaknoyn/clf:Ask
 sudo supervisorctl status
 sudo supervisorctl stop  all
