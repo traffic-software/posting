@@ -8,11 +8,11 @@ import string
 import fnmatch
 import sys
 from os import path
-
+import smtp
 from pyvirtualdisplay import Display
 from datetime import datetime
-import smtp
 from ps_lib.browser import browser
+from ps_lib.uc import ucbrowser
 from ps_lib.accounts import accounts
 from ps_lib.psThread import psThread
 from ps_lib.helper import helper
@@ -54,7 +54,8 @@ def main(account_data, postinfo, packages_id, body_mail):
     settings = table()
 
 
-    b = browser(account_id, pva=account_data)
+    # b = browser(account_id, pva=account_data)
+    b = ucbrowser(account_id, pva=account_data)
 
 
     time.sleep(5)
