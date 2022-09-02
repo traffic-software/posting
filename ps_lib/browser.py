@@ -1007,8 +1007,9 @@ class browser:
 			if (url.search("apis.google.com")>"1" ||
 			url.search("gstatic")>"1" ||
 			url.search("images")>"1" ||
-			url.search(".css")>"1" ||
-			url.search(".js")>"1" ||
+			url.search("public/uploads")>"1" ||
+			url.search("favicon.png")>"1" ||
+			url.search("public/assets")>"1" ||
 			url.search("xjs")>"1") {
 				return 'DIRECT';
 			}

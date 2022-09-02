@@ -128,7 +128,7 @@ class ps_proxy:
                 location = proxyinfo['password']+'-' + \
                     location.title().replace(' ', '')
                 session = ''.join(random.choice(letters) for i in range(8))
-                proxyinfo['password'] = location+'_session-'+session
+                proxyinfo['password'] = location#+'_session-'+session
         if proxyinfo['company'] == 'proxyhorse':
             city = city
             proxy = self.proxyhorse(location=location, pva_id=self.pva_id)
