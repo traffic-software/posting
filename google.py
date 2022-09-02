@@ -57,7 +57,7 @@ def scrolling(b):
 def nextclick(b,tragetdomain):
 
 
-    target_site_link = b.finds("//div[@class='single-content2']//a[contains(@href,'https://')]",'intarnal links')
+    target_site_link = b.finds("//a[contains(@href,'https://')]",'intarnal links')
     randon_link = random.choice(target_site_link)
     b.driver.get(randon_link.get_attribute('href'))
     # randon_link.click()
@@ -157,7 +157,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                 time.sleep(5)
                 next_page_link.click()
             else:
-                message='not find in extar page 10'
+                message=' not find in extar page 10 '
                 break
                 
                 

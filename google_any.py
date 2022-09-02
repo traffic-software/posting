@@ -66,7 +66,7 @@ def scrolling(b):
 def nextclick(b,tragetdomain):
 
 
-    target_site_link = b.finds("//div[@class='site-content']//a[contains(@href,'https://{}')]".format(tragetdomain),'intarnal links')
+    target_site_link = b.finds("//a[contains(@href,'https://')]",'intarnal links')
     
     randon_link = random.choice(target_site_link)
     b.driver.get(randon_link.get_attribute('href'))
@@ -157,7 +157,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     while True:
         target_link= False
         target_link = b.find("//a[contains(@href,'https://{}')]".format(account_data['password']),'traget link',try_only=True)
-            # time.sleep(150)
+        
         if target_link:
 
             target_link.click()

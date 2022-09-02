@@ -62,8 +62,8 @@ sudo update-grub
 
 docker login
 ............update............
-docker build . -t clf:direct
-docker tag clf:Ask malaknoyn/clf:Ask
+docker build . -t google:start
+docker tag clf:direct malaknoyn/clf:google
 sudo supervisorctl status
 sudo supervisorctl stop  all
 docker container rm -f $(docker ps -a -q)
