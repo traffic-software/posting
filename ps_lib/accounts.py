@@ -1,109 +1,160 @@
 import sqlite3
+import json
 import os
+import time
+import requests
+from sys import exit
+from ps_lib.ps_setup import table
+from datetime import datetime
+from datetime import timedelta
+
+
 class accounts:
 
     def __init__(self):
-        self.conn = sqlite3.connect('data/databases.db')
 
-    def ps_proxys_insert(self, proxys):
-
-        c = self.conn.cursor()
-
-        c.executemany("INSERT INTO proxys (data,checked) VALUES  (?,?)", proxys)
-        self.conn.commit()
-
-    def ps_proxys_save(self):
-
-        with open('proxy.txt', encoding="utf8") as my_file:
-            lines = my_file.readlines()
-            my_file.truncate()
-        proxy = []
-        for key, line in enumerate(lines):
-            ps_data = line.rstrip("\n")
-            # .split(":")
-            # print(ps_data)
-
-            # host = ps_data[0]
-            # port = ps_data[1].rstrip("\n")
-            proxy_tada = (ps_data, 0)  # (host+":"+port,0)
-            proxy.append(proxy_tada)
-        self.ps_proxys_insert(proxy)
-    def insert(self,combos):
-        c = self.conn.cursor()
-        c.executemany("INSERT INTO accounts (data,runing) VALUES  (?,?)", combos)
-        self.conn.commit()
-
-
-    def get_accounts(self,limit):
-        c = self.conn.cursor()
-        # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "SELECT * FROM accounts WHERE runing = 0 ORDER BY random() LIMIT " + str(limit)
-        c.execute(sql)
-        account = c.fetchall()
-        # c.fetchall()
-        # c.fetchmany()()
-        # c.fetchone()
-        self.conn.commit()
-        return account
+        self.software = table()
+        self.conn = sqlite3.connect(self.software.databasesfile)
 
     def get_account(self):
-        c = self.conn.cursor()
-        # c.execute("SELECT * FROM accounts WHERE runing = 0")
-        #c.execute("SELECT * FROM accounts WHERE runing = 0 ORDER BY random() LIMIT 1")
-        c.execute("SELECT * FROM accounts ORDER BY random() LIMIT 1")
-        a = c.fetchone()
-        a = self.get_formated_data(c.description,a)
-        return a
+        url = 'https://{host}/api/v1/post/account/{token}'.format(
+            host=self.software.host_verify(), token=self.software.software_token())
+
+        r = requests.get(url)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()["data"]
+
+    def get_token(self, account):
+        url = '{url}/api/login'.format(url=account['extra'])
+
+        r = requests.post(
+            url, params={'email': account['email'], 'password': account['password'], 'device_name': 'ask'})
+
+        return r.text
+
+    def get_ask_keyword(self, account, access_token):
+        url = '{url}/api/keyword'.format(url=account['extra'])
+
+        try:
+
+            r = requests.get(url, headers={'Content-Type': 'application/json',
+                                           'Authorization': 'Bearer {}'.format(access_token)}, timeout=15)
+
+            print(r.json())
+            return r.json()
+        except:
+            print('network request timeout in 15 second')
+        return None
+
+    def save_data(self, account, access_token, data):
+        url = '{url}/api/keyword'.format(url=account['extra'])
+
+        try:
+
+            r = requests.post(url, headers={'Content-Type': 'application/json',
+                                            'Authorization': 'Bearer {}'.format(access_token)},
+                              data=json.dumps(data), timeout=15)
+            print(r.text)
+        except:
+            print('network request timeout in 15 second')
+
+        return True
+
+    def get_proxy_list(self):
+        url = 'https://{host}/api/v1/post/account/proxy/{token}'.format(
+            host=self.software.host_verify(), token=self.software.software_token())
+
+        try:
+            r = requests.get(url, timeout=15)
+            if "error" in r.json():
+                print("error", r.json()['message'])
+                return None
+            return r.json()
+        except:
+
+            print('network request timeout in 15 second')
+            return None
+
+    def get_account_for_lead_find(self):
+        url = 'https://{host}/api/v1/post/account/rendom/{token}'.format(
+            host=self.software.host_verify(), token=self.software.software_token())
+
+        r = requests.get(url)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()["data"]
 
     def get_formated_data(self, headers, data):
-        data = dict(zip([c[0] for c in headers], data))
+        try:
+            data = dict(zip([c[0] for c in headers], data))
+        except:
+            data = None
         return data
-    def get_account_for_inactive(self):
-        file = open('active.txt', "r+")
-        lines = file.readlines()
 
-        file.truncate(0)
-        file.close()
-        for line in lines:
-            account_id = line.rstrip("\n")
-            self.account_inactive(account_id)
-            open('active.txt', "w+")
+    def ban_3(self, id, status=1):
+        url = 'https://{host}/api/v1/post/account/ban/{token}/{id}'.format(
+            host=self.software.host_verify(), token=self.software.software_token(), id=id)
 
-    def account_active(self,acc_id):
-        c = self.conn.cursor()
-        # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "UPDATE accounts SET runing =1 WHERE id = " + str(acc_id)
-        c.execute(sql)
-        self.conn.commit()
+        params = {'status': status}
+        r = requests.get(url, params=params)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
 
-    def account_inactive(self,id):
-        c = self.conn.cursor()
-        # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "UPDATE accounts SET runing =0 WHERE id = " + str(id)
-        c.execute(sql)
-        self.conn.commit()
+        return r.json()
 
-    def account_ban(self,id):
-        c = self.conn.cursor()
-        # c.execute("SELECT * FROM account WHERE runing = 0")
-        sql = "UPDATE accounts SET runing =2 WHERE id = " + str(id)
-        c.execute(sql)
-        self.conn.commit()
-    def save(self):
+    def post_done(self, id, messasge='post done'):
+        url = 'https://{host}/api/v1/post/account/postdone/{token}/{id}'.format(
+            host=self.software.host_verify(), token=self.software.software_token(), id=id)
 
-        my_file = open('account.txt', 'r+', encoding="utf8")
-        lines = my_file.readlines()
-        my_file.truncate(0)
-        my_file.close()
+        params = {'data': messasge}
+        r = requests.get(url, params=params)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()
+    def save_cookie(self, id, messasge='post done'):
+        url = 'https://{host}/api/v1/post/account/postdone/{token}/{id}'.format(
+            host=self.software.host_verify(), token=self.software.software_token(), id=id)
 
-        list_data = []
-        for key, line in enumerate(lines):
+        params = {'data': messasge}
+        r = requests.get(url, params=params)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()
+    def get_cookie(self, id, messasge='post done'):
+        url = 'https://{host}/api/v1/post/account/postdone/{token}/{id}'.format(
+            host=self.software.host_verify(), token=self.software.software_token(), id=id)
 
+        params = {'data': messasge}
+        r = requests.get(url, params=params)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()
 
-            ps_data = line.split(":")
-            username = ps_data[0]
-            password = ps_data[1].rstrip("\n")
-            combos_tada = (username+":"+password, 0)
-            list_data.append(combos_tada)
-        self.insert(list_data)
+    def post_log(self, id, messasge='post log'):
+        url = 'https://{host}/api/v1/post/account/postlog/{token}/{id}'.format(
+            host=self.software.host_verify(), token=self.software.software_token(), id=id)
 
+        params = {'data': messasge}
+        r = requests.get(url, params=params)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()
+
+    def post_error(self, id, message="default messge", software_type='clf'):
+        url = 'https://{host}/api/v1/post/account/posterror/{token}/{id}'.format(
+            host=self.software.host_verify(), token=self.software.software_token(), id=id)
+
+        params = {'data': message, 'software_type': software_type}
+        r = requests.get(url, params=params)
+        if "error" in r.json():
+            print("error", r.json()['message'])
+            return None
+        return r.json()

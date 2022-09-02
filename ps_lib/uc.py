@@ -1,6 +1,4 @@
-from email.policy import default
-import imp
-from logging import exception
+import undetected_chromedriver as uc
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,21 +6,17 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import Select
-from selenium import webdriver
+
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from ps_lib.accounts import accounts
-from ps_lib.ps_str import ps_str
-from ps_lib.proxy import ps_proxy
-from ps_lib.timezone import t
-from ps_lib.userAgent import l
-
-
 import json
 import requests
 import os
 import time
-
-from sys import exit
+from ps_lib.ps_str import ps_str
+from ps_lib.proxy import ps_proxy
+from ps_lib.timezone import t
+from ps_lib.userAgent import l
 import sys
 if sys.platform in ['Windows', 'win32', 'cygwin']:
     import pyautogui
@@ -32,7 +26,7 @@ import random
 import string
 
 
-class browser:
+class ucbrowser:
     account_id = None
 
     def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None, image_bock=True, headless=False):
@@ -55,7 +49,7 @@ class browser:
         # ................account.....................................
         self.account = accounts()
         # ......................Chrome..............................
-        self.options = webdriver.ChromeOptions()
+        self.options = uc.ChromeOptions()
         # https://peter.sh/experiments/chromium-command-line-switches/
         ####################proxy user##############
         self.PROXY_PASS = False  # password
@@ -89,24 +83,29 @@ class browser:
         if sys.platform not in ['Windows', 'win32', 'cygwin']:
 
             self.options.add_argument("--disable-dev-shm-usage")
-        self.options.add_argument("--disable-infobars")
-        self.options.add_argument("start-maximized")
-        self.options.add_experimental_option("useAutomationExtension", False)
-        self.options.add_experimental_option(
-            "excludeSwitches", ["enable-automation"])
+            self.options.add_argument("--disable-infobars")
+            # self.options.add_argument("start-maximized")
+            self.options.add_experimental_option(
+                "useAutomationExtension", False)
+            self.options.add_experimental_option(
+                "excludeSwitches", ["enable-automation"])
+            # "--disable-web-security", "--user-data-dir=true", "--allow-running-insecure-content"
+
         if headless:
             self.options.add_argument('--headless')
             self.options.add_argument('--disable-gpu')
 
         # self.options.add_argument("--lang=it-IT")
-        self.options.add_argument("--no-sandbox")
+        # self.options.add_argument("--no-sandbox")
         if profile_dir:
             self.options.add_argument("--user-data-dir={}".format(profile_dir))
 
         else:
-            self.options.add_argument("--use-temporary-user-data-dir")
+            # self.options.add_argument("--use-temporary-user-data-dir")
+            pass
 
-        self.driver = webdriver.Chrome(driverUrl, chrome_options=self.options)
+        self.driver = uc.Chrome(
+            driver_executable_path=driverUrl, options=self.options, use_subprocess=True)
 
     def exit(self):
         try:
@@ -136,7 +135,6 @@ class browser:
         try:
 
             proxyinfo = self.account.get_proxy_list()
-
             #............. check for use defaultProxy.............#
             dProxy = proxyinfo['defaultProxy']
 
@@ -350,6 +348,7 @@ class browser:
 
     def proxy_save(self, px=None, p=None):
         try:
+            print(px)
 
             self.proxy_city = p["city"]
             self.proxy_region = p['regionName']
@@ -358,7 +357,7 @@ class browser:
             self.proxy_latLon = str(p['lat'])+":"+str(p["lon"])
             self.proxy_isp = p['isp']
             self.proxy_ip = p['query']
-            if px['company'] == 'dichvusocks' or px['company'] == 'socks5':
+            if px['company'] == 'dichvusocks':
                 self.PROXY_TYPE = 'SOCKS5'
             self.settimezoone(p)
 
@@ -400,7 +399,8 @@ class browser:
         if sys.platform in ['Windows', 'win32', 'cygwin']:
             for ti in t:
                 if self.proxy_timezone in ti['utc']:
-                    os.system("tzutil /s \"{}\"".format(ti['value']))
+                    # os.system("tzutil /s \"{}\"".format(ti['value']))
+                    pass
         newTime = time.strftime('%X %x %Z')
         print('old time: ', oldTime, "new time: ",
               newTime, 'timezone: ', p["timezone"])
@@ -412,7 +412,7 @@ class browser:
             try:
                 element = self.driver.find_element_by_css_selector(selector)
                 if element.is_displayed():
-                    print("element ", selector)
+                    # print("element ", selector)
                     break
             except:
                 co = co+1
@@ -427,6 +427,43 @@ class browser:
             exit()
         return element
 
+    def visibil_element(self, by, selector, wait=30):
+
+        element = False
+        if by == 'name':
+            byselector = By.NAME
+        if by == 'xpath':
+            byselector = By.XPATH
+        if by == 'css':
+            byselector = By.CSS_SELECTOR
+        if by == 'id':
+            byselector = By.ID
+        try:
+
+            element = WebDriverWait(self.driver, wait).until(
+                EC.visibility_of_element_located((byselector, selector)))
+
+        except:
+            element = False
+        if element == False:
+            pass
+            # print("element not find: ", selector)
+
+        return element
+
+    def try_select_element(self, selector):
+        try:
+            element = self.driver.find_element_by_css_selector(selector)
+
+            if element.is_displayed() and element.is_enabled():
+                print('try_select_element')
+                pass
+
+        except:
+            element = False
+
+        return element
+
     def select_elements(self, selector):
 
         return self.driver.find_elements_by_css_selector(selector)
@@ -437,7 +474,7 @@ class browser:
         element = False
         while True:
             try:
-                element = self.driver.find_element(By.XPATH, selector)
+                element = self.driver.find_element_by_xpath(selector)
                 if element.is_displayed() and element.is_enabled():
                     print("done : ", mesasage)
                     if type == 2:
@@ -458,195 +495,6 @@ class browser:
             if type == 2:
                 mesasage = mesasage + self.check_error(valu)
             self.account.post_error(self.account_id, message=mesasage)
-
-            self.exit()
-        return element
-
-    def element_xpath(self, elements, selector, mesasage="genarl work"):
-        # print(self.current_url())
-        co = 0
-        element = False
-        try:
-
-            element = elements.find_element(By.XPATH, selector)
-            if element.is_displayed() and element.is_enabled():
-                print("elements done : ", mesasage)
-
-        except:
-
-            print("element waiting for : ", mesasage)
-
-        if element == False:
-
-            print("element not find : ", mesasage)
-
-            self.account.post_error(self.account_id, message=mesasage)
-            self.exit()
-        return element
-
-    def elements_xpath(self, elements, selector, mesasage="genarl work"):
-        # print(self.current_url())
-        co = 0
-        element = False
-        try:
-
-            element = elements.find_elements(By.XPATH, selector)
-
-            print("elements done : ", mesasage)
-
-        except:
-
-            print("elements waiting for : ", mesasage)
-
-        if element == False:
-
-            print("element not find : ", mesasage)
-
-            self.account.post_error(self.account_id, message=mesasage)
-            self.exit()
-        return element
-
-    def afew(self, elements, selector, mesasage="genarl work", bytype='xpath',try_only=False):
-        # print(self.current_url())
-        co = 0
-        element = False
-        try:
-            if bytype == 'xpath':
-                selectortype = By.XPATH
-            if bytype == 'css':
-                selectortype = By.CSS_SELECTOR
-            if bytype == 'class':
-                selectortype = By.CLASS_NAME
-            if bytype == 'name':
-                selectortype = By.NAME
-            if bytype == 'tag':
-                selectortype = By.TAG_NAME
-            if bytype == 'id':
-                selectortype = By.ID
-
-            element = elements.find_elements(selectortype, selector)
-
-            print("elements done : ", mesasage)
-
-        except:
-
-            print("elements waiting for : ", mesasage)
-        if try_only:
-            return element
-
-        if element == False:
-
-            print("element not find : ", mesasage)
-
-            self.account.post_error(self.account_id, message=mesasage)
-            self.exit()
-        return element
-    def one(self, elements, selector, mesasage="genarl work", bytype='xpath',try_only=False):
-        # print(self.current_url())
-        co = 0
-        element = False
-        try:
-            if bytype == 'xpath':
-                selectortype = By.XPATH
-            if bytype == 'css':
-                selectortype = By.CSS_SELECTOR
-            if bytype == 'class':
-                selectortype = By.CLASS_NAME
-            if bytype == 'name':
-                selectortype = By.NAME
-            if bytype == 'tag':
-                selectortype = By.TAG_NAME
-            if bytype == 'id':
-                selectortype = By.ID
-
-            element = elements.find_element(selectortype, selector)
-
-            print("elements done : ", mesasage)
-
-        except:
-
-            print("elements waiting for : ", mesasage)
-
-        if try_only:
-            return element
-        if element == False:
-
-            print("element not find : ", mesasage)
-
-            self.account.post_error(self.account_id, message=mesasage)
-            
-            self.exit()
-        return element
-    def find(self,selector, mesasage="genarl work", bytype='xpath',try_only=False):
-        # print(self.current_url())
-        co = 0
-        element = False
-        try:
-            if bytype == 'xpath':
-                selectortype = By.XPATH
-            if bytype == 'css':
-                selectortype = By.CSS_SELECTOR
-            if bytype == 'class':
-                selectortype = By.CLASS_NAME
-            if bytype == 'name':
-                selectortype = By.NAME
-            if bytype == 'tag':
-                selectortype = By.TAG_NAME
-            if bytype == 'id':
-                selectortype = By.ID
-
-            element = self.driver.find_element(selectortype, selector)
-
-            print("element done : ", mesasage)
-
-        except:
-
-            print("element waiting for : ", mesasage)
-
-        if try_only:
-            return element
-        if element == False:
-
-            print("element not find : ", mesasage)
-
-            self.account.post_error(self.account_id, message=mesasage)
-            
-            self.exit()
-        return element
-    def finds(self,selector, mesasage="genarl work", bytype='xpath',try_only=False):
-        # print(self.current_url())
-        co = 0
-        element = False
-        try:
-            if bytype == 'xpath':
-                selectortype = By.XPATH
-            if bytype == 'css':
-                selectortype = By.CSS_SELECTOR
-            if bytype == 'class':
-                selectortype = By.CLASS_NAME
-            if bytype == 'name':
-                selectortype = By.NAME
-            if bytype == 'tag':
-                selectortype = By.TAG_NAME
-            if bytype == 'id':
-                selectortype = By.ID
-
-            element = self.driver.find_elements(selectortype, selector)
-
-            print("element done : ", mesasage)
-
-        except:
-
-            print("element waiting for : ", mesasage)
-
-        if try_only:
-            return element
-        if element == False:
-
-            print("element not find : ", mesasage)
-
-            self.account.post_error(self.account_id, message=mesasage)
-            
             self.exit()
         return element
 
@@ -664,6 +512,7 @@ class browser:
                         pyautogui.write(r""+imge_dir+"\{}".format(i))
                         pyautogui.press('enter')
                         sleep_time += 5
+                        time.sleep(10)
             else:
                 for i in os.listdir(os.getcwd() + "\img"):
                     if i.find('.') > 1:
@@ -672,13 +521,14 @@ class browser:
                         pyautogui.write(r""+os.getcwd() + "\img\{}".format(i))
                         pyautogui.press('enter')
                         sleep_time += 5
+                        time.sleep(10)
         except OSError:
             pass
         return sleep_time
 
     def try_xpath(self, selector, mesasage="genarl work"):
         try:
-            element = self.driver.find_element(By.XPATH, selector)
+            element = self.driver.find_element_by_xpath(selector)
             if element.is_displayed() and element.is_enabled():
                 element = True
 
@@ -869,6 +719,18 @@ class browser:
             self.exit()
             print("wait")
 
+    def wait_css(self, x):
+
+        try:
+            print('wait css')
+            wait = WebDriverWait(self.driver, 30)
+            return wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, x)))
+
+        except:
+
+            print("wait")
+        return False
+
     def link_save(self, link):
         with open('links.txt', 'a') as file:
             file.write(link+"\n")
@@ -922,7 +784,9 @@ class browser:
 				bypassList: ["localhost"]
 				}
 			};
+
 		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
+
 		function callbackFn(details) {
 			return {
 				authCredentials: {
@@ -931,6 +795,7 @@ class browser:
 				}
 			};
 		}
+
 		chrome.webRequest.onAuthRequired.addListener(
 					callbackFn,
 					{urls: ["<all_urls>"]},
@@ -1004,15 +869,14 @@ class browser:
 
         background_js = """
 		function FindProxyForURL(url, host) {
-			if (url.search("apis.google.com")>"1" ||
-			url.search("gstatic")>"1" ||
-			url.search("images")>"1" ||
-			url.search("public/uploads")>"1" ||
-			url.search("favicon.png")>"1" ||
-			url.search("public/assets")>"1" ||
-			url.search("xjs")>"1") {
+			if (url.search("GTM")>"1" ||
+			url.search("google")>"1" ||
+			url.search("GTM")>"1" ||
+			url.search("GTM")>"1") {
 				return 'DIRECT';
+
 			}
+
 			return "%s %s:%s";
 			}
 		var config = {
@@ -1022,7 +886,9 @@ class browser:
     		mandatory: true
 			}
 		};
+
 		chrome.proxy.settings.set({value: config, scope: "regular"}, function() {});
+
 		function callbackFn(details) {
 			return {
 				authCredentials: {
@@ -1031,6 +897,7 @@ class browser:
 				}
 			};
 		}
+
 		chrome.webRequest.onAuthRequired.addListener(
 					callbackFn,
 					{urls: ["<all_urls>"]},

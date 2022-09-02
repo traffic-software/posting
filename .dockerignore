@@ -1,0 +1,13 @@
+.idea
+.vscode
+chromedriver.exe
+.gitignore
+__pycache__
+.db
+.html
+.spec
+*.tar
+*.zip
+ps_lib/*.db
+
+
