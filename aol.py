@@ -11,6 +11,16 @@ driver = webdriver.Chrome(executable_path="C:\\Users\Md Alamin Hossain\\Download
 driver.maximize_window()
 driver.get("https://login.aol.com/?src=fp-us&client_id=dj0yJmk9ZXRrOURhMkt6bkl5JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWQ2&crumb=lErcIbXyggQ&intl=us&redirect_uri=https%3A%2F%2Foidc.www.aol.com%2Fcallback&pspid=1197803361&activity=default&done=https%3A%2F%2Fapi.login.aol.com%2Foauth2%2Fauthorize%3Fclient_id%3Ddj0yJmk9ZXRrOURhMkt6bkl5JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PWQ2%26intl%3Dus%26nonce%3DUW6GKeJ5DjdDQ278GWFciVrnrmB1keyY%26redirect_uri%3Dhttps%253A%252F%252Foidc.www.aol.com%252Fcallback%26response_type%3Dcode%26scope%3Dmail-r%2Bopenid%2Bopenid2%2Bsdps-r%26src%3Dfp-us%26state%3DeyJhbGciOiJSUzI1NiIsImtpZCI6IjZmZjk0Y2RhZDExZTdjM2FjMDhkYzllYzNjNDQ4NDRiODdlMzY0ZjcifQ.eyJyZWRpcmVjdFVyaSI6Imh0dHBzOi8vd3d3LmFvbC5jb20vIn0.hlDqNBD0JrMZmY2k9lEi6-BfRidXnogtJt8aI-q2FdbvKg9c9EhckG0QVK5frTlhV8HY7Mato7D3ek-Nt078Z_i9Ug0gn53H3vkBoYG-J-SMqJt5MzG34rxdOa92nZlQ7nKaNrAI7K9s72YQchPBn433vFbOGBCkU_ZC_4NXa9E")
 
+def ran_password():
+    characters ="abcdefghijklmnopshwyz"
+    upper ="ABCDEFGHIJKLMNOPQPSHWYZ"
+    symbol ="@%"
+    num = "0123456789"
+    string = characters+symbol+num+upper
+    length = 8
+    password = "".join(random.sample(string,length))
+    print("Random password:",password)
+    return password
 
 create_account = driver.find_element(By.XPATH,("//div[@class='bottom-links-container has-social-buttons']//p//a"))
 create_account.click()
@@ -24,10 +34,27 @@ last_name.send_keys("hhgg")
 time.sleep(2)
 email_name = driver.find_element(By.XPATH,("//input[@id='usernamereg-yid']"))
 email_name.send_keys("ddddf55")
+time.sleep(2)
+suggest_email_name = driver.find_elements(By.XPATH,("//ul[@id='desktop-suggestion-list']/li"))[-1]
+values = suggest_email_name.get_attribute('data-value')
+print("Maol_name:",values)
+suggest_email_name.click()
+
 
 time.sleep(2)
-email_name = driver.find_element(By.XPATH,("//input[@id='usernamereg-password']"))
-email_name.send_keys("sm55555@#")
+email_pass = driver.find_element(By.XPATH,("//input[@id='usernamereg-password']"))
+pwd = ran_password()
+print("password:",pwd)
+email_pass.send_keys(pwd)
+
+# text_file_write
+f = open("aol.txt", "a")
+f.write("{0}:{1}\n".format(values,pwd))
+f.close()
+#open and read the file after the appending:
+f = open("aol.txt", "r")
+print(f.read())
+
 
 time.sleep(2)
 pva = number('eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NjY0MzYwOTEsImlhdCI6MTYzNDkwMDA5MSwicmF5IjoiY2MzNzRmNTM3MTUyMDc3MWZjODAyNWM1MTM5OWIzYWUiLCJzdWIiOjIzMTAyOH0.OOd17iPERjvtNLc6KNa15nnG5hKXvkzeBf7aJa0ApMjWoO9on4NMC4UIbJRgJ8CtVk2dk7mVi5JwzC1e_zZXis-M2sx1GsFRgWum7BIlyxhYWYYp2rAJuW7YrcAn5MWBXC7E2DaKeeVonDgwzN1_FlUAEnS1iggGgdeKtTy3YZ75mH1z3lrsjjbml_vvP2PrCdpjEl7x2EXBizng3NNxqG72rF9OwI8I5mJj1ks0oHbdMNqOdScdExG6a9MJj9NXOFQmBx9C9bTgCCkhcd1T5bmX5-royaHq8LEyZnuE9HXMwo3mHL_Nny3mwCwftC95dMUqNARrQkY5p0hK4OUQfg','spain','any','aol')
@@ -81,12 +108,14 @@ code_field = driver.find_element(By.XPATH,("//input[@id='verification-code-field
 if code_field:
     check_sms = pva.check_sms()
     print(check_sms)
-    print(check_sms["code"])
-    code = check_sms["code"]
-    
-    code_field.send_keys('{0}'.format(code))
+    code_field.send_keys('{0}'.format(check_sms))
 
-
+    time.sleep(2)
+    next = driver.find_element(By.XPATH,("//button[@id='verify-code-button']"))
+    next.click()
+    time.sleep(5)
+    submit = driver.find_element(By.XPATH,("//button[@type='submit']"))
+    submit.click()
 
 time.sleep(1000)
 
