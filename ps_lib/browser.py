@@ -83,7 +83,7 @@ class browser:
 
         self.a = random.choice(l)
 
-        # self.options.add_argument(f'user-agent={self.a}')
+        self.options.add_argument(f'user-agent={self.a}')
         print('user set')
 
         if sys.platform not in ['Windows', 'win32', 'cygwin']:
@@ -505,7 +505,30 @@ class browser:
             self.account.post_error(self.account_id, message=mesasage)
             self.exit()
         return element
+    def visibil_element(self, by, selector, wait=30):
+            print(selector)
+            element = False
+            if by == 'name':
+                byselector = By.NAME
+            if by == 'xpath':
+                byselector = By.XPATH
+            if by == 'css':
+                byselector = By.CSS_SELECTOR
+            if by == 'id':
+                byselector = By.ID
+            try:
 
+                element = WebDriverWait(self.driver, wait).until(
+                    EC.visibility_of_element_located((byselector, selector)))
+
+            except Exception as e:
+                print(e)
+                element = False
+            if element == False:
+                
+                print("visibil_element not find: ", selector)
+
+            return element
     def afew(self, elements, selector, mesasage="genarl work", bytype='xpath',try_only=False):
         # print(self.current_url())
         co = 0

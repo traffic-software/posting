@@ -428,7 +428,7 @@ class ucbrowser:
         return element
 
     def visibil_element(self, by, selector, wait=30):
-
+        print(selector)
         element = False
         if by == 'name':
             byselector = By.NAME
@@ -443,11 +443,12 @@ class ucbrowser:
             element = WebDriverWait(self.driver, wait).until(
                 EC.visibility_of_element_located((byselector, selector)))
 
-        except:
+        except Exception as e:
+            print(e)
             element = False
         if element == False:
-            pass
-            # print("element not find: ", selector)
+            
+            print("visibil_element not find: ", selector)
 
         return element
 

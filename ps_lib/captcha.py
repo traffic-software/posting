@@ -3,7 +3,6 @@ import requests
 import time
 from sys import exit
 class capcha:
-
 	anti_api='071a73b48a5ce1528a7f8f441ebee35a'
 	tow_api=None
 	type = None
@@ -22,36 +21,57 @@ class capcha:
 		job.join()
 		print('recaptcha task done')
 		return job.get_solution_response()
-	def two_captcha(self,siteKe,pageUrl):
-			id = self.two_start(siteKe,pageUrl)
+	def two_captcha(self,siteKe,pageUrl,surl,proxy=None,proxytype=None):
+			id = self.two_start(siteKe,pageUrl,surl,proxy,proxytype)
 			response =self.two_respond(id)
 			print('task done')
 			return {"id":id,"key":response}
 
-	def two_start(self,siteKe,pageUrl):
+	def two_start(self,siteKe,pageUrl,surl=None,proxy=None,proxytype=None):
 		id=None
 
 		try:
+			url = "http://2captcha.com/in.php?lang={0}&key={1}&pageurl={2}".format(self.lan,self.tow_api, pageUrl)
+			if proxy:
+				url = url+"&proxy={0}&proxytype={1}".format(proxy,proxytype)
+			# hcaptcha
 			if self.type == 1:
-				data = requests.get("http://2captcha.com/in.php?lang={0}&key={1}&method=hcaptcha&sitekey={2}&pageurl={3}".format(self.lan,self.tow_api, siteKe, pageUrl))
+				url = url+'&method=hcaptcha&sitekey={0}'.format(siteKe)
+				
+				data = requests.get(url)
+			#funcaptcha
+			if self.type == 2:
+				url = url+'&method=funcaptcha&publickey={0}&surl={1}'.format(siteKe,surl)
+				data = requests.get(url)
 			
+			# recaptcha
 			else:
-				data = requests.get("http://2captcha.com/in.php?lang={0}&key={1}&method=userrecaptcha&googlekey={2}&pageurl={3}".format(self.lan,self.tow_api, siteKe, pageUrl))
+				url = url+'&method=userrecaptcha&googlekey={0}'.format(siteKe)
+				data = requests.get(url)
 			data = data.text.split("|")
 			id = data[1]
 		except:
 			print('captcha requests not work')
+		print(url)
 		return id
 	def two_respond(self,id):
 		text = None
+		time.sleep(20)
 		while True:
-			time.sleep(10)
+			time.sleep(5)
 			data = requests.get("http://2captcha.com/res.php?key={0}&action=get&id={1}".format(self.tow_api,id))
 			t = data.text
+			# print(data.text)
+	
 			if "|" in t:
+				
 				data =t.split("|")
 				text=data[1]
+				if self.type ==2:
+					text=t.replace("OK|",'')
 				break
 			else:
 				print('CAPCHA_NOT_READY') 
+				if 'ERROR_CAPTCHA_UNSOLVABLE' == data.text:
+					return None
 		return text
