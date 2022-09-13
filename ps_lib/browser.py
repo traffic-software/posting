@@ -83,7 +83,7 @@ class browser:
 
         self.a = random.choice(l)
 
-        self.options.add_argument(f'user-agent={self.a}')
+        # self.options.add_argument(f'user-agent={self.a}')
         print('user set')
 
         if sys.platform not in ['Windows', 'win32', 'cygwin']:
