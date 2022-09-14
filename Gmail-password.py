@@ -31,27 +31,19 @@ keyboard = Controller()
 # keyboard.type(str(258956856))
 
 
-def main(account_data, postinfo, packages_id, body_mail):
+def main():
     # work start time
     starttime = datetime.now().strftime("%H:%M:%S")
 
     print(datetime.now().strftime("%H:%M:%S"))
     # print(account_data)
-    account_id = account_data['id']
-    worker_acc = accounts()
-    use_proxy = True
+    
 
     # b = browser(account_id, pva=account_data)
     # b = firefoxBrowser(account_id, pva=account_data)
-    b = ucbrowser(account_id, pva=account_data)
+    b = ucbrowser()
 
     time.sleep(1)
-    if b.PROXY_PASS == False and b.use_proxy == True:
-        b.exit()
-        print('proxy condition not fulfilled')
-        # worker_acc.ban_3(account_id, 5)
-        time.sleep(10)
-        return False
 
     try:
         loginurl = 'https://accounts.google.com/signin/v2/identifier'
@@ -62,8 +54,23 @@ def main(account_data, postinfo, packages_id, body_mail):
         b.exit()
     # time.sleep(120)
     count = 0
+    # list to store file lines
+    lines = []
+    # read file
+    with open(r"input.txt", 'r') as fp:
+        # read an store all lines into list
+        lines = fp.readlines()
 
-    for no in range(int(account_data['extra']), int(account_data['extra'])+60):
+    # Write file
+    with open(r"input.txt", 'w') as fp:
+        # iterate each line
+        for number, line in enumerate(lines):
+            # delete line 5 and 8. or pass any Nth line you want to remove
+            # note list index starts from 0
+            if number != 0:
+                fp.write(line)
+
+    for no in range(0, 20):
         time.sleep(1)
 
         # rejeted
@@ -73,19 +80,18 @@ def main(account_data, postinfo, packages_id, body_mail):
         # password page
         # https://accounts.google.com/signin/v2/challenge/pwd
         count = count+1
-        print(count)
+        
         if count % 20 == 1:
-            worker_acc.update_account(data=no, id=account_data['id'])
+            
             b.get_url(loginurl)
         if 'signinrejecte' in b.current_url():
 
             b.get_url(loginurl)
 
         if 'challenge/pwd' in b.current_url():
-            oldNumber = str(no-1)
             password = b.visibil_element('name', "password")
 
-            mailpass = oldNumber
+            mailpass = lines[1]
             password.clear()
             password.send_keys(mailpass)
 
@@ -100,9 +106,6 @@ def main(account_data, postinfo, packages_id, body_mail):
                 continue
             else:
                 print('pssword matched')
-                worker_acc.save_account(
-                    data=oldNumber, soft_token=account_data['password'])
-                time.sleep(60)
 
         try:
             imgcapch = b.visibil_element('id', "captchaimg", wait=1)
@@ -129,8 +132,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                 number = b.visibil_element('name', "identifier")
                 number.clear()
 
-                number.send_keys(0)
-                number.send_keys(no)
+                number.send_keys(lines[0])
             except:
                 b.get_url(loginurl)
                 continue
@@ -151,54 +153,16 @@ def main(account_data, postinfo, packages_id, body_mail):
     print('end :', datetime.now().strftime("%H:%M:%S"))
 
 
-setup = table()
-setup.token_verify()
-# setup.pop_verify()
 
-#w = int(input('how much worker you need? '))
-# packages_id = input('proxy info by a line : ')
-packages_id = '317345'
 
-# worker = w + 1
-worker = 2
-# ........................start worker....................
-# open('active.txt', "w+")
-utility = helper()
-headers = {}
-profile_ids = {}
-acc = accounts()
+
 # print(acc.get_proxy_list())
 # exit()
-post = post()
-if sys.platform not in ['Windows', 'win32', 'cygwin']:
-    display = Display(visible=0, size=(1024, 768))
-    display.start()
+
 # x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
 # x.start()
 while True:
 
-    # subprocess.call(["sudo", "ifconfig", "ens33", "down"])
-    # subprocess.call(["sudo", "ifconfig", "ens33", "hw",
-    #                 "ether", "00:11:22:33:44:55"])
-    # subprocess.call(["sudo", "ifconfig", "ens33", "up"])
-    utility.network_check()
-    if setup.token_off():
-        print('software off now but reply checking runing')
-        time.sleep(60)
-        continue
-    one_account = acc.get_account()
-
-    postinfo = post.get_post()
-    body_mail = None
-    if one_account == None or postinfo == None:
-        print('post or account not find for worker')
-        time.sleep(60)
-        continue
-    print('account id : ', one_account['id'])
-
-    if path.isdir('profiles/' + str(one_account['id'])) == True:
-        shutil.rmtree('profiles/' + str(one_account['id']))
-
-    print('main')
-    main(one_account, post, packages_id, body_mail)
+    print('start new')
+    main()
     time.sleep(1)
