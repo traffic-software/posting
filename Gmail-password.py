@@ -142,7 +142,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         except:
             continue
 
-    b.ipinfo_save(software_name='gmail checker')
+    b.ipinfo_save(software_name='gmail password')
 
     b.exit()
     print('browser close')
