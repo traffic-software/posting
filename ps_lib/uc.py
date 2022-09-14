@@ -29,7 +29,7 @@ import string
 class ucbrowser:
     account_id = None
 
-    def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None, image_bock=True, headless=False):
+    def __init__(self,use_proxy=True, profile_dir=False, pva=None, image_bock=True, headless=False):
 
         self.proxy_country = "IT"
         self.proxy_city = None
@@ -42,12 +42,10 @@ class ucbrowser:
         self.proxy_ip = None
         self.proxy_company = 'proxyrotator'
         self.pva = pva
-        self.account_id = pofileLocation
         self.use_proxy = use_proxy
         self.image_bock = image_bock
         warnings.filterwarnings('ignore')
         # ................account.....................................
-        self.account = accounts()
         # ......................Chrome..............................
         self.options = uc.ChromeOptions()
         # https://peter.sh/experiments/chromium-command-line-switches/
@@ -61,14 +59,8 @@ class ucbrowser:
             self.PROXY_TYPE = 'PROXY'
 
             # ............Normal rotating proxy......................
-        if self.proxy():
 
-            print("done: proxy set")
-            if self.use_proxy:
-                # self.proxy_auth_plugin()
-                self.proxy_auth_plugin_pac_script()
-            else:
-                self.PROXY_PASS = False
+           
 
         if sys.platform in ['Windows', 'win32', 'cygwin']:
             driverUrl = 'chromedriver.exe'
@@ -98,7 +90,8 @@ class ucbrowser:
         # self.options.add_argument("--lang=it-IT")
         # self.options.add_argument("--no-sandbox")
         if profile_dir:
-            self.options.add_argument("--user-data-dir={}".format(profile_dir))
+            # self.options.add_argument("--user-data-dir={}".format(profile_dir))
+            pass
 
         else:
             # self.options.add_argument("--use-temporary-user-data-dir")
@@ -131,166 +124,7 @@ class ucbrowser:
                 break
         return returndata
 
-    def proxy(self):
-        try:
-
-            proxyinfo = self.account.get_proxy_list()
-            #............. check for use defaultProxy.............#
-            dProxy = proxyinfo['defaultProxy']
-
-            if type(dProxy) is dict:
-
-                defaultProxy = ps_proxy(
-                    company=dProxy['company'], key=dProxy['user'])
-                defaultByCity = defaultProxy.firstProxy(
-                    location=self.pva['extra'], proxyinfo=dProxy)
-
-                if 'checkinfo' in defaultByCity:
-
-                    self.proxy_save(px=dProxy, p=defaultByCity['checkinfo'])
-                    self.PROXY_HOST = defaultByCity['host']
-                    self.PROXY_PORT = defaultByCity['port']
-                    self.PROXY_USER = defaultByCity['user']
-                    self.PROXY_PASS = defaultByCity['password']
-                    self.proxy_company = dProxy['company']
-                    return True
-                else:
-
-                    self.account.post_log(id=self.pva['id'], messasge='city not present default {extra}'.format(
-                        extra=self.pva['extra']))
-                    print('city not present')
-            #............. check for use backupProxy.............#
-            bProxy = proxyinfo['backupProxy']
-
-            if type(bProxy) is dict:
-                backupProxy = ps_proxy(
-                    company=bProxy['company'], key=bProxy['user'])
-                backupByCity = backupProxy.backupProxy(
-                    location=self.pva['extra'], proxyinfo=bProxy)
-
-                if 'checkinfo' in backupByCity:
-
-                    self.proxy_save(px=dProxy, p=backupByCity['checkinfo'])
-                    self.PROXY_HOST = backupByCity['host']
-                    self.PROXY_PORT = backupByCity['port']
-                    self.PROXY_USER = backupByCity['user']
-                    self.PROXY_PASS = backupByCity['password']
-                    self.proxy_company = bProxy['company']
-                    return True
-                else:
-
-                    self.account.post_log(id=self.pva['id'], messasge='city not present backup {extra}'.format(
-                        extra=self.pva['extra']))
-                    print('city not present')
-            aProxy = proxyinfo['activeProxys']
-            if type(aProxy) is dict:
-                activeProxys = ps_proxy(
-                    company=aProxy['company'], key=aProxy['user'])
-                activeByCity = activeProxys.normalProxy(
-                    location=self.pva['extra'], proxyinfo=aProxy)
-
-                if 'checkinfo' in activeByCity:
-
-                    self.proxy_save(px=dProxy, p=activeByCity['checkinfo'])
-                    self.PROXY_HOST = activeByCity['host']
-                    self.PROXY_PORT = activeByCity['port']
-                    self.PROXY_USER = activeByCity['user']
-                    self.PROXY_PASS = activeByCity['password']
-                    self.proxy_company = aProxy['company']
-                    return True
-                else:
-
-                    self.account.post_log(id=self.pva['id'], messasge='city not present normal {extra}'.format(
-                        extra=self.pva['extra']))
-                    print('city not present')
-            else:
-                self.use_proxy = False
-
-            # ............packetstream.io......................
-
-            # if self.proxy_company == "packetstream":
-            #     self.PROXY_HOST = "proxy.packetstream.io"
-            #     self.PROXY_PORT = 31112
-            #     proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
-            # ............https://dashboard.soax.com/......................
-            # if self.proxy_company == "soax":
-
-            #     psproxy = ps_proxy(company="soax", key=self.PROXY_USER)
-            #     soax = psproxy.proxysoax(self.PROXY_PASS)
-            #     if soax:
-
-            #         self.PROXY_USER = soax['login']
-            #         self.PROXY_PASS = soax['password']
-            #         self.PROXY_HOST = soax['ip']
-            #         self.PROXY_PORT = soax['port']
-            #         proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
-            #     else:
-            #         self.PROXY_PASS = False
-            #         proxy = "%s:%s" % ("proxy.soax.com", 9000)
-
-            # ............rsocks.net......................
-            # if self.proxy_company == "rsocks":
-
-            #     headers = {
-            #         'X-Auth-ID': '107841',
-            #         'X-Auth-Key': '3a8390f63fa54c014a9bbaf2a0cdcbd4439f09f6217cbd04de59459f0e035eec'
-            #     }
-            #     resp = requests.post(
-            #         'https://rsocks.net/api/v1/file/get-proxy', headers=headers, timeout=1)
-
-            #     data = json.loads(resp.text)
-
-            #     # data = random.choice(data['packages'])
-            #     print(data['packages'])
-            #     # proxy = rendomip=random.choice(data['ips'])
-            #     data = data['packages'][self.packages_id]['ips']
-
-            #     proxy = rendomip = random.choice(data)
-                # ............proxyhorse.com......................
-
-            # if self.proxy_company == "proxyhorse":
-
-            #     psproxy = ps_proxy(company="proxyhorse",
-            #                        key=self.PROXY_USER)
-
-            #     pva_id = None
-            #     if self.other_city == None:
-            #         pva_id = self.account_id
-            #     proxy = psproxy.proxyhorse(
-            #         location=self.PROXY_PASS, pva_id=pva_id)
-            #     self.PROXY_PASS = False
-
-            #     if proxy:
-
-            #         self.PROXY_HOST = proxy['ip']
-            #         self.PROXY_PORT = proxy['port']
-            #         self.PROXY_USER = proxy['login']
-            #         self.PROXY_PASS = proxy['password']
-            #     proxy = "%s:%s" % (self.PROXY_HOST, self.PROXY_PORT)
-
-                # .............proxyrotator.com................
-
-            # if self.proxy_company == "proxyrotator":
-            #     url = 'http://falcon.proxyrotator.com:51337'
-            #     params = dict(
-            #         apiKey='TX2DLoKZVd6peF8fuJ59wqsyQgc4CGnv',
-            #         userAgent='true',
-            #         country=self.proxy_country,
-            #         get='true',
-            #         connectionType='Residential'
-            #     )
-            #     resp = requests.get(url, params=params, timeout=3)
-
-            #     data = json.loads(resp.text)
-            #     proxy = data['proxy']
-
-                # .............pubproxy.com......................
-                # url = 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT'
-
-        except (requests.ConnectionError, requests.Timeout) as exception:
-            print('plz check your internet connection')
-
-        return False
+    
 
     def proxy_check(self, data):
 
@@ -368,23 +202,7 @@ class ucbrowser:
 
             return False
 
-    def ipinfo_save(self, software_name):
-        try:
-
-            message = ('%s-%s-%s-%s-%s-%s' % (software_name,
-                                              self.proxy_ip,
-                                              self.proxy_city,
-                                              self.proxy_region,
-                                              self.proxy_isp,
-                                              self.proxy_company))
-            self.account.post_log(id=self.pva['id'], messasge=message)
-
-            return True
-        except Exception as e:
-            print(e)
-            print('proxy error')
-
-            return False
+   
 
     def textProxy(self):
         return "{}:{}:{}".format(self.proxy_city, self.proxy_isp, self.proxy_ip)
@@ -494,7 +312,6 @@ class ucbrowser:
             print("element not find : ", mesasage)
             if type == 2:
                 mesasage = mesasage + self.check_error(valu)
-            self.account.post_error(self.account_id, message=mesasage)
             self.exit()
         return element
 
@@ -743,7 +560,6 @@ class ucbrowser:
         except Exception as e:
             if "page" in message:
                 message = message + str(self.page_source())
-            self.account.post_error(self.account_id, message=message)
             self.exit()
             print('error: ', message, e)
 
