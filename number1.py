@@ -27,13 +27,14 @@ class number:
 			'Accept': 'application/json',
 		}
 
-		while True:
+		for i in range(1,60):
 			
 			url = 'https://5sim.net/v1/user/buy/activation/' + self.country +'/' + self.operator + '/' + self.product
 			# print(url)
 
 
 			r = requests.get(url, headers=headers)
+			print(r.status_code)
 			if r.status_code != 200:
 				time.sleep(10)
 				print(r.text)
@@ -66,7 +67,7 @@ class number:
 			'Accept': 'application/json',
 		}
 		code = False
-		for i in range(1,60):
+		for i in range(1,30):
 			r = requests.get('https://5sim.net/v1/user/check/' + str(id), headers=headers)
 			if (r.status_code == 200) and (len(r.json()['sms'])>=1):
 
@@ -76,6 +77,8 @@ class number:
 				break
 			time.sleep(10)
 			print("waiting for sms")
+		if code == False:
+			self.ban_number()
 		return  code
 	
 	def ban_number(self):

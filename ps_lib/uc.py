@@ -533,7 +533,8 @@ class ucbrowser:
             if element.is_displayed() and element.is_enabled():
                 element = True
 
-        except:
+        except Exception as e:
+            
             element = False
 
         return element

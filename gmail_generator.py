@@ -1,12 +1,15 @@
+
 import time
 import shutil
 import sys
 import requests
 from os import path
+import random
 from pyvirtualdisplay import Display
 from datetime import datetime
 # from ps_lib.firefox import firefoxBrowser
 # from ps_lib.browser import browser
+
 from ps_lib.uc import ucbrowser
 from ps_lib.accounts import accounts
 from ps_lib.helper import helper
@@ -18,6 +21,7 @@ from ps_lib.imap import imap
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from number1 import number
 import os
 
@@ -56,12 +60,13 @@ def get_prices(product = 'google'):
         fastitem['country']=i
         fastitem['avarage ']=price/avarage
         fastitem['count']=count
-        print(fastitem)
-        print('.............................')
+        if fastitem['avarage '] <= 12:
+            print(fastitem)
+            print('.............................')
 
 get_prices('google')
-# country=input('plz input contry name:')
-pva = number('eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9eyJleHAiOjE2NjY0MzYwOTEsImlhdCI6MTYzNDkwMDA5MSwicmF5IjoiY2MzNzRmNTM3MTUyMDc3MWZjODAyNWM1MTM5OWIzYWUiLCJzdWIiOIzMTAyOH0OOd17iPERjvtNLc6KNa15nnG5hKXvkzeBf7aJa0ApMjWoO9on4NMC4UIbJRgJ8CtVk2dk7mVi5JwzC1e_zZXis-M2sx1GsFRgWum7BIlyxhYWYp2rAJuW7YrcAn5MWBXC7E2DaKeeVonDgwzN1_FlUAEnS1iggGgdeKtTy3YZ75mH1z3lrsjjbml_vvP2PrCdpjEl7x2EXBizng3NNxqG72rF9wI8I5mJj1ks0oHbdMNqOdScdExG6a9MJj9NXOFQmBx9C9bTgCCkhcd1T5bmX5-royaHq8LEyZnuE9HXMwo3mHL_Nny3mwCwftC95dMUqNARrQY5p0hK4OUQfg','russia','any','google')
+country=input('plz input contry name:')
+pva = number('eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NjY0MzYwOTEsImlhdCI6MTYzNDkwMDA5MSwicmF5IjoiY2MzNzRmNTM3MTUyMDc3MWZjODAyNWM1MTM5OWIzYWUiLCJzdWIiOjIzMTAyOH0.OOd17iPERjvtNLc6KNa15nnG5hKXvkzeBf7aJa0ApMjWoO9on4NMC4UIbJRgJ8CtVk2dk7mVi5JwzC1e_zZXis-M2sx1GsFRgWum7BIlyxhYWYYp2rAJuW7YrcAn5MWBXC7E2DaKeeVonDgwzN1_FlUAEnS1iggGgdeKtTy3YZ75mH1z3lrsjjbml_vvP2PrCdpjEl7x2EXBizng3NNxqG72rF9OwI8I5mJj1ks0oHbdMNqOdScdExG6a9MJj9NXOFQmBx9C9bTgCCkhcd1T5bmX5-royaHq8LEyZnuE9HXMwo3mHL_Nny3mwCwftC95dMUqNARrQkY5p0hK4OUQfg',country,'any','google')
 def main(account_data, postinfo, packages_id, body_mail):
     # work start time
     starttime = datetime.now().strftime("%H:%M:%S")
@@ -99,7 +104,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     # new.click()
     firstName = b.visibil_element('id', "firstName")
     name = account_data['post_data'].split("-")
-
+    
     print('first name typing')
     for character in name[0]:
         firstName.send_keys(character)
@@ -128,7 +133,6 @@ def main(account_data, postinfo, packages_id, body_mail):
     for character in account_data['extra']:
         ConfirmPasswd.send_keys(character)
         # time.sleep(2)
-        
     if b.visibil_element('css', 'button[data-username]'):
         ConfirmUsername = b.visibil_element('css', 'button[data-username]')
         ConfirmUsername.click()
@@ -162,10 +166,14 @@ def main(account_data, postinfo, packages_id, body_mail):
         
     except:
         pva.ban_number()
-    
+    mailinfo=''
     newgmail = b.visibil_element('css', '[data-profile-identifier]')
     if newgmail:
         gmail = newgmail.get_attribute("data-email")
+        mailinfo += gmail
+        mailinfo += ':'+account_data['extra']
+        mailinfo += ':'+account_data['email']
+        print(mailinfo)
         recoveryEmail = b.visibil_element('css', '[name="recoveryEmail"]')
         recoveryEmail.send_keys(account_data['email'])
 
@@ -174,19 +182,31 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         month = b.visibil_element('id',"month")
         mdb = Select(month)
-        mdb.select_by_visible_text('April')
+        mdb.select_by_index(random.randint(0,11))
 
         year = b.visibil_element('css', '[name="year"]')
-        year.send_keys(1990)
+        year.send_keys(random.randint(1980,2007))
 
         gender = b.visibil_element('id',"gender")
         gd = Select(gender)
-        gd.select_by_visible_text('Male')
+        gd.select_by_index(random.randint(1,2))
 
-        clr_ele = b.driver.find_element(By.XPATH,("//div[@class='Ufn6O UOZHQ']//label"))
-        clr_ele.send_keys(Keys.DELETE)
-        # print('others option')
-        time.sleep(2000)
+        clr_ele = b.driver.find_element(By.XPATH,("//div[@class='Ufn6O UOZHQ']//label/input"))
+        clr_ele.clear()
+        finalbutton = b.driver.find_element(By.XPATH,("//button[@type='button']//span"))
+        finalbutton.click()
+        print('others option')
+        time.sleep(2)
+        # btnIagree = b.visibil_element('xpath','//*[@id="view_container"]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
+        btnIagree = b.visibil_element('xpath','//*[@id="view_container"]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
+        b.scroll_like_user(btnIagree)
+        ActionChains(b.driver).move_to_element(btnIagree).click(btnIagree).perform()
+        
+        if btnIagree:
+            b.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(10)
+            # btnIagree.click()
+        time.sleep(200)
     else:
 
         print('varify need')
