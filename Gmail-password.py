@@ -157,10 +157,7 @@ def main():
         linkarg=link.split('?')
         b.get_url("https://myaccount.google.com/signinoptions/password?"+linkarg[1])
 
-        # password = b.driver.find_element(By.XPATH,("//input[@type='password']"))
-        # password.send_keys(account_data['password'])
-        # next = b.driver.find_elements(By.XPATH,("//span[@class='VfPpkd-vQzf8d']"))[1]
-        # next.click()
+       
         time.sleep(10)
         
         password = b.driver.find_element(By.XPATH,("//input[@name='password']"))
