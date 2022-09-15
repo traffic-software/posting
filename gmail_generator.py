@@ -14,7 +14,10 @@ from ps_lib.post import post
 from ps_lib.captcha import capcha
 from ps_lib.ps_str import ps_str
 from ps_lib.imap import imap
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from number1 import number
 import os
 
 abspath = os.path.abspath(__file__)
@@ -67,18 +70,18 @@ def main(account_data, postinfo, packages_id, body_mail):
     print('first name typing')
     for character in name[0]:
         firstName.send_keys(character)
-        time.sleep(1)
+        # time.sleep(1)
     lastName = b.visibil_element('id', "lastName")
     print('last name typing')
     for character in name[1]:
         lastName.send_keys(character)
-        time.sleep(1)
+        # time.sleep(1)
     username = b.visibil_element('id', "username")
     print('username typing')
 
     for character in name[0]+name[1]:
         username.send_keys(character)
-        time.sleep(1)
+        # time.sleep(1)
     time.sleep(5)
     if b.visibil_element('css', 'button[data-username]'):
         ConfirmUsername = b.visibil_element('css', 'button[data-username]')
@@ -87,20 +90,46 @@ def main(account_data, postinfo, packages_id, body_mail):
     print('Passwd typing')
     for character in account_data['extra']:
         Passwd.send_keys(character)
-        time.sleep(2)
+        # time.sleep(2)
     ConfirmPasswd = b.visibil_element('css', '[name="ConfirmPasswd"]')
     for character in account_data['extra']:
         ConfirmPasswd.send_keys(character)
-        time.sleep(2)
+        # time.sleep(2)
 
     if b.visibil_element('css', 'button[data-username]'):
         ConfirmUsername = b.visibil_element('css', 'button[data-username]')
         ConfirmUsername.click()
 
     nextpage = b.visibil_element('xpath',
-                                 '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
+                                '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
     nextpage.click()
 
+    pva = number('eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NjY0MzYwOTEsImlhdCI6MTYzNDkwMDA5MSwicmF5IjoiY2MzNzRmNTM3MTUyMDc3MWZjODAyNWM1MTM5OWIzYWUiLCJzdWIiOjIzMTAyOH0.OOd17iPERjvtNLc6KNa15nnG5hKXvkzeBf7aJa0ApMjWoO9on4NMC4UIbJRgJ8CtVk2dk7mVi5JwzC1e_zZXis-M2sx1GsFRgWum7BIlyxhYWYYp2rAJuW7YrcAn5MWBXC7E2DaKeeVonDgwzN1_FlUAEnS1iggGgdeKtTy3YZ75mH1z3lrsjjbml_vvP2PrCdpjEl7x2EXBizng3NNxqG72rF9OwI8I5mJj1ks0oHbdMNqOdScdExG6a9MJj9NXOFQmBx9C9bTgCCkhcd1T5bmX5-royaHq8LEyZnuE9HXMwo3mHL_Nny3mwCwftC95dMUqNARrQkY5p0hK4OUQfg','belgium','any','google')
+
+    
+    buy_number = pva.buy_number()
+    country_code = pva.country_c
+    print(buy_number)
+
+    put_number = b.visibil_element('xpath',"//div[@class='Ufn6O UOZHQ']//label")
+    put_number.send_keys('{0}'.format(country_code))
+    put_number.send_keys('{0}'.format(buy_number))
+    
+    next_page = b.visibil_element('xpath',"//button[@type='button']//span")
+    next_page.click()
+
+    try:
+        set_code = b.visibil_element('xpath',"//input[@class='whsOnd zHQkBf']")
+        if set_code:
+            check_sms = pva.check_sms()
+            set_code.send_keys("{0}".format(check_sms))
+            time.sleep(2)
+            next_page = b.visibil_element('xpath',"//button[@type='button']//span")
+            next_page.click()
+        
+    except:
+        pva.ban_number()
+    
     newgmail = b.visibil_element('css', '[data-profile-identifier]')
     if newgmail:
         gmail = newgmail.get_attribute("data-email")
@@ -109,15 +138,22 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         day = b.visibil_element('css', '[name="day"]')
         day.send_keys(23)
-        month = b.visibil_element('css', '[id="month"]', '11')
+
+        month = b.visibil_element('id',"month")
+        mdb = Select(month)
+        mdb.select_by_visible_text('April')
+
         year = b.visibil_element('css', '[name="year"]')
         year.send_keys(1990)
 
-        gender = b.visibil_element('css', '[id="gender"]', '2')
-        button = b.visibil_element('css', '[type="button"]')
-        button.click()
-        print('others option')
-        time.sleep(200)
+        gender = b.visibil_element('id',"gender")
+        gd = Select(gender)
+        gd.select_by_visible_text('Male')
+
+        clr_ele = b.driver.find_element(By.XPATH,("//div[@class='Ufn6O UOZHQ']//label")).clear()
+        clr_ele.send_keys(Keys.DELETE)
+        # print('others option')
+        time.sleep(2000)
     else:
 
         print('varify need')
@@ -166,7 +202,7 @@ while True:
     # subprocess.call(["sudo", "ifconfig", "ens33", "hw",
     #                 "ether", "00:11:22:33:44:55"])
     # subprocess.call(["sudo", "ifconfig", "ens33", "up"])
-    utility.network_check()
+    # utility.network_check()
     if setup.token_off():
         print('software off now but reply checking runing')
         time.sleep(60)
