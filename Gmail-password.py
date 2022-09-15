@@ -6,6 +6,10 @@ import time
 import random
 import shutil
 import sys
+from datetime import date
+
+    
+
 from os import path
 from pyvirtualdisplay import Display
 from datetime import datetime
@@ -22,7 +26,21 @@ from ps_lib.imap import imap
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import os
+d1 =str(date(2022,9,15))
+d2 =str(date.today())
 
+
+def days_between(d1, d2):
+    d1 = datetime.strptime(d1, "%Y-%m-%d")
+    d2 = datetime.strptime(d2, "%Y-%m-%d")
+    return abs((d2 - d1).days)
+if days_between(d1, d2) >= 60:
+    print("""
+              wellcome to pointssoft.com 
+              new update available
+              """)
+    time.sleep(60)
+    exit()
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
@@ -209,13 +227,12 @@ def main():
 
 
 
-# print(acc.get_proxy_list())
-# exit()
 
-# x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
-# x.start()
+
 while True:
+    
 
+    
     print('start new')
     main()
     time.sleep(1)
