@@ -1,6 +1,7 @@
 import time
 import shutil
 import sys
+import requests
 from os import path
 from pyvirtualdisplay import Display
 from datetime import datetime
@@ -28,7 +29,39 @@ os.path.dirname(os.path.abspath(__file__))
 
 # from pynput.mouse import Button, Controller
 
+def get_prices(product = 'google'):
+    product = 'google'
 
+    headers = {
+        'Accept': 'application/json',
+    }
+
+    params = (
+        ('product', product),
+    )
+    response = requests.get('https://5sim.net/v1/guest/prices', headers=headers, params=params)
+    items = response.json()[product]
+    for i in items:
+        
+        price=0
+        count=0
+        fastitem={}
+        avarage=0
+        for n in items[i].values():
+            # print(n)
+            price +=n['cost']
+            count +=n['count']
+            avarage +=1
+       
+        fastitem['country']=i
+        fastitem['avarage ']=price/avarage
+        fastitem['count']=count
+        print(fastitem)
+        print('.............................')
+
+get_prices('google')
+# country=input('plz input contry name:')
+pva = number('eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9eyJleHAiOjE2NjY0MzYwOTEsImlhdCI6MTYzNDkwMDA5MSwicmF5IjoiY2MzNzRmNTM3MTUyMDc3MWZjODAyNWM1MTM5OWIzYWUiLCJzdWIiOIzMTAyOH0OOd17iPERjvtNLc6KNa15nnG5hKXvkzeBf7aJa0ApMjWoO9on4NMC4UIbJRgJ8CtVk2dk7mVi5JwzC1e_zZXis-M2sx1GsFRgWum7BIlyxhYWYp2rAJuW7YrcAn5MWBXC7E2DaKeeVonDgwzN1_FlUAEnS1iggGgdeKtTy3YZ75mH1z3lrsjjbml_vvP2PrCdpjEl7x2EXBizng3NNxqG72rF9wI8I5mJj1ks0oHbdMNqOdScdExG6a9MJj9NXOFQmBx9C9bTgCCkhcd1T5bmX5-royaHq8LEyZnuE9HXMwo3mHL_Nny3mwCwftC95dMUqNARrQY5p0hK4OUQfg','russia','any','google')
 def main(account_data, postinfo, packages_id, body_mail):
     # work start time
     starttime = datetime.now().strftime("%H:%M:%S")
@@ -52,18 +85,18 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     try:
 
-        b.get_url('https://gmail.com')
-        # b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
+        # b.get_url('https://gmail.com')
+        b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
     except:
         b.exit()
 
-    new = b.visibil_element('xpath',
-                            '//*[@id="yDmH0d"]/c-wiz/div/div[2]/div/div[2]/div/div[2]/div/div/div[1]/div/button/span')
+    # new = b.visibil_element('xpath',
+    #                         '//*[@id="yDmH0d"]/c-wiz/div/div[2]/div/div[2]/div/div[2]/div/div/div[1]/div/button/span')
                             
-    new.click()
-    new = b.visibil_element('xpath',
-                            '//*[@id="yDmH0d"]/c-wiz/div/div[2]/div/div[2]/div/div[2]/div/div/div[2]/div/ul/li[1]/span[2]')
-    new.click()
+    # new.click()
+    # new = b.visibil_element('xpath',
+    #                         '//*[@id="yDmH0d"]/c-wiz/div/div[2]/div/div[2]/div/div[2]/div/div/div[2]/div/ul/li[1]/span[2]')
+    # new.click()
     firstName = b.visibil_element('id', "firstName")
     name = account_data['post_data'].split("-")
 
@@ -95,16 +128,16 @@ def main(account_data, postinfo, packages_id, body_mail):
     for character in account_data['extra']:
         ConfirmPasswd.send_keys(character)
         # time.sleep(2)
-
+        
     if b.visibil_element('css', 'button[data-username]'):
         ConfirmUsername = b.visibil_element('css', 'button[data-username]')
         ConfirmUsername.click()
+    
 
     nextpage = b.visibil_element('xpath',
                                 '/html/body/div[1]/div[1]/div[2]/div[1]/div[2]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
     nextpage.click()
-
-    pva = number('eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NjY0MzYwOTEsImlhdCI6MTYzNDkwMDA5MSwicmF5IjoiY2MzNzRmNTM3MTUyMDc3MWZjODAyNWM1MTM5OWIzYWUiLCJzdWIiOjIzMTAyOH0.OOd17iPERjvtNLc6KNa15nnG5hKXvkzeBf7aJa0ApMjWoO9on4NMC4UIbJRgJ8CtVk2dk7mVi5JwzC1e_zZXis-M2sx1GsFRgWum7BIlyxhYWYYp2rAJuW7YrcAn5MWBXC7E2DaKeeVonDgwzN1_FlUAEnS1iggGgdeKtTy3YZ75mH1z3lrsjjbml_vvP2PrCdpjEl7x2EXBizng3NNxqG72rF9OwI8I5mJj1ks0oHbdMNqOdScdExG6a9MJj9NXOFQmBx9C9bTgCCkhcd1T5bmX5-royaHq8LEyZnuE9HXMwo3mHL_Nny3mwCwftC95dMUqNARrQkY5p0hK4OUQfg','belgium','any','google')
+    
 
     
     buy_number = pva.buy_number()
@@ -150,7 +183,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         gd = Select(gender)
         gd.select_by_visible_text('Male')
 
-        clr_ele = b.driver.find_element(By.XPATH,("//div[@class='Ufn6O UOZHQ']//label")).clear()
+        clr_ele = b.driver.find_element(By.XPATH,("//div[@class='Ufn6O UOZHQ']//label"))
         clr_ele.send_keys(Keys.DELETE)
         # print('others option')
         time.sleep(2000)

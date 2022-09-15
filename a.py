@@ -1,29 +1,23 @@
 import requests
-product = 'google'
 
-headers = {
-    'Accept': 'application/json',
-}
+def get_prices(product = 'google'):
+    product = 'google'
 
-params = (
-    ('product', product),
-)
-def keywithmaxval(d):
-     """ a) create a list of the dict's keys and values; 
-         b) return the key with the max value"""  
-     v = list(d.values())
-     k = list(d.keys())
-     return k[v.index(max(v))]
-response = requests.get('https://5sim.net/v1/guest/prices', headers=headers, params=params)
-items = response.json()[product]
-for i in items:
-    fastitem = next(iter(items[i].values()))
-    fastitem['country']=i
-    print(fastitem)
-    print('.............................')
-    # info ='   '+str(fastitem['cost']) +'   '+str(fastitem['count'])+'   '+i
+    headers = {
+        'Accept': 'application/json',
+    }
 
-    # print(info)
+    params = (
+        ('product', product),
+    )
+    response = requests.get('https://5sim.net/v1/guest/prices', headers=headers, params=params)
+    items = response.json()[product]
+    for i in items:
+        fastitem = next(iter(items[i].values()))
+        fastitem['country']=i
+        print(fastitem)
+        print('.............................')
+get_prices('google')
 exit()
 
 

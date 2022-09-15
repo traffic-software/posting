@@ -1,0 +1,3982 @@
+{
+    "afghanistan": {
+        "virtual21": {
+            "cost": 16,
+            "count": 7,
+            "rate": 21.39
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 33.33
+        },
+        "virtual29": {
+            "cost": 16,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 16,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 16,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 50
+        },
+        "virtual4": {
+            "cost": 16.8,
+            "count": 500,
+            "rate": 47.22
+        }
+    },
+    "albania": {
+        "virtual21": {
+            "cost": 12,
+            "count": 1
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 60.33
+        },
+        "virtual29": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 60.87
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 500,
+            "rate": 31.03
+        }
+    },
+    "algeria": {
+        "virtual21": {
+            "cost": 14,
+            "count": 2,
+            "rate": 27.84
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 40.17
+        },
+        "virtual29": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 42.72
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500,
+            "rate": 61.67
+        }
+    },
+    "angola": {
+        "virtual23": {
+            "cost": 33.5,
+            "count": 1000,
+            "rate": 37.36
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 51.39
+        }
+    },
+    "anguilla": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.4,
+            "count": 0
+        }
+    },
+    "antiguaandbarbuda": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 400
+        }
+    },
+    "argentina": {
+        "virtual21": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 33.5,
+            "count": 1000,
+            "rate": 52.85
+        },
+        "virtual25": {
+            "cost": 24,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 53.67
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 501,
+            "rate": 60.32
+        }
+    },
+    "armenia": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 31.37
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 34.88
+        },
+        "virtual4": {
+            "cost": 13.4,
+            "count": 500,
+            "rate": 31.03
+        }
+    },
+    "aruba": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 13.4,
+            "count": 0
+        }
+    },
+    "australia": {
+        "virtual23": {
+            "cost": 45.5,
+            "count": 1000,
+            "rate": 25.4
+        },
+        "virtual32": {
+            "cost": 49.97,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 600,
+            "rate": 33.33
+        }
+    },
+    "austria": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 25.97
+        },
+        "virtual26": {
+            "cost": 75.1,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 23.53
+        },
+        "virtual4": {
+            "cost": 13.4,
+            "count": 500
+        }
+    },
+    "azerbaijan": {
+        "virtual2": {
+            "cost": 21,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 33,
+            "count": 11
+        },
+        "virtual23": {
+            "cost": 46.5,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 33,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 33,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 33,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 35.1,
+            "count": 533
+        }
+    },
+    "bahamas": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        }
+    },
+    "bahrain": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 36.67
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 522,
+            "rate": 37.5
+        }
+    },
+    "bangladesh": {
+        "virtual21": {
+            "cost": 7,
+            "count": 38,
+            "rate": 29.89
+        },
+        "virtual23": {
+            "cost": 11.2,
+            "count": 1000,
+            "rate": 45.42
+        },
+        "virtual25": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 37.36
+        },
+        "virtual4": {
+            "cost": 13.4,
+            "count": 667
+        }
+    },
+    "barbados": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500
+        }
+    },
+    "belarus": {
+        "virtual2": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 39,
+            "count": 0,
+            "rate": 28.26
+        },
+        "virtual23": {
+            "cost": 55.6,
+            "count": 1000,
+            "rate": 24.53
+        },
+        "virtual29": {
+            "cost": 39,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 39,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 39,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 35.71
+        },
+        "virtual4": {
+            "cost": 24,
+            "count": 245,
+            "rate": 28.57
+        }
+    },
+    "belgium": {
+        "virtual23": {
+            "cost": 44.4,
+            "count": 1000,
+            "rate": 34.69
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 30.77
+        },
+        "virtual4": {
+            "cost": 33.6,
+            "count": 522,
+            "rate": 34.78
+        }
+    },
+    "belize": {
+        "virtual21": {
+            "cost": 9,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 9,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 9,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 9,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        }
+    },
+    "benin": {
+        "virtual21": {
+            "cost": 20,
+            "count": 2
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 27.73
+        },
+        "virtual29": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500
+        }
+    },
+    "bhutane": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 47.06
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 400
+        }
+    },
+    "bih": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 60
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 422
+        }
+    },
+    "bolivia": {
+        "virtual21": {
+            "cost": 17,
+            "count": 2
+        },
+        "virtual23": {
+            "cost": 26,
+            "count": 1000,
+            "rate": 38.89
+        },
+        "virtual30": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual4": {
+            "cost": 19.6,
+            "count": 545,
+            "rate": 56.76
+        }
+    },
+    "botswana": {
+        "virtual2": {
+            "cost": 36.9,
+            "count": 0,
+            "rate": 50
+        },
+        "virtual21": {
+            "cost": 22,
+            "count": 1
+        },
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 40.32
+        },
+        "virtual29": {
+            "cost": 22,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 22,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 22,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 62.5
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 538
+        }
+    },
+    "brazil": {
+        "virtual21": {
+            "cost": 6,
+            "count": 1,
+            "rate": 21.9
+        },
+        "virtual23": {
+            "cost": 23.4,
+            "count": 1000,
+            "rate": 41.95
+        },
+        "virtual25": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 38.51
+        },
+        "virtual4": {
+            "cost": 18.3,
+            "count": 506,
+            "rate": 46.82
+        }
+    },
+    "bulgaria": {
+        "virtual2": {
+            "cost": 38.9,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 33.5,
+            "count": 1000,
+            "rate": 50.57
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 37.13
+        },
+        "virtual4": {
+            "cost": 25.2,
+            "count": 566,
+            "rate": 27.42
+        }
+    },
+    "burkinafaso": {
+        "virtual2": {
+            "cost": 34,
+            "count": 26,
+            "rate": 30.77
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 16,
+            "count": 532
+        }
+    },
+    "burundi": {
+        "virtual21": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 30
+        },
+        "virtual29": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500
+        }
+    },
+    "cambodia": {
+        "virtual21": {
+            "cost": 5,
+            "count": 4
+        },
+        "virtual23": {
+            "cost": 9.3,
+            "count": 1000,
+            "rate": 43.15
+        },
+        "virtual25": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 5,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 5,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 5,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 37.95
+        },
+        "virtual4": {
+            "cost": 13.2,
+            "count": 651
+        }
+    },
+    "cameroon": {
+        "virtual2": {
+            "cost": 21,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 38.58
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 47.06
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500
+        }
+    },
+    "canada": {
+        "virtual12": {
+            "cost": 9.59,
+            "count": 88577,
+            "rate": 35.59
+        },
+        "virtual23": {
+            "cost": 9.3,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 31.39
+        },
+        "virtual4": {
+            "cost": 16,
+            "count": 600,
+            "rate": 27.53
+        },
+        "virtual8": {
+            "cost": 7.5,
+            "count": 3501,
+            "rate": 44.1
+        }
+    },
+    "capeverde": {
+        "virtual21": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 33.33
+        },
+        "virtual29": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 400
+        }
+    },
+    "caymanislands": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 0
+        }
+    },
+    "chad": {
+        "virtual2": {
+            "cost": 40,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 501,
+            "rate": 35.56
+        }
+    },
+    "chile": {
+        "virtual21": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 39.6
+        },
+        "virtual25": {
+            "cost": 15,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        }
+    },
+    "china": {
+        "virtual23": {
+            "cost": 6.5,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 16,
+            "count": 500
+        }
+    },
+    "colombia": {
+        "claro": {
+            "cost": 7,
+            "count": 0
+        },
+        "tigo": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 24.2,
+            "count": 1000,
+            "rate": 57.17
+        },
+        "virtual29": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 53.86
+        },
+        "virtual4": {
+            "cost": 17.2,
+            "count": 614,
+            "rate": 54.44
+        }
+    },
+    "comoros": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 48.39
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        }
+    },
+    "congo": {
+        "virtual21": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 22,
+            "count": 522,
+            "rate": 34.49
+        }
+    },
+    "costarica": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 46.67
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 56
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 808,
+            "rate": 28
+        }
+    },
+    "croatia": {
+        "virtual2": {
+            "cost": 15.5,
+            "count": 0,
+            "rate": 55.56
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 50
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 30.49
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 400,
+            "rate": 25.71
+        }
+    },
+    "cuba": {
+        "virtual23": {
+            "cost": 40.9,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 1400
+        }
+    },
+    "cyprus": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual26": {
+            "cost": 50,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 401
+        }
+    },
+    "czech": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 29.41
+        },
+        "virtual26": {
+            "cost": 25,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 51.35
+        },
+        "virtual4": {
+            "cost": 19.8,
+            "count": 580,
+            "rate": 29.55
+        }
+    },
+    "djibouti": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 13.4,
+            "count": 0
+        }
+    },
+    "dominica": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        }
+    },
+    "dominicana": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 41.42
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 54.29
+        },
+        "virtual4": {
+            "cost": 14.7,
+            "count": 610,
+            "rate": 46.94
+        }
+    },
+    "easttimor": {
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 16.8,
+            "count": 300
+        },
+        "virtual7": {
+            "cost": 13.3,
+            "count": 1000
+        }
+    },
+    "ecuador": {
+        "virtual2": {
+            "cost": 36.9,
+            "count": 1,
+            "rate": 41.38
+        },
+        "virtual21": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 28.57
+        },
+        "virtual4": {
+            "cost": 22.3,
+            "count": 619,
+            "rate": 42.37
+        }
+    },
+    "egypt": {
+        "virtual2": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 37.2,
+            "count": 1000,
+            "rate": 50.23
+        },
+        "virtual25": {
+            "cost": 26,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 24,
+            "count": 1000,
+            "rate": 45.66
+        },
+        "virtual4": {
+            "cost": 28,
+            "count": 652,
+            "rate": 36.59
+        }
+    },
+    "england": {
+        "ee": {
+            "cost": 20,
+            "count": 0,
+            "rate": 36.34
+        },
+        "lycamobile": {
+            "cost": 20,
+            "count": 896,
+            "rate": 69.93
+        },
+        "three": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual26": {
+            "cost": 20,
+            "count": 2,
+            "rate": 61.49
+        },
+        "virtual32": {
+            "cost": 35.73,
+            "count": 1000,
+            "rate": 23.83
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 1613,
+            "rate": 27.86
+        },
+        "vodafone": {
+            "cost": 20,
+            "count": 0,
+            "rate": 55.24
+        }
+    },
+    "equatorialguinea": {
+        "virtual21": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 28.57
+        },
+        "virtual29": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 17.4,
+            "count": 400
+        }
+    },
+    "eritrea": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 18.7,
+            "count": 0
+        }
+    },
+    "estonia": {
+        "tele2": {
+            "cost": 35,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 13.8,
+            "count": 600
+        }
+    },
+    "ethiopia": {
+        "virtual21": {
+            "cost": 6,
+            "count": 4,
+            "rate": 20.75
+        },
+        "virtual23": {
+            "cost": 26.8,
+            "count": 1000,
+            "rate": 74.02
+        },
+        "virtual29": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 56.59
+        },
+        "virtual4": {
+            "cost": 7.9,
+            "count": 566,
+            "rate": 28.11
+        }
+    },
+    "finland": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 84.75
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 40,
+            "count": 500
+        }
+    },
+    "france": {
+        "lebara": {
+            "cost": 53,
+            "count": 0
+        },
+        "lycamobile": {
+            "cost": 53,
+            "count": 289,
+            "rate": 59.39
+        },
+        "syma": {
+            "cost": 40,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 32.6,
+            "count": 1000,
+            "rate": 23.37
+        },
+        "virtual4": {
+            "cost": 19.6,
+            "count": 1571,
+            "rate": 29.83
+        }
+    },
+    "frenchguiana": {
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 100
+        }
+    },
+    "gabon": {
+        "virtual21": {
+            "cost": 19,
+            "count": 0,
+            "rate": 24.24
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 40
+        },
+        "virtual25": {
+            "cost": 19,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 19,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 19,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 19,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 501,
+            "rate": 33.33
+        }
+    },
+    "gambia": {
+        "virtual2": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 30
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 500,
+            "rate": 35.14
+        }
+    },
+    "georgia": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 34.81
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 31.58
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 505,
+            "rate": 27.66
+        }
+    },
+    "germany": {
+        "lebara": {
+            "cost": 45,
+            "count": 0
+        },
+        "virtual2": {
+            "cost": 54,
+            "count": 2,
+            "rate": 58.74
+        },
+        "virtual23": {
+            "cost": 45.4,
+            "count": 1000,
+            "rate": 27.27
+        },
+        "virtual26": {
+            "cost": 75,
+            "count": 123,
+            "rate": 62.56
+        },
+        "virtual4": {
+            "cost": 32.7,
+            "count": 744,
+            "rate": 25.47
+        }
+    },
+    "ghana": {
+        "virtual2": {
+            "cost": 30.3,
+            "count": 12,
+            "rate": 39.81
+        },
+        "virtual23": {
+            "cost": 26,
+            "count": 1000,
+            "rate": 50.15
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 53.09
+        },
+        "virtual4": {
+            "cost": 19.6,
+            "count": 683,
+            "rate": 42.29
+        }
+    },
+    "greece": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 46.27
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 400,
+            "rate": 34.78
+        }
+    },
+    "grenada": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        }
+    },
+    "guadeloupe": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 100
+        }
+    },
+    "guatemala": {
+        "virtual21": {
+            "cost": 21,
+            "count": 3,
+            "rate": 20.93
+        },
+        "virtual23": {
+            "cost": 29.8,
+            "count": 1000,
+            "rate": 76
+        },
+        "virtual30": {
+            "cost": 21,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 21,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 45.28
+        },
+        "virtual4": {
+            "cost": 22.4,
+            "count": 1493,
+            "rate": 43.81
+        }
+    },
+    "guinea": {
+        "virtual21": {
+            "cost": 6,
+            "count": 1,
+            "rate": 26.09
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 21.74
+        },
+        "virtual29": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500,
+            "rate": 26.92
+        }
+    },
+    "guineabissau": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 34.62
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 400
+        }
+    },
+    "guyana": {
+        "virtual21": {
+            "cost": 18,
+            "count": 3
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 654,
+            "rate": 53.13
+        }
+    },
+    "haiti": {
+        "virtual2": {
+            "cost": 23.2,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 14,
+            "count": 1
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 40.16
+        },
+        "virtual29": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 15.9,
+            "count": 500,
+            "rate": 34.09
+        }
+    },
+    "honduras": {
+        "virtual21": {
+            "cost": 11,
+            "count": 5,
+            "rate": 21.93
+        },
+        "virtual23": {
+            "cost": 24.2,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 23.19
+        },
+        "virtual4": {
+            "cost": 12,
+            "count": 999,
+            "rate": 25
+        }
+    },
+    "hongkong": {
+        "virtual23": {
+            "cost": 37.2,
+            "count": 1000,
+            "rate": 73.33
+        },
+        "virtual28": {
+            "cost": 20,
+            "count": 2
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500,
+            "rate": 73.39
+        }
+    },
+    "hungary": {
+        "virtual23": {
+            "cost": 29.8,
+            "count": 1000,
+            "rate": 33.33
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 49.34
+        },
+        "virtual4": {
+            "cost": 22.4,
+            "count": 500,
+            "rate": 34.38
+        }
+    },
+    "india": {
+        "virtual21": {
+            "cost": 8,
+            "count": 1553,
+            "rate": 46.79
+        },
+        "virtual23": {
+            "cost": 12.1,
+            "count": 1000,
+            "rate": 39.17
+        },
+        "virtual29": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual4": {
+            "cost": 7.9,
+            "count": 5310,
+            "rate": 30.73
+        }
+    },
+    "indonesia": {
+        "virtual23": {
+            "cost": 9,
+            "count": 1000,
+            "rate": 25.4
+        },
+        "virtual25": {
+            "cost": 5,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        }
+    },
+    "iran": {
+        "virtual21": {
+            "cost": 23,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 29,
+            "count": 1000
+        },
+        "virtual25": {
+            "cost": 23,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 23,
+            "count": 3
+        },
+        "virtual30": {
+            "cost": 23,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 23,
+            "count": 0
+        }
+    },
+    "ireland": {
+        "lycamobile": {
+            "cost": 40,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 24.14
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 14.7,
+            "count": 200,
+            "rate": 42.96
+        }
+    },
+    "israel": {
+        "019": {
+            "cost": 25,
+            "count": 0
+        },
+        "virtual2": {
+            "cost": 54.1,
+            "count": 0,
+            "rate": 45.61
+        },
+        "virtual23": {
+            "cost": 46.5,
+            "count": 1000,
+            "rate": 47.78
+        },
+        "virtual25": {
+            "cost": 33,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 23.94
+        },
+        "virtual4": {
+            "cost": 34.7,
+            "count": 505,
+            "rate": 36
+        }
+    },
+    "italy": {
+        "virtual23": {
+            "cost": 37.2,
+            "count": 1000,
+            "rate": 36.99
+        },
+        "virtual4": {
+            "cost": 28,
+            "count": 908,
+            "rate": 32.89
+        }
+    },
+    "ivorycoast": {
+        "virtual2": {
+            "cost": 26,
+            "count": 67,
+            "rate": 43.61
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 59.09
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 564
+        }
+    },
+    "jamaica": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 32
+        },
+        "virtual25": {
+            "cost": 22,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 50.42
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 1008,
+            "rate": 41.94
+        }
+    },
+    "japan": {
+        "virtual21": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 27.03
+        },
+        "virtual29": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 0
+        }
+    },
+    "jordan": {
+        "virtual21": {
+            "cost": 22,
+            "count": 5
+        },
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 22,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 22,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 22,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 882
+        }
+    },
+    "kazakhstan": {
+        "activ": {
+            "cost": 6,
+            "count": 0
+        },
+        "altel": {
+            "cost": 6,
+            "count": 0
+        },
+        "beeline": {
+            "cost": 6,
+            "count": 0
+        },
+        "kcell": {
+            "cost": 6,
+            "count": 0
+        },
+        "tele2": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000,
+            "rate": 60.93
+        }
+    },
+    "kenya": {
+        "virtual2": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 66.28
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 55.79
+        },
+        "virtual4": {
+            "cost": 13.2,
+            "count": 1047,
+            "rate": 35.29
+        }
+    },
+    "kuwait": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 400
+        }
+    },
+    "kyrgyzstan": {
+        "beeline": {
+            "cost": 6.5,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 6,
+            "count": 3
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 23.85
+        },
+        "virtual25": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 504,
+            "rate": 36.67
+        }
+    },
+    "laos": {
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 27
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 33.33
+        },
+        "virtual4": {
+            "cost": 24,
+            "count": 600,
+            "rate": 25.27
+        }
+    },
+    "latvia": {
+        "pildyk": {
+            "cost": 35,
+            "count": 0
+        },
+        "tele2": {
+            "cost": 25,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 600,
+            "rate": 48.65
+        }
+    },
+    "lesotho": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 55.93
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 61.54
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 566,
+            "rate": 55.97
+        }
+    },
+    "liberia": {
+        "virtual2": {
+            "cost": 5,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 14,
+            "count": 0,
+            "rate": 22.45
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500
+        }
+    },
+    "lithuania": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual26": {
+            "cost": 30,
+            "count": 0,
+            "rate": 45.45
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.4,
+            "count": 600
+        },
+        "zz": {
+            "cost": 35,
+            "count": 0
+        }
+    },
+    "luxembourg": {
+        "virtual21": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 200
+        }
+    },
+    "macau": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 200
+        }
+    },
+    "madagascar": {
+        "virtual23": {
+            "cost": 19.5,
+            "count": 1000,
+            "rate": 51.01
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 58.43
+        },
+        "virtual4": {
+            "cost": 14,
+            "count": 666,
+            "rate": 26.83
+        }
+    },
+    "malawi": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 30.16
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500
+        }
+    },
+    "malaysia": {
+        "virtual21": {
+            "cost": 19,
+            "count": 2,
+            "rate": 21.95
+        },
+        "virtual23": {
+            "cost": 19.5,
+            "count": 1000,
+            "rate": 51.69
+        },
+        "virtual29": {
+            "cost": 19,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 19,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 19,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 20.5,
+            "count": 1000,
+            "rate": 32.92
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 1343,
+            "rate": 58.84
+        }
+    },
+    "maldives": {
+        "virtual21": {
+            "cost": 18,
+            "count": 1,
+            "rate": 28.57
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500
+        }
+    },
+    "mauritania": {
+        "virtual21": {
+            "cost": 12,
+            "count": 1
+        },
+        "virtual23": {
+            "cost": 26.4,
+            "count": 1000,
+            "rate": 58.33
+        },
+        "virtual29": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 400
+        }
+    },
+    "mauritius": {
+        "virtual21": {
+            "cost": 6,
+            "count": 3,
+            "rate": 26.92
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 500,
+            "rate": 22.73
+        }
+    },
+    "mexico": {
+        "virtual23": {
+            "cost": 20.5,
+            "count": 1000,
+            "rate": 40.8
+        },
+        "virtual25": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 40.9
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 5313,
+            "rate": 30.11
+        }
+    },
+    "moldova": {
+        "virtual2": {
+            "cost": 38.6,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 23,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 32
+        },
+        "virtual29": {
+            "cost": 23,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 23,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 23,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 16.8,
+            "count": 642,
+            "rate": 50.82
+        }
+    },
+    "mongolia": {
+        "virtual4": {
+            "cost": 20,
+            "count": 419,
+            "rate": 27.27
+        },
+        "virtual7": {
+            "cost": 13.3,
+            "count": 1000,
+            "rate": 93.46
+        }
+    },
+    "montenegro": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 19.8,
+            "count": 0
+        }
+    },
+    "montserrat": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 0
+        }
+    },
+    "morocco": {
+        "virtual2": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 7,
+            "count": 1
+        },
+        "virtual23": {
+            "cost": 24.2,
+            "count": 1000,
+            "rate": 31.1
+        },
+        "virtual29": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 24.06
+        },
+        "virtual4": {
+            "cost": 24,
+            "count": 802,
+            "rate": 25.93
+        }
+    },
+    "mozambique": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 34.48
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 727
+        }
+    },
+    "myanmar": {
+        "virtual21": {
+            "cost": 14,
+            "count": 41,
+            "rate": 31.11
+        },
+        "virtual23": {
+            "cost": 20.5,
+            "count": 1000,
+            "rate": 50.37
+        },
+        "virtual25": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 39.11
+        },
+        "virtual4": {
+            "cost": 14.7,
+            "count": 537,
+            "rate": 36.36
+        }
+    },
+    "namibia": {
+        "virtual21": {
+            "cost": 13,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 75.16
+        },
+        "virtual29": {
+            "cost": 13,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 13,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 13,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 68.81
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 566,
+            "rate": 55.17
+        }
+    },
+    "nepal": {
+        "virtual21": {
+            "cost": 11,
+            "count": 47,
+            "rate": 26.16
+        },
+        "virtual23": {
+            "cost": 26,
+            "count": 1000,
+            "rate": 54.17
+        },
+        "virtual25": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 38.1
+        },
+        "virtual4": {
+            "cost": 19.6,
+            "count": 550
+        }
+    },
+    "netherlands": {
+        "lycamobile": {
+            "cost": 28.4,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 27.03
+        },
+        "virtual4": {
+            "cost": 26.7,
+            "count": 1140,
+            "rate": 35.03
+        }
+    },
+    "newcaledonia": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 400
+        }
+    },
+    "newzealand": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 600
+        }
+    },
+    "nicaragua": {
+        "virtual21": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 6.3,
+            "count": 1000,
+            "rate": 66.67
+        },
+        "virtual25": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        }
+    },
+    "niger": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        }
+    },
+    "nigeria": {
+        "virtual2": {
+            "cost": 32.5,
+            "count": 1,
+            "rate": 31.21
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 51.77
+        },
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000,
+            "rate": 43.2
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 599,
+            "rate": 29.41
+        }
+    },
+    "northmacedonia": {
+        "virtual2": {
+            "cost": 30.9,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual30": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 400
+        }
+    },
+    "norway": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 500
+        }
+    },
+    "pakistan": {
+        "virtual23": {
+            "cost": 13,
+            "count": 1000,
+            "rate": 57.53
+        },
+        "virtual29": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 40.93
+        },
+        "virtual4": {
+            "cost": 13.1,
+            "count": 1027,
+            "rate": 52.64
+        }
+    },
+    "panama": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 40.54
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 44
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 500,
+            "rate": 39.13
+        }
+    },
+    "papuanewguinea": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 53.09
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 58.97
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 962,
+            "rate": 52.63
+        }
+    },
+    "paraguay": {
+        "virtual21": {
+            "cost": 17,
+            "count": 1,
+            "rate": 23.81
+        },
+        "virtual23": {
+            "cost": 26,
+            "count": 1000,
+            "rate": 53.13
+        },
+        "virtual29": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 19.6,
+            "count": 500
+        }
+    },
+    "peru": {
+        "virtual21": {
+            "cost": 17,
+            "count": 1,
+            "rate": 22.03
+        },
+        "virtual23": {
+            "cost": 24.2,
+            "count": 1000,
+            "rate": 51.03
+        },
+        "virtual29": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 52.9
+        },
+        "virtual4": {
+            "cost": 18.3,
+            "count": 501,
+            "rate": 48.84
+        }
+    },
+    "philippines": {
+        "virtual21": {
+            "cost": 16,
+            "count": 97
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 37.88
+        },
+        "virtual25": {
+            "cost": 16,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 16,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 16,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 16,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 22.42
+        }
+    },
+    "poland": {
+        "orange": {
+            "cost": 8,
+            "count": 0
+        },
+        "play": {
+            "cost": 8,
+            "count": 0
+        },
+        "redbullmobile": {
+            "cost": 8,
+            "count": 0
+        },
+        "tmobile": {
+            "cost": 8,
+            "count": 0
+        },
+        "virginmobile": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 31.68
+        },
+        "virtual26": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 7,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 40.46
+        },
+        "virtual4": {
+            "cost": 11.2,
+            "count": 1471,
+            "rate": 33.84
+        }
+    },
+    "portugal": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 36.27
+        },
+        "virtual25": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 53.03
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 700,
+            "rate": 34.33
+        }
+    },
+    "puertorico": {
+        "virtual23": {
+            "cost": 37.2,
+            "count": 1000,
+            "rate": 65.71
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 65.1
+        },
+        "virtual4": {
+            "cost": 28,
+            "count": 500
+        }
+    },
+    "qatar": {
+        "virtual23": {
+            "cost": 40.9,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 18186
+        }
+    },
+    "reunion": {
+        "virtual23": {
+            "cost": 26.8,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 322
+        }
+    },
+    "romania": {
+        "virtual2": {
+            "cost": 27.8,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 48.48
+        },
+        "virtual26": {
+            "cost": 25,
+            "count": 46,
+            "rate": 78.06
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 46.58
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 1683,
+            "rate": 30.87
+        },
+        "virtual5": {
+            "cost": 5,
+            "count": 0
+        }
+    },
+    "russia": {
+        "beeline": {
+            "cost": 5,
+            "count": 0
+        },
+        "lycamobile": {
+            "cost": 5,
+            "count": 0
+        },
+        "matrix": {
+            "cost": 5,
+            "count": 0
+        },
+        "megafon": {
+            "cost": 5,
+            "count": 1,
+            "rate": 60.23
+        },
+        "mts": {
+            "cost": 5,
+            "count": 0,
+            "rate": 50.85
+        },
+        "rostelecom": {
+            "cost": 5,
+            "count": 0,
+            "rate": 25.81
+        },
+        "tele2": {
+            "cost": 5,
+            "count": 36,
+            "rate": 34.71
+        },
+        "yota": {
+            "cost": 5,
+            "count": 0
+        }
+    },
+    "rwanda": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 23.94
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 53.66
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 522
+        }
+    },
+    "saintkittsandnevis": {
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 400
+        }
+    },
+    "saintlucia": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500
+        }
+    },
+    "saintvincentandgrenadines": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 400
+        }
+    },
+    "salvador": {
+        "virtual2": {
+            "cost": 36.9,
+            "count": 9,
+            "rate": 76.09
+        },
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 557
+        }
+    },
+    "samoa": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000,
+            "rate": 73.77
+        }
+    },
+    "saotomeandprincipe": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 0
+        }
+    },
+    "saudiarabia": {
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 42.72
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 40
+        },
+        "virtual4": {
+            "cost": 16.8,
+            "count": 500
+        }
+    },
+    "senegal": {
+        "virtual23": {
+            "cost": 24.2,
+            "count": 1000,
+            "rate": 29.63
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 18.3,
+            "count": 742
+        }
+    },
+    "serbia": {
+        "virtual2": {
+            "cost": 54.1,
+            "count": 149,
+            "rate": 48.86
+        },
+        "virtual23": {
+            "cost": 46.5,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 32,
+            "count": 560
+        }
+    },
+    "seychelles": {
+        "virtual21": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 14,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 0
+        }
+    },
+    "sierraleone": {
+        "virtual2": {
+            "cost": 12.6,
+            "count": 87,
+            "rate": 48.24
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 44
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 52
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 323
+        }
+    },
+    "singapore": {
+        "virtual21": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 6,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000,
+            "rate": 27.03
+        }
+    },
+    "slovakia": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 34.62
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 500
+        }
+    },
+    "slovenia": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 400
+        }
+    },
+    "solomonislands": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        }
+    },
+    "southafrica": {
+        "virtual23": {
+            "cost": 24.2,
+            "count": 1000,
+            "rate": 54.88
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 50.07
+        },
+        "virtual4": {
+            "cost": 16,
+            "count": 8060,
+            "rate": 35.16
+        }
+    },
+    "spain": {
+        "lycamobile": {
+            "cost": 25,
+            "count": 0
+        },
+        "virtual2": {
+            "cost": 80.3,
+            "count": 26,
+            "rate": 54.79
+        },
+        "virtual21": {
+            "cost": 52,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 51.93
+        },
+        "virtual29": {
+            "cost": 52,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 52,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 52,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 52.5
+        },
+        "virtual4": {
+            "cost": 15,
+            "count": 564,
+            "rate": 42.22
+        }
+    },
+    "srilanka": {
+        "virtual2": {
+            "cost": 30.3,
+            "count": 0
+        },
+        "virtual21": {
+            "cost": 18,
+            "count": 20,
+            "rate": 23.82
+        },
+        "virtual23": {
+            "cost": 26,
+            "count": 1000,
+            "rate": 23.68
+        },
+        "virtual25": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 18,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 50.33
+        },
+        "virtual4": {
+            "cost": 18.3,
+            "count": 671,
+            "rate": 25
+        }
+    },
+    "sudan": {
+        "virtual21": {
+            "cost": 17,
+            "count": 65
+        },
+        "virtual23": {
+            "cost": 31.3,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 17,
+            "count": 1
+        },
+        "virtual30": {
+            "cost": 17,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 17,
+            "count": 13
+        },
+        "virtual4": {
+            "cost": 18.3,
+            "count": 651
+        }
+    },
+    "suriname": {
+        "virtual21": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 65.31
+        },
+        "virtual29": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 400
+        }
+    },
+    "swaziland": {
+        "virtual23": {
+            "cost": 26.4,
+            "count": 1000,
+            "rate": 50.48
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 60.42
+        },
+        "virtual4": {
+            "cost": 16,
+            "count": 500,
+            "rate": 56
+        }
+    },
+    "sweden": {
+        "lycamobile": {
+            "cost": 30,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 68.8,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 37.4,
+            "count": 500
+        }
+    },
+    "switzerland": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 40.74
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 32.14
+        },
+        "virtual4": {
+            "cost": 18.7,
+            "count": 400
+        }
+    },
+    "syria": {
+        "virtual23": {
+            "cost": 40.9,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 410
+        }
+    },
+    "taiwan": {
+        "virtual23": {
+            "cost": 26,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 19.6,
+            "count": 200
+        }
+    },
+    "tajikistan": {
+        "virtual21": {
+            "cost": 39,
+            "count": 11,
+            "rate": 21.05
+        },
+        "virtual23": {
+            "cost": 55.6,
+            "count": 1000
+        },
+        "virtual29": {
+            "cost": 39,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 39,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 39,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 28,
+            "count": 233
+        }
+    },
+    "tanzania": {
+        "virtual21": {
+            "cost": 11,
+            "count": 10
+        },
+        "virtual23": {
+            "cost": 27,
+            "count": 1000
+        },
+        "virtual25": {
+            "cost": 12,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 11,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 544
+        }
+    },
+    "thailand": {
+        "virtual21": {
+            "cost": 8,
+            "count": 8,
+            "rate": 24.25
+        },
+        "virtual23": {
+            "cost": 20,
+            "count": 1000
+        },
+        "virtual25": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual29": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual30": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual31": {
+            "cost": 8,
+            "count": 0
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 29.44
+        }
+    },
+    "tit": {
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 56.86
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 698
+        }
+    },
+    "togo": {
+        "virtual2": {
+            "cost": 26,
+            "count": 16,
+            "rate": 36.03
+        },
+        "virtual23": {
+            "cost": 22.3,
+            "count": 1000,
+            "rate": 26.47
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 37.61
+        },
+        "virtual4": {
+            "cost": 16.8,
+            "count": 534,
+            "rate": 42.86
+        }
+    },
+    "tonga": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        }
+    },
+    "tunisia": {
+        "virtual21": {
+            "cost": 20,
+            "count": 24,
+            "rate": 20.16
+        },
+        "virtual23": {
+            "cost": 31.6,
+            "count": 1000,
+            "rate": 43.48
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 35.09
+        },
+        "virtual4": {
+            "cost": 23.9,
+            "count": 600
+        }
+    },
+    "turkey": {
+        "virtual23": {
+            "cost": 25.3,
+            "count": 1000,
+            "rate": 70.14
+        },
+        "virtual32": {
+            "cost": 25,
+            "count": 1000,
+            "rate": 60.55
+        },
+        "virtual4": {
+            "cost": 18.3,
+            "count": 18835,
+            "rate": 64.92
+        }
+    },
+    "turkmenistan": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 500
+        }
+    },
+    "turksandcaicos": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        }
+    },
+    "uganda": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 36.84
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 41.3
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 523,
+            "rate": 55.26
+        }
+    },
+    "ukraine": {
+        "kyivstar": {
+            "cost": 30,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 18.6,
+            "count": 1000,
+            "rate": 36.28
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 16,
+            "count": 764,
+            "rate": 25.27
+        }
+    },
+    "uruguay": {
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 30.36
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 38.28
+        },
+        "virtual4": {
+            "cost": 20,
+            "count": 698
+        }
+    },
+    "usa": {
+        "virtual23": {
+            "cost": 31.4,
+            "count": 1000,
+            "rate": 39.85
+        },
+        "virtual32": {
+            "cost": 38.52,
+            "count": 1000,
+            "rate": 26.46
+        },
+        "virtual8": {
+            "cost": 9.31,
+            "count": 7539
+        }
+    },
+    "uzbekistan": {
+        "virtual2": {
+            "cost": 35,
+            "count": 42
+        },
+        "virtual21": {
+            "cost": 39,
+            "count": 3
+        },
+        "virtual23": {
+            "cost": 55.6,
+            "count": 1000,
+            "rate": 58.33
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000
+        },
+        "virtual4": {
+            "cost": 40,
+            "count": 783
+        }
+    },
+    "venezuela": {
+        "virtual21": {
+            "cost": 13,
+            "count": 2
+        },
+        "virtual23": {
+            "cost": 24.2,
+            "count": 1000,
+            "rate": 57.95
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 51.46
+        },
+        "virtual4": {
+            "cost": 18.7,
+            "count": 7751,
+            "rate": 59.77
+        }
+    },
+    "vietnam": {
+        "virtual16": {
+            "cost": 10,
+            "count": 0
+        },
+        "virtual17": {
+            "cost": 10,
+            "count": 0,
+            "rate": 36.37
+        },
+        "virtual19": {
+            "cost": 10,
+            "count": 0,
+            "rate": 36.65
+        },
+        "virtual20": {
+            "cost": 10,
+            "count": 0,
+            "rate": 74.68
+        },
+        "virtual21": {
+            "cost": 10,
+            "count": 1
+        },
+        "virtual23": {
+            "cost": 19.4,
+            "count": 1000,
+            "rate": 51.98
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 44.83
+        },
+        "virtual4": {
+            "cost": 10.7,
+            "count": 1377,
+            "rate": 52.86
+        }
+    },
+    "virginislands": {
+        "virtual32": {
+            "cost": 24.61,
+            "count": 1000
+        }
+    },
+    "yemen": {
+        "virtual2": {
+            "cost": 48.7,
+            "count": 25
+        }
+    },
+    "zambia": {
+        "virtual2": {
+            "cost": 32.5,
+            "count": 0,
+            "rate": 23.81
+        },
+        "virtual21": {
+            "cost": 20,
+            "count": 0
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 51.9
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 66.52
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 590,
+            "rate": 62.96
+        }
+    },
+    "zimbabwe": {
+        "virtual21": {
+            "cost": 18,
+            "count": 2
+        },
+        "virtual23": {
+            "cost": 27.9,
+            "count": 1000,
+            "rate": 48.84
+        },
+        "virtual32": {
+            "cost": 27.28,
+            "count": 1000,
+            "rate": 52.63
+        },
+        "virtual4": {
+            "cost": 21.1,
+            "count": 501
+        }
+    }
+}
