@@ -697,7 +697,7 @@ class ucbrowser:
         for i in range(1, round(total), 1):
             self.driver.execute_script("window.scrollTo(0, {});".format(i))
             # time.sleep(1)
-        self.scroll_element_into_view(element)
+        # self.scroll_element_into_view(element)
 
     def element_window_size(self, element):
 

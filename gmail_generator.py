@@ -1,4 +1,5 @@
 
+from logging import exception
 import time
 import shutil
 import sys
@@ -196,23 +197,36 @@ def main(account_data, postinfo, packages_id, body_mail):
         finalbutton = b.driver.find_element(By.XPATH,("//button[@type='button']//span"))
         finalbutton.click()
         print('others option')
-        time.sleep(2)
+        time.sleep(10)
         # btnIagree = b.visibil_element('xpath','//*[@id="view_container"]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
-        btnIagree = b.visibil_element('xpath','//*[@id="view_container"]/div/div/div[2]/div/div[2]/div/div[1]/div/div/button')
-        b.scroll_like_user(btnIagree)
-        ActionChains(b.driver).move_to_element(btnIagree).click(btnIagree).perform()
+        btnGroup = b.driver.find_element(By.XPATH,'//*[@id="view_container"]/div/div/div[2]/div/div[2]')
+        b.scroll_like_user(btnGroup)
+        btnIagree = btnGroup.find_element(By.TAG_NAME,'button')
         
-        if btnIagree:
-            b.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(10)
-            # btnIagree.click()
+        
+        
+       
+        
+        
+        try:
+            btnIagree.click()
+            f = open("gmail.txt", "a")
+            f.write(mailinfo)
+            f.close()
+            time.sleep(20)
+            
+            # ActionChains(b.driver).move_to_element(btnGroup).click(btnIagree).perform()
+        except Exception as e:
+            # print(e)
+            time.sleep(100)
+        # btnIagree.click()
         time.sleep(200)
     else:
+        
 
         print('varify need')
 
-    worker_acc.post_error(
-        account_id, "action try", software_type='GmailCreator')
+    worker_acc.post_error(account_id, "action try", software_type='GmailCreator')
     #title="thanks for flagging!"
     # b.wait('//*[@title="thanks for flagging!"]')
 

@@ -93,6 +93,17 @@ class number:
 
 		response = requests.get('https://5sim.net/v1/user/ban/' + str(id), headers=headers)
 		print(response.text)
+	def finish_number(self):
+
+		id = self.num_id
+
+		headers = {
+			'Authorization': 'Bearer ' + self.token,
+			'Accept': 'application/json',
+		}
+
+		r = requests.get('https://5sim.net/v1/user/finish/' + id, headers=headers)
+    	
 
 	def get_prices(product = 'google'):
 		product = 'google'
