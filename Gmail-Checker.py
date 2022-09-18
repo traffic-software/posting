@@ -98,7 +98,8 @@ def main(account_data, postinfo, packages_id, body_mail):
                 oldNumber = '0'+str(no-1)
             print(oldNumber)
             worker_acc.save_account(data=oldNumber, soft_token=account_data['password'])
-            password = b.visibil_element('name', "password")
+            #<input type="password" class="whsOnd zHQkBf" jsname="YPqjbf" autocomplete="current-password" spellcheck="false" tabindex="0" aria-label="Enter your password" name="Passwd" autocapitalize="off" dir="ltr" data-initial-dir="ltr" data-initial-value="">
+            password = b.visibil_element('xpath','//input[@name="Passwd"]',wait=120)
 
             mailpass = oldNumber
             password.clear()
@@ -111,7 +112,7 @@ def main(account_data, postinfo, packages_id, body_mail):
 
             passwordNext.click()
             time.sleep(3)
-            if b.visibil_element('name', "password", wait=10):
+            if b.visibil_element('xpath','//input[@name="Passwd"]',wait=10):
                 # print('pssword not match')
                 b.get_url(loginurl)
                 continue
