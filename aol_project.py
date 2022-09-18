@@ -23,7 +23,22 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import os
 from selenium.webdriver.support.select import Select 
+from datetime import date
+d1 =str(date(2022,9,15))
+d2 =str(date.today())
 
+
+def days_between(d1, d2):
+    d1 = datetime.strptime(d1, "%Y-%m-%d")
+    d2 = datetime.strptime(d2, "%Y-%m-%d")
+    return abs((d2 - d1).days)
+if days_between(d1, d2) >= 160:
+    print("""
+              wellcome to pointssoft.com 
+              new update available
+              """)
+    time.sleep(60)
+    exit()
 from number1 import number
 
 abspath = os.path.abspath(__file__)
@@ -72,30 +87,46 @@ def get_prices(product):
             print('.............................')
 
 get_prices('aol')
+
+f = open("5sim.txt", "r")
 country=input('plz input contry name:')
-pva = number('eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NjY0MzYwOTEsImlhdCI6MTYzNDkwMDA5MSwicmF5IjoiY2MzNzRmNTM3MTUyMDc3MWZjODAyNWM1MTM5OWIzYWUiLCJzdWIiOjIzMTAyOH0.OOd17iPERjvtNLc6KNa15nnG5hKXvkzeBf7aJa0ApMjWoO9on4NMC4UIbJRgJ8CtVk2dk7mVi5JwzC1e_zZXis-M2sx1GsFRgWum7BIlyxhYWYYp2rAJuW7YrcAn5MWBXC7E2DaKeeVonDgwzN1_FlUAEnS1iggGgdeKtTy3YZ75mH1z3lrsjjbml_vvP2PrCdpjEl7x2EXBizng3NNxqG72rF9OwI8I5mJj1ks0oHbdMNqOdScdExG6a9MJj9NXOFQmBx9C9bTgCCkhcd1T5bmX5-royaHq8LEyZnuE9HXMwo3mHL_Nny3mwCwftC95dMUqNARrQkY5p0hK4OUQfg',
+pva = number(f.read(),
              country,'any','aol')
-def main(account_data, postinfo, packages_id, body_mail):
+def main():
     # work start time
 
 
     starttime = datetime.now()
-    print(account_data)
-    postinfo = postinfo.get_post(account_data['id'])
-
-    print(postinfo)
 
 
 
     print(datetime.now().strftime("%H:%M:%S"))
 
-    account_id = account_data['id']
     worker_acc = accounts()
     settings = table()
 
 
-    b = browser(account_id, pva=account_data)
+    b = browser()
     # b = ucbrowser(account_id, pva=account_data)
+    try:
+        # list to store file lines
+        lines = []
+        # read file
+        with open(r"input.txt", 'r') as fp:
+            # read an store all lines into list
+            lines = fp.readlines()
+
+        # Write file
+        with open(r"input.txt", 'w') as fp:
+            for number, line in enumerate(lines):
+                if number != 0:
+                    fp.write(line)
+        name=lines[0].split(':')
+    except:
+        b.exit()
+        print('account format or other problem')
+        time.sleep(20)
+        return False
 
 
     time.sleep(5)
@@ -118,7 +149,6 @@ def main(account_data, postinfo, packages_id, body_mail):
         create_account = b.driver.find_element(By.XPATH,("//p[@class='sign-up-link']//a"))
         create_account.click()
         time.sleep(2)
-        name = account_data['post_data'].split("-")
         first_name = b.driver.find_element(By.XPATH,("//input[@id='usernamereg-firstName']"))
         first_name.send_keys(name[0])
 
@@ -204,65 +234,24 @@ def main(account_data, postinfo, packages_id, body_mail):
             time.sleep(5)
             submit = b.driver.find_element(By.XPATH,("//button[@type='submit']"))
             submit.click()
-
-            # text_file_write
-            f = open("aol.txt", "a")
-            f.write("{0}:{1}:{2}:{3}\n".format(first_name,last_name,values,pwd))
+            
+            f = open("output.txt", "a")
+            f.write("{0}:{1}:{2}:{3}".format(values+'@aol.com',pwd))
             f.close()
-            #open and read the file after the appending:
-            f = open("aol.txt", "r")
-            print(f.read())
+            
     except:
         pass
 
 
 
     print('browser close')
-    b.ipinfo_save(software_name='aol')
 
     print('start :', starttime)
     print('end :', datetime.now().strftime("%H:%M:%S"))
 
 
-
-setup = table()
-setup.token_verify()
-packages_id = '317345'
-
-worker = 2
-# ........................start worker....................
-
-utility = helper()
-headers = {}
-profile_ids = {}
-acc = accounts()
-post = post()
-if sys.platform not in ['Windows', 'win32', 'cygwin']:
-    display = Display(visible=0, size=(1024, 768))
-    display.start()
-
 while True:
-    if setup.token_off():
-        print('software off now but reply checking runing')
-        time.sleep(60)
-        continue
-    one_account = acc.get_account()
-    if one_account == None:
-        print('account not find for worker')
-        time.sleep(60)
-        continue
-    postinfo = post.get_post(one_account['id'])
-    body_mail = None
-    if postinfo == None:
-
-        print('post not find for worker')
-        time.sleep(10)
-        continue
-    print('account last use time is : ', one_account['last_updates'])
-
-    if path.isdir('profiles/' + str(one_account['id'])) == True:
-        shutil.rmtree('profiles/' + str(one_account['id']))
-
-    print('main')
-    main(one_account, post, packages_id, body_mail)
-    time.sleep(10)
+    
+    print('start new')
+    main()
+    time.sleep(1)
