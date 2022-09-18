@@ -129,6 +129,9 @@ def main(account_data, postinfo, packages_id, body_mail):
                 worker_acc.save_account(
                     data=fullaccount, soft_token=account_data['password'])
                 worker_acc.update_account(data="0"+str(oldNumber), id=account_data['id'])
+                b.driver.delete_all_cookies()
+                b.get_url(loginurl)
+                continue
                 
 
         try:
