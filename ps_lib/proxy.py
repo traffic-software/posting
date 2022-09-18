@@ -233,6 +233,8 @@ class ps_proxy:
             r = requests.get(url, timeout=60, proxies=proxie)
 
             if r.status_code in [400, 407, 500, 502, 522, 525]:
+                print(r.status_code)
+                print(r.text)
                 return data
 
             ip = json.loads(r.text)

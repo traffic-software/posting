@@ -79,6 +79,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     use_proxy = True
 
     b = ucbrowser(account_id, pva=account_data)
+    # b = browser(account_id, pva=account_data)
     # b = firefoxBrowser(account_id, pva=account_data)
 
     time.sleep(1)
@@ -93,6 +94,7 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         # b.get_url('https://gmail.com')
         b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
+        
     except:
         b.exit()
 
