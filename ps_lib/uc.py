@@ -264,8 +264,8 @@ class ucbrowser:
         except:
             element = False
         if element == False:
-            pass
-            # print("element not find: ", selector)
+            
+            print("element not find: ", selector)
 
         return element
 

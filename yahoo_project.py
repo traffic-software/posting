@@ -144,76 +144,122 @@ def main():
 
     
     try:
-        create_account = b.driver.find_element(By.XPATH,("//p[@class='sign-up-link']//a"))
+        create_account = b.visibil_element('xpath',"//p[@class='sign-up-link']//a")
         create_account.click()
-        time.sleep(2)
+        time.sleep(5)
         
-        first_name = b.driver.find_element(By.XPATH,("//input[@id='usernamereg-firstName']"))
-        first_name.send_keys(name[0])
-        first_name = name[0]
-        print(first_name)
+        first_name = b.visibil_element('xpath',"//input[@id='usernamereg-firstName']")
+        for character in name[0].replace('\n',''):
+            print(character)
+            time.sleep(0.2)
+            first_name.send_keys(character)
+        print(name[0])
 
-        time.sleep(2)
-        last_name = b.driver.find_element(By.XPATH,("//div[@class='last-name pure-u-1-2']//input[@id='usernamereg-lastName']"))
-        last_name.send_keys(name[1])
-        last_name = name[1]
-        print(last_name)
+        time.sleep(5)
+        last_name = b.visibil_element('xpath',"//div[@class='last-name pure-u-1-2']//input[@id='usernamereg-lastName']")
+        for character in name[1].replace('\n',''):
+            print(character)
+            time.sleep(0.2)
+            last_name.send_keys(character)
+        print(name[1])
 
-        time.sleep(2)
-        email_name = b.driver.find_element(By.XPATH,("//input[@name='userId']"))
-        email_name.send_keys(name[0]+name[1])
-        time.sleep(2)
-        suggest_email_name = b.driver.find_elements(By.XPATH,("//ul[@class='desktop-suggestion-list']//li"))[-1]
-        values = suggest_email_name.get_attribute('data-value')
-        print("Mail_name:",values)
-        suggest_email_name.click()
+        time.sleep(5)
+        email_name = b.visibil_element('xpath',"//input[@name='userId']")
+        fullname = name[0]+name[1]
+        for character in fullname.replace('\n',''):
+            print(character)
+            time.sleep(1)
+            email_name.send_keys(character)
+            suggest_email_name = b.visibil_element('xpath',"//ul[@class='desktop-suggestion-list']//li")
+            if suggest_email_name:
+                values = suggest_email_name.get_attribute('data-value')
+                print("Mail_name:",values)
+                suggest_email_name.click()
+                break
+        time.sleep(5)
+        # suggest_email_name = b.visibil_element('xpath',"//ul[@class='desktop-suggestion-list']//li")
+        # if suggest_email_name:
+        #     values = suggest_email_name.get_attribute('data-value')
+        #     print("Mail_name:",values)
+        #     suggest_email_name.click()
+        # else:
+        #     print('Not suggest username')
+            
 
 
-        time.sleep(2)
-        email_pass = b.driver.find_element(By.XPATH,("//input[@id='usernamereg-password']"))
+        time.sleep(5)
+        email_pass = b.visibil_element('xpath',"//input[@id='usernamereg-password']")
         pwd = ran_password()
         print("password:",pwd)
         email_pass.send_keys(pwd)
 
 
         #birth_year
-        time.sleep(2)
-        bd_year = b.driver.find_element(By.XPATH,("//input[@id='usernamereg-birthYear']"))
+        time.sleep(5)
+        bd_year = b.visibil_element('xpath',"//input[@id='usernamereg-birthYear']")
         bd_year.send_keys("1995")
 
-        next_click = b.driver.find_element(By.XPATH,("//button[@id='reg-submit-button']"))
+        next_click = b.visibil_element('xpath',"//button[@id='reg-submit-button']")
         next_click.click()
 
-        time.sleep(2)
+        time.sleep(5)
         buy_number = pva.buy_number()
         country_code = pva.country_c
         print(buy_number)
 
-        time.sleep(2)
-        country_list = b.driver.find_element(By.XPATH,("//select[@name='shortCountryCode']"))
+        time.sleep(5)
+        country_list = b.visibil_element('xpath',"//select[@name='shortCountryCode']")
         optionss =  country_list.find_element(By.XPATH,"//option[@data-code='{0}']".format(country_code))
         optionss.click()
 
-        time.sleep(2)
-        country_number = b.driver.find_element(By.XPATH,("//input[@id='usernamereg-phone']"))
+        time.sleep(5)
+        country_number = b.visibil_element('xpath',"//input[@id='usernamereg-phone']")
         country_number.send_keys('{0}'.format(buy_number)) 
 
-        send_code = b.driver.find_element(By.XPATH,("//button[@name='signup']"))
+        send_code = b.visibil_element('xpath',"//button[@name='signup']")
         send_code.click()
 
-        time.sleep(2)
-        code_field = b.driver.find_element(By.XPATH,("//input[@id='verification-code-field']"))
+        
+        
+        recaptcha =b.visibil_element('xpath',"//iframe[@id='recaptcha-iframe']")
+        if recaptcha:
+            time.sleep(2000)
+            
+            
+            chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da')
+
+
+
+
+            site_url = b.current_url()
+
+            chacha_key = chacha_worker.two_captcha('6Ldbp6saAAAAAAwuhsFeAysZKjR319pRcKUitPUO', site_url)
+
+            chacha_respons = b.driver.find_element_by_id('g-recaptcha-response')
+            print('g-recaptcha-response')
+            b.script_run("document.getElementById('g-recaptcha-response').style.display = 'block';")
+            print('g-recaptcha-response block')
+            script = 'document.getElementById("g-recaptcha-response").innerHTML="{}";'.format(chacha_key)
+            
+            b.script_run(script)
+            print('g-recaptcha-response set data')
+            b.script_run("document.getElementById('g-recaptcha-response').style.display = 'none';")
+            print('g-recaptcha-response none')
+            submit1 =b.select_element('[id="recaptcha-submit"]')
+            submit1.click()
+        
+        code_field = b.visibil_element('xpath',"//input[@id='verification-code-field']")
         if code_field:
             check_sms = pva.check_sms()
             print(check_sms)
             code_field.send_keys('{0}'.format(check_sms))
 
             time.sleep(2)
-            next = b.driver.find_element(By.XPATH,("//button[@name='verifyCode']"))
+            next = b.visibil_element('xpath',"//button[@name='verifyCode']")
             next.click()
 
             time.sleep(2)
-            next = b.driver.find_element(By.XPATH,("//button[@type='submit']"))
+            next = b.visibil_element('xpath',"//button[@type='submit']")
             next.click()
 
         # text_file_write
