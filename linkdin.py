@@ -365,7 +365,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         b.driver.get("https://www.linkedin.com/feed/")
     except:
         b.exit()
-    # b.driver.get("https://www.linkedin.com/checkpoint/lg/sign-in-another-account")
+    # b.driver.get("https://www.linkedin.com/checkpoint/lg/sign-in-another-account") 
     # def random_name():
     #     upper_char ='ABCDEFGHIJKLMNOPSRUVWXYZ'
     #     lower_char ='abcdefghijklmnopsruvwxyz'
