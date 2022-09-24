@@ -29,6 +29,7 @@ import os
 from datetime import date
 d1 =str(date(2022,9,15))
 d2 =str(date.today())
+date.day
 
 
 def days_between(d1, d2):

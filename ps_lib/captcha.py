@@ -22,13 +22,13 @@ class capcha:
 		job.join()
 		print('recaptcha task done')
 		return job.get_solution_response()
-	def two_captcha(self,siteKe,pageUrl):
-			id = self.two_start(siteKe,pageUrl)
+	def two_captcha(self,siteKe,pageUrl,enterprise=0):
+			id = self.two_start(siteKe,pageUrl,enterprise)
 			response =self.two_respond(id)
 			print('task done')
 			return {"id":id,"key":response}
 
-	def two_start(self,siteKe,pageUrl):
+	def two_start(self,siteKe,pageUrl,enterprise=0):
 		id=None
 
 		try:
@@ -36,7 +36,7 @@ class capcha:
 				data = requests.get("http://2captcha.com/in.php?lang={0}&key={1}&method=hcaptcha&sitekey={2}&pageurl={3}".format(self.lan,self.tow_api, siteKe, pageUrl))
 			
 			else:
-				data = requests.get("http://2captcha.com/in.php?lang={0}&key={1}&method=userrecaptcha&googlekey={2}&pageurl={3}".format(self.lan,self.tow_api, siteKe, pageUrl))
+				data = requests.get("http://2captcha.com/in.php?lang={0}&key={1}&method=userrecaptcha&googlekey={2}&pageurl={3}&enterprise={4}".format(self.lan,self.tow_api, siteKe, pageUrl,enterprise))
 			data = data.text.split("|")
 			id = data[1]
 		except:

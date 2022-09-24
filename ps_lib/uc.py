@@ -94,7 +94,7 @@ class ucbrowser:
             pass
 
         else:
-            # self.options.add_argument("--use-temporary-user-data-dir")
+            #self.options.add_argument("--use-temporary-user-data-dir")
             pass
 
         self.driver = uc.Chrome(

@@ -207,8 +207,12 @@ def main():
         country_code = pva.country_c
         print(buy_number)
 
-        time.sleep(5)
-        country_list = b.visibil_element('xpath',"//select[@name='shortCountryCode']")
+        print('wait for CountryCode')
+        # time.sleep(500)
+        # return False
+        
+        
+        country_list = b.driver.find_element(By.XPATH,"//select[@name='shortCountryCode']")
         optionss =  country_list.find_element(By.XPATH,"//option[@data-code='{0}']".format(country_code))
         optionss.click()
 
@@ -223,7 +227,7 @@ def main():
         
         recaptcha =b.visibil_element('xpath',"//iframe[@id='recaptcha-iframe']")
         if recaptcha:
-            time.sleep(2000)
+            # time.sleep(2000)
             
             
             chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da')
@@ -233,7 +237,7 @@ def main():
 
             site_url = b.current_url()
 
-            chacha_key = chacha_worker.two_captcha('6Ldbp6saAAAAAAwuhsFeAysZKjR319pRcKUitPUO', site_url)
+            chacha_key = chacha_worker.two_captcha('6Ldbp6saAAAAAAwuhsFeAysZKjR319pRcKUitPUO', site_url,enterprise=1)
 
             chacha_respons = b.driver.find_element_by_id('g-recaptcha-response')
             print('g-recaptcha-response')
