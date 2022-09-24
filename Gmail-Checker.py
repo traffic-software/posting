@@ -45,7 +45,6 @@ def main(account_data, postinfo, packages_id, body_mail):
     # b = firefoxBrowser(account_id, pva=account_data)
     b = ucbrowser(account_id, pva=account_data)
 
-    time.sleep(1)
     if b.PROXY_PASS == False and b.use_proxy == True:
         b.exit()
         print('proxy condition not fulfilled')
@@ -65,12 +64,12 @@ def main(account_data, postinfo, packages_id, body_mail):
     
 
     for no in range(int(account_data['extra']), int(account_data['extra'])+1000):
-        time.sleep(1)
+        # time.sleep(0.2)
 
         # rejeted
         # https://accounts.google.com/signin/v2/deniedsigninrejected
         # login page
-        loginurl = 'https://accounts.google.com/signin/v2/identifier'
+        loginurl = 'https://accounts.google.com/AccountChooser/signinchooser'
         # password page
         # https://accounts.google.com/signin/v2/challenge/pwd
         count = count+1
@@ -86,6 +85,16 @@ def main(account_data, postinfo, packages_id, body_mail):
 
             b.get_url(loginurl)
         if 'myaccount' in b.current_url():
+            b.driver.delete_all_cookies()
+            
+
+            b.get_url(loginurl)
+        if 'challenge/dp' in b.current_url():
+            b.driver.delete_all_cookies()
+            
+
+            b.get_url(loginurl)
+        if 'signinchooser' in b.current_url():
             b.driver.delete_all_cookies()
             
 
@@ -108,7 +117,7 @@ def main(account_data, postinfo, packages_id, body_mail):
             password.send_keys(mailpass)
 
             passwordNext = b.visibil_element(
-                'css', '[id="passwordNext"] [type="button"]')
+                'css', '[id="passwordNext"] button')
 
             passwordNext.click()
             time.sleep(3)
@@ -169,7 +178,8 @@ def main(account_data, postinfo, packages_id, body_mail):
                 continue
 
         nextpage = b.visibil_element(
-            'css', '#identifierNext button[type="button"]', wait=1)
+            'css', '#identifierNext button', wait=1)
+        
         try:
             nextpage.click()
         except:
