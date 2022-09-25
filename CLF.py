@@ -67,9 +67,10 @@ def main(account_data, postinfo, packages_id, body_mail):
         print('This posting has been flagged for removal')
         worker_acc.ban_3(account_id, status=3)
     else:
+        # time.sleep(150)
 
         nextpage = b.select_element_xpath(
-            '//*[@class="flag-action action"]', 'flag button')
+            '//*[@class="flag-action"]', 'flag button')
 
         nextpage.click()
 

@@ -28,7 +28,8 @@ python3 -c "import os; print(os.environ['PS_PROXY_USER'])"
 python3 bk.py
 reboot
 shutdown -h 0
-docker run --rm -d -it --memory="300m" malaknoyn/clf
+docker run --rm -d -it  malaknoyn/clf:hidebutton 
+docker pull malaknoyn/clf:hidebutton
 docker exec -it id /bin/bash
 docker container start id
 docker container restart $(docker ps -a -q)
