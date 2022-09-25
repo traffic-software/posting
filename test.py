@@ -24,7 +24,7 @@ cookie = mycursor.fetchone()
 
 
 today = datetime.datetime.now()
-yesterday = today - timedelta(1)
+yesterday = today - timedelta(days = 1)
 print(yesterday)
 
 
