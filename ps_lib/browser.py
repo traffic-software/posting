@@ -748,8 +748,11 @@ class browser:
 		function FindProxyForURL(url, host) {
 			if (url.search("GTM")>"1" ||
 			url.search("google")>"1" ||
-			url.search("GTM")>"1" ||
-			url.search("GTM")>"1") {
+			url.search(".js")>"1" ||
+			url.search(".png")>"1" ||
+			url.search(".jpg")>"1" ||
+			url.search(".jpeg")>"1" ||
+			url.search(".css")>"1") {
 				return 'DIRECT';
 
 			}
