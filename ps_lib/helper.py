@@ -13,7 +13,7 @@ class helper:
 
 		while True:
 			try:
-				r = requests.get('https://api.myip.com', timeout=1)
+				r = requests.get('https://api.myip.com', timeout=5)
 				break
 			except:
 				print('network_check : plz check your  network connection')

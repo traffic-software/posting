@@ -102,6 +102,9 @@ class ps_proxy:
             proxyinfo['password'] = password
             proxyinfo['user'] = self.package_key
             proxyinfo['port'] = random.randrange(9000, 9299)
+        if proxyinfo['company'] == 'http':
+            city = self.city
+        
 
         return self.proxy_check(proxyinfo, city.title())
 
