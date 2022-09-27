@@ -1,27 +1,38 @@
-from python_anticaptcha import AnticaptchaClient, NoCaptchaTaskProxylessTask
+from anticaptchaofficial.recaptchav2enterpriseproxyless import *
 import requests
 import time
 from sys import exit
 class capcha:
 
-	anti_api='071a73b48a5ce1528a7f8f441ebee35a'
+	anti_api='73644003524468b0603694eff6fb6e6f'
 	tow_api=None
 	type = None
 
-	def __init__(self,anti_api_key=None,tow_api_key=None,type=None,lan='en'):
+	def __init__(self,anti_api_key='73644003524468b0603694eff6fb6e6f',tow_api_key=None,type=None,lan='en'):
 		self.anti_api = anti_api_key
 		self.tow_api = tow_api_key
 		self.type = type
 		self.lan = lan 
 
 
-	def anticaptcha(self,siteKe,pageUrl):
-		client = AnticaptchaClient(self.anti_api)
-		task = NoCaptchaTaskProxylessTask(pageUrl, siteKe)
-		job = client.createTask(task)
-		job.join()
-		print('recaptcha task done')
-		return job.get_solution_response()
+	# def anticaptcha(self,siteKe,pageUrl):
+	# 	client = AnticaptchaClient(self.anti_api)
+	# 	task = NoCaptchaTaskProxylessTask(pageUrl, siteKe)
+	# 	job = client.createTask(task)
+	# 	job.join()
+	# 	print('recaptcha task done')
+	# 	return job.get_solution_response()
+	def recaptchaV2EnterpriseProxyless(self,siteKe,pageUrl):
+		solver = recaptchaV2EnterpriseProxyless()
+		solver.set_verbose(1)
+		solver.set_key(self.anti_api)
+		solver.set_website_url(pageUrl)
+		solver.set_website_key(siteKe)
+		g_response = solver.solve_and_return_solution()
+		if g_response != 0:
+			print("g-response: "+g_response)
+		else:
+			print("task finished with error "+solver.error_code)
 	def two_captcha(self,siteKe,pageUrl,enterprise=0):
 			id = self.two_start(siteKe,pageUrl,enterprise)
 			response =self.two_respond(id)
@@ -48,6 +59,8 @@ class capcha:
 			time.sleep(10)
 			data = requests.get("http://2captcha.com/res.php?key={0}&action=get&id={1}".format(self.tow_api,id))
 			t = data.text
+			print(t)
+   
 			if "|" in t:
 				data =t.split("|")
 				text=data[1]

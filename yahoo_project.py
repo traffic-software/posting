@@ -46,7 +46,7 @@ abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
 bundle_dir = path.abspath(path.dirname(__file__))
-import requests
+
 def get_prices(product):
 
     headers = {
@@ -227,7 +227,7 @@ def main():
         
         recaptcha =b.visibil_element('xpath',"//iframe[@id='recaptcha-iframe']")
         if recaptcha:
-            # time.sleep(2000)
+            time.sleep(200)
             
             
             chacha_worker = capcha('73644003524468b0603694eff6fb6e6f','4191a9a8a00ad6ce300a49d8d36935da')
