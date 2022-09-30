@@ -1,5 +1,6 @@
 dist
 build
+ps_lib/profile
 .vscode
 *.tar
 *.zip

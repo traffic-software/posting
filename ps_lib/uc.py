@@ -24,8 +24,10 @@ import zipfile
 import warnings
 import random
 import string
-
-
+import os
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+bundle_dir = os.path.abspath(os.path.dirname(__file__))
 class ucbrowser:
     account_id = None
 
@@ -69,7 +71,7 @@ class ucbrowser:
 
         self.a = random.choice(l)
 
-        # self.options.add_argument(f'user-agent={self.a}')
+        # self.options.add_argument('--user-agent={0}'.format(self.a))
         print('user set')
 
         if sys.platform not in ['Windows', 'win32', 'cygwin']:
@@ -90,8 +92,8 @@ class ucbrowser:
         # self.options.add_argument("--lang=it-IT")
         # self.options.add_argument("--no-sandbox")
         if profile_dir:
-            # self.options.add_argument("--user-data-dir={}".format(profile_dir))
-            pass
+            self.options.add_argument("--user-data-dir={}".format(bundle_dir+"\\"+profile_dir))
+            
 
         else:
             #self.options.add_argument("--use-temporary-user-data-dir")

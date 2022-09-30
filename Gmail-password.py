@@ -72,9 +72,9 @@ def main():
 
     # b = browser(account_id, pva=account_data)
     # b = firefoxBrowser(account_id, pva=account_data)
-    b = ucbrowser()
+    b = ucbrowser(profile_dir='profile')
+    
 
-    # time.sleep(120)
     try:
         # list to store file lines
         lines = []
@@ -98,8 +98,11 @@ def main():
 
     try:
 
+        b.get_url('https://myaccount.google.com/two-step-verification/backup-codes')
+        b.driver.delete_all_cookies()
         b.get_url('https://accounts.google.com/signin/v2/identifier?continue=https%3A%2F%2Fmyaccount.google.com%2Fsigninoptions%2Frescuephone&osid=1&rart=ANgoxcfbj5MICImsby3i6E4WliB4NiCObSuRKGTYLSt03bQVr5EN0ekxnuxLrRGkyz5DKW13ZqMxZkUoZn1oMKAXz3u6m-8mXw&service=accountsettings&flowName=GlifWebSignIn&flowEntry=ServiceLogin')
     except:
+        
         b.exit()
         return False
     
@@ -117,6 +120,7 @@ def main():
         time.sleep(10)
         password=False
     except:
+        
         b.exit()
         print('account typing problem')
         time.sleep(20)
@@ -215,7 +219,9 @@ def main():
         
 
     # b.ipinfo_save(software_name='gmail password')
+    
 
+    
     b.exit()
     print('browser close')
 
