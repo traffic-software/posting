@@ -57,7 +57,7 @@ def ran_password():
         symbol ="@%*^$#"
         num = "0123456789"
         string = characters+symbol+num+upper
-        length = 20
+        length = 12
         password = "".join(random.sample(string,length))
         print("Random password:",password)
         return password
@@ -183,40 +183,19 @@ def main():
         print('new password typing problem')
         time.sleep(20)
         return False
-    try:
-
-        
-        
-        
-        print('in recovary mail chenge')
-        link=b.current_url()
-        linkarg = link.split('?')
-        b.get_url("https://myaccount.google.com/recovery/email?"+linkarg[1])
-        time.sleep(15)       
-        rec_mail = b.driver.find_element(By.XPATH,("//input[@class='VfPpkd-fmcmS-wGMbrd CtvUB']"))
-        rec_mail.clear()
-        rec_mail.send_keys(mailinfo[3])
-        rec_next = b.driver.find_element(By.XPATH,"(//form//input[@type='text'])[last()]")
-        rec_next.send_keys(Keys.ENTER)
-        update_rec=mailinfo[3]
-        time.sleep(15)
-    except:
-        b.exit()
-        print('recovary mail add problem')
-        time.sleep(20)
-        return False
+    
     try:
         
 
         # Open a file with access mode 'a'
         file_object = open('output.txt', 'a')
         # Append 'hello' at the end of file
-        file_object.write('{0}:{1}:{2}\n'.format(mailinfo[0],pwd,update_rec))
+        file_object.write('{0}:{1}:{2}\n'.format(mailinfo[0],pwd,mailinfo[2]))
         # Close the file
         file_object.close()
     except:
         b.exit()
-        print('{0}:{1}:{2}\n'.format(mailinfo[0],pwd,update_rec))
+        print('{0}:{1}:{2}\n'.format(mailinfo[0],pwd,mailinfo[2]))
         print('output problem')
         time.sleep(20)
         return False

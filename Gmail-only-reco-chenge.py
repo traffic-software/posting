@@ -162,29 +162,6 @@ def main():
     
     try:
 
-        time.sleep(10)
-        link = b.current_url()
-        linkarg=link.split('?')
-        b.get_url("https://myaccount.google.com/signinoptions/password?"+linkarg[1])
-
-       
-        time.sleep(10)
-        
-        password = b.driver.find_element(By.XPATH,("//input[@name='password']"))
-        pwd = ran_password()
-        password.send_keys(pwd)
-        cm_password = b.driver.find_element(By.XPATH,("//input[@name='confirmation_password']"))
-        cm_password.send_keys(pwd)
-        change_password = b.driver.find_element(By.XPATH,("//span[@class='VfPpkd-vQzf8d']"))
-        change_password.click()
-        time.sleep(10)
-    except:
-        b.exit()
-        print('new password typing problem')
-        time.sleep(20)
-        return False
-    try:
-
         
         
         
@@ -211,12 +188,12 @@ def main():
         # Open a file with access mode 'a'
         file_object = open('output.txt', 'a')
         # Append 'hello' at the end of file
-        file_object.write('{0}:{1}:{2}\n'.format(mailinfo[0],pwd,update_rec))
+        file_object.write('{0}:{1}:{2}\n'.format(mailinfo[0],mailinfo[1],update_rec))
         # Close the file
         file_object.close()
     except:
         b.exit()
-        print('{0}:{1}:{2}\n'.format(mailinfo[0],pwd,update_rec))
+        print('{0}:{1}:{2}\n'.format(mailinfo[0],mailinfo[1],update_rec))
         print('output problem')
         time.sleep(20)
         return False

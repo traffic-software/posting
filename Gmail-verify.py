@@ -26,6 +26,7 @@ from ps_lib.imap import imap
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import os
+from number1 import number
 from datetime import date
 d1 =str(date(2022,9,15))
 d2 =str(date.today())
@@ -36,7 +37,7 @@ def days_between(d1, d2):
     d1 = datetime.strptime(d1, "%Y-%m-%d")
     d2 = datetime.strptime(d2, "%Y-%m-%d")
     return abs((d2 - d1).days)
-if days_between(d1, d2) >= 60:
+if days_between(d1, d2) >= 200:
     print("""
               wellcome to pointssoft.com 
               new update available
@@ -57,11 +58,44 @@ def ran_password():
         symbol ="@%*^$#"
         num = "0123456789"
         string = characters+symbol+num+upper
-        length = 20
+        length = 10
         password = "".join(random.sample(string,length))
         print("Random password:",password)
         return password
+def get_prices(product):
 
+    headers = {
+        'Accept': 'application/json',
+    }
+
+    params = (
+        ('product', product),
+    )
+    response = requests.get('https://5sim.net/v1/guest/prices', headers=headers, params=params)
+    items = response.json()[product]
+    for i in items:
+        
+        price=0
+        count=0
+        fastitem={}
+        avarage=0
+        for n in items[i].values():
+            # print(n)
+            price +=n['cost']
+            count +=n['count']
+            avarage +=1
+       
+        fastitem['country']=i
+        fastitem['avarage ']=price/avarage
+        fastitem['count']=count
+        if fastitem['avarage '] <= 12:
+            print(fastitem)
+            print('.............................')
+
+get_prices('yahoo')
+f = open("5sim.txt", "r")
+country=input('plz input contry name:')
+pva = number(f.read(),country,'any','google')
 def main():
     # work start time
     starttime = datetime.now().strftime("%H:%M:%S")
@@ -162,29 +196,6 @@ def main():
     
     try:
 
-        time.sleep(10)
-        link = b.current_url()
-        linkarg=link.split('?')
-        b.get_url("https://myaccount.google.com/signinoptions/password?"+linkarg[1])
-
-       
-        time.sleep(10)
-        
-        password = b.driver.find_element(By.XPATH,("//input[@name='password']"))
-        pwd = ran_password()
-        password.send_keys(pwd)
-        cm_password = b.driver.find_element(By.XPATH,("//input[@name='confirmation_password']"))
-        cm_password.send_keys(pwd)
-        change_password = b.driver.find_element(By.XPATH,("//span[@class='VfPpkd-vQzf8d']"))
-        change_password.click()
-        time.sleep(10)
-    except:
-        b.exit()
-        print('new password typing problem')
-        time.sleep(20)
-        return False
-    try:
-
         
         
         
@@ -211,12 +222,12 @@ def main():
         # Open a file with access mode 'a'
         file_object = open('output.txt', 'a')
         # Append 'hello' at the end of file
-        file_object.write('{0}:{1}:{2}\n'.format(mailinfo[0],pwd,update_rec))
+        file_object.write('{0}:{1}:{2}\n'.format(mailinfo[0],mailinfo[1],update_rec))
         # Close the file
         file_object.close()
     except:
         b.exit()
-        print('{0}:{1}:{2}\n'.format(mailinfo[0],pwd,update_rec))
+        print('{0}:{1}:{2}\n'.format(mailinfo[0],mailinfo[1],update_rec))
         print('output problem')
         time.sleep(20)
         return False
