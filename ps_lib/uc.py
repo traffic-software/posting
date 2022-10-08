@@ -26,6 +26,7 @@ import random
 import string
 import os
 abspath = os.path.abspath(__file__)
+print(abspath)
 dname = os.path.dirname(abspath)
 bundle_dir = os.path.abspath(os.path.dirname(__file__))
 class ucbrowser:

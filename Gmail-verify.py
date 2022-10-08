@@ -7,8 +7,8 @@ import random
 import shutil
 import sys
 from datetime import date
+import requests
 
-    
 
 from os import path
 from pyvirtualdisplay import Display
@@ -28,8 +28,8 @@ from selenium.webdriver.common.by import By
 import os
 from number1 import number
 from datetime import date
-d1 =str(date(2022,9,15))
-d2 =str(date.today())
+d1 = str(date(2022, 10, 15))
+d2 = str(date.today())
 date.day
 
 
@@ -37,7 +37,9 @@ def days_between(d1, d2):
     d1 = datetime.strptime(d1, "%Y-%m-%d")
     d2 = datetime.strptime(d2, "%Y-%m-%d")
     return abs((d2 - d1).days)
-if days_between(d1, d2) >= 200:
+
+
+if days_between(d1, d2) >= 30:
     print("""
               wellcome to pointssoft.com 
               new update available
@@ -52,16 +54,20 @@ os.path.dirname(os.path.abspath(__file__))
 
 keyboard = Controller()
 # keyboard.type(str(258956856))
+
+
 def ran_password():
-        characters ="abcdefghijklmnopshwyzABCDEFGHIJKLMNOPQSTUVWXYZ"
-        upper ="ABCDEFGHIJKLMNOPQPSHWYZ"
-        symbol ="@%*^$#"
-        num = "0123456789"
-        string = characters+symbol+num+upper
-        length = 10
-        password = "".join(random.sample(string,length))
-        print("Random password:",password)
-        return password
+    characters = "abcdefghijklmnopshwyzABCDEFGHIJKLMNOPQSTUVWXYZ"
+    upper = "ABCDEFGHIJKLMNOPQPSHWYZ"
+    symbol = "@%*^$#"
+    num = "0123456789"
+    string = characters+symbol+num+upper
+    length = 10
+    password = "".join(random.sample(string, length))
+    print("Random password:", password)
+    return password
+
+
 def get_prices(product):
 
     headers = {
@@ -71,43 +77,52 @@ def get_prices(product):
     params = (
         ('product', product),
     )
-    response = requests.get('https://5sim.net/v1/guest/prices', headers=headers, params=params)
+    response = requests.get(
+        'https://5sim.net/v1/guest/prices', headers=headers, params=params)
     items = response.json()[product]
     for i in items:
-        
-        price=0
-        count=0
-        fastitem={}
-        avarage=0
+
+        price = 0
+        count = 0
+        fastitem = {}
+        avarage = 0
         for n in items[i].values():
             # print(n)
-            price +=n['cost']
-            count +=n['count']
-            avarage +=1
-       
-        fastitem['country']=i
-        fastitem['avarage ']=price/avarage
-        fastitem['count']=count
+            price += n['cost']
+            count += n['count']
+            avarage += 1
+
+        fastitem['country'] = i
+        fastitem['avarage '] = price/avarage
+        fastitem['count'] = count
         if fastitem['avarage '] <= 12:
             print(fastitem)
             print('.............................')
 
-get_prices('yahoo')
+
+get_prices('google')
 f = open("5sim.txt", "r")
-country=input('plz input contry name:')
-pva = number(f.read(),country,'any','google')
+country = input('plz input contry name:')
+pva = number(f.read(), country, 'any', 'google')
+
+
+def apandLine(mailinfo, filename="input.txt"):
+    inputfile = open(r'{0}'.format(filename), 'a')
+    line = ':'.join(mailinfo)
+    inputfile.write(f'{line}')
+    inputfile.close()
+
+
 def main():
     # work start time
     starttime = datetime.now().strftime("%H:%M:%S")
 
     print(datetime.now().strftime("%H:%M:%S"))
     # print(account_data)
-    
 
     # b = browser(account_id, pva=account_data)
     # b = firefoxBrowser(account_id, pva=account_data)
     b = ucbrowser(profile_dir='profile')
-    
 
     try:
         # list to store file lines
@@ -122,121 +137,124 @@ def main():
             for number, line in enumerate(lines):
                 if number != 0:
                     fp.write(line)
-        mailinfo=lines[0].split(':')
+        mailinfo = lines[0].split(':')
     except:
+        apandLine(mailinfo)
         b.exit()
         print('account format or other problem')
         time.sleep(20)
         return False
-    
 
     try:
 
         b.get_url('https://accounts.google.com/signin/v2/challenge/selection')
         b.driver.delete_all_cookies()
-        b.get_url('https://accounts.google.com/signin/v2/identifier?continue=https%3A%2F%2Fmyaccount.google.com%2Fsigninoptions%2Frescuephone&osid=1&rart=ANgoxcfbj5MICImsby3i6E4WliB4NiCObSuRKGTYLSt03bQVr5EN0ekxnuxLrRGkyz5DKW13ZqMxZkUoZn1oMKAXz3u6m-8mXw&service=accountsettings&flowName=GlifWebSignIn&flowEntry=ServiceLogin')
+        b.get_url(
+            'https://accounts.google.com/AddSession?hl=en&continue=https://www.google.com%3Fhl%3Den-US&ec=GAlA8wE')
     except:
-        
+        apandLine(mailinfo)
+
         b.exit()
         return False
-    
-
-    
-    
 
     try:
-        Enter_gmail = b.driver.find_element(By.XPATH,("//input[@type='email']"))
-        print('email typing:',mailinfo[0])
+        Enter_gmail = b.driver.find_element(
+            By.XPATH, ("//input[@type='email']"))
+        print('email typing:', mailinfo[0])
         Enter_gmail.send_keys(mailinfo[0])
-        
-        next = b.driver.find_elements(By.XPATH,("//span[@class='VfPpkd-vQzf8d']"))[1]
+
+        next = b.driver.find_elements(
+            By.XPATH, ("//span[@class='VfPpkd-vQzf8d']"))[1]
         next.click()
         time.sleep(10)
-        password=False
+        password = False
     except:
-        
-        b.exit()
+        apandLine(mailinfo)
+
+        # b.exit()
         print('account typing problem')
-        time.sleep(20)
+        # time.sleep(20)
         return False
     try:
-        #https://accounts.google.com/signin/v2/challenge/selection
+        # https://accounts.google.com/signin/v2/challenge/selection
         # https://accounts.google.com/signin/v2/challenge/kpe
-        password = b.driver.find_element(By.XPATH,("//input[@type='password']"))
-        print('old password typing:',mailinfo[1])
+        password = b.driver.find_element(
+            By.XPATH, ("//input[@type='password']"))
+        print('old password typing:', mailinfo[1])
         password.send_keys(mailinfo[1])
-        next = b.driver.find_elements(By.XPATH,("//span[@class='VfPpkd-vQzf8d']"))[1]
+        next = b.driver.find_elements(
+            By.XPATH, ("//span[@class='VfPpkd-vQzf8d']"))[1]
         next.click()
 
         time.sleep(10)
     except:
+        apandLine(mailinfo)
         b.exit()
         print('password typing problem')
         time.sleep(20)
         return False
     try:
 
-
         if "challenge/selection" in b.current_url():
-            #//div[@data-challengetype='12']
+            # //div[@data-challengetype='12']
 
-            click_rec_mail_link = b.driver.find_element(By.XPATH,("//div[@data-challengetype='12']"))
+            click_rec_mail_link = b.driver.find_element(
+                By.XPATH, ("//div[@data-challengetype='12']"))
             click_rec_mail_link.click()
             time.sleep(10)
-            enter_rec_mail = b.driver.find_element(By.XPATH,("//input[@type='email']"))
-            print('old recovery typing:',mailinfo[2])
+            enter_rec_mail = b.driver.find_element(
+                By.XPATH, ("//input[@type='email']"))
+            print('old recovery typing:', mailinfo[2])
             enter_rec_mail.send_keys(mailinfo[2])
-            next = b.driver.find_element(By.XPATH,("//button[@class='VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-k8QpJ VfPpkd-LgbsSe-OWXEXe-dgl2Hf nCP5yc AjY5Oe DuMIQc LQeN7 qIypjc TrZEUc lw1w4b']//span[@class='VfPpkd-vQzf8d']"))
+            next = b.driver.find_element(
+                By.XPATH, ("//button[@class='VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-k8QpJ VfPpkd-LgbsSe-OWXEXe-dgl2Hf nCP5yc AjY5Oe DuMIQc LQeN7 qIypjc TrZEUc lw1w4b']//span[@class='VfPpkd-vQzf8d']"))
             next.click()
     except:
-        b.exit()
+        # apandLine(mailinfo)
+        # b.exit()
         print('recovery typing problem')
-        time.sleep(20)
-        return False
-    
-    try:
 
-        
-        
-        
-        print('in recovary mail chenge')
-        link=b.current_url()
-        linkarg = link.split('?')
-        b.get_url("https://myaccount.google.com/recovery/email?"+linkarg[1])
-        time.sleep(15)       
-        rec_mail = b.driver.find_element(By.XPATH,("//input[@class='VfPpkd-fmcmS-wGMbrd CtvUB']"))
+    try:
+        number = pva.buy_number()
+
+        rec_mail = b.visibil_element('xpath', "//input[@id='deviceAddress']")
         rec_mail.clear()
-        rec_mail.send_keys(mailinfo[3])
-        rec_next = b.driver.find_element(By.XPATH,"(//form//input[@type='text'])[last()]")
-        rec_next.send_keys(Keys.ENTER)
-        update_rec=mailinfo[3]
-        time.sleep(15)
-    except:
-        b.exit()
-        print('recovary mail add problem')
-        time.sleep(20)
-        return False
-    try:
-        
+        rec_mail.send_keys(pva.country_c)
+        rec_mail.send_keys(number)
+        get_codeButtun = b.visibil_element(
+            'xpath', "//form//input[@type='submit']")
+        get_codeButtun.click()
 
-        # Open a file with access mode 'a'
-        file_object = open('output.txt', 'a')
-        # Append 'hello' at the end of file
-        file_object.write('{0}:{1}:{2}\n'.format(mailinfo[0],mailinfo[1],update_rec))
-        # Close the file
-        file_object.close()
-    except:
-        b.exit()
-        print('{0}:{1}:{2}\n'.format(mailinfo[0],mailinfo[1],update_rec))
-        print('output problem')
+        # time.sleep(15)
+    except exception as e:
+        print(e)
+        print('phone problem')
         time.sleep(20)
-        return False
-        
+
+    if b.visibil_element('xpath', "//input[@id='deviceAddress']", 10):
+        pva.ban_number()
+        apandLine(mailinfo)
+
+        return True
+    try:
+
+        sms_code = pva.check_sms()
+
+        rec_mail = b.visibil_element('xpath', "//input[@id='smsUserPin']")
+        rec_mail.clear()
+        rec_mail.send_keys(sms_code)
+        get_codeButtun = b.visibil_element(
+            'xpath', "//form//input[@type='submit']")
+        get_codeButtun.click()
+
+        # time.sleep(15)
+    except:
+        # b.exit()
+        print('pin submit prolem problem')
 
     # b.ipinfo_save(software_name='gmail password')
-    
+    apandLine(mailinfo, filename="output.txt")
 
-    
     b.exit()
     print('browser close')
 
@@ -244,15 +262,8 @@ def main():
     print('end :', datetime.now().strftime("%H:%M:%S"))
 
 
-
-
-
-
-
 while True:
-    
 
-    
     print('start new')
     main()
     time.sleep(1)
