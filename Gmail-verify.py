@@ -122,7 +122,7 @@ def main():
 
     # b = browser(account_id, pva=account_data)
     # b = firefoxBrowser(account_id, pva=account_data)
-    b = ucbrowser(profile_dir='profile')
+    b = ucbrowser()
 
     try:
         # list to store file lines
@@ -147,10 +147,10 @@ def main():
 
     try:
 
-        b.get_url('https://accounts.google.com/signin/v2/challenge/selection')
-        b.driver.delete_all_cookies()
-        b.get_url(
-            'https://accounts.google.com/AddSession?hl=en&continue=https://www.google.com%3Fhl%3Den-US&ec=GAlA8wE')
+        b.get_url('https://accounts.google.com/AccountChooser/signinchooser')
+        # b.driver.delete_all_cookies()
+        # b.get_url(
+        #     'https://accounts.google.com/AddSession?hl=en&continue=https://www.google.com%3Fhl%3Den-US&ec=GAlA8wE')
     except:
         apandLine(mailinfo)
 
@@ -254,6 +254,8 @@ def main():
 
     # b.ipinfo_save(software_name='gmail password')
     apandLine(mailinfo, filename="output.txt")
+
+    b.driver.delete_all_cookies()
 
     b.exit()
     print('browser close')

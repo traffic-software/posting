@@ -662,3 +662,55 @@ USAGE:
 
 For more information try --help
 
+geckodriver: error: Found argument '--websocket-port' which wasn't expected, or isn't valid in this context
+
+USAGE:
+    geckodriver [FLAGS] [OPTIONS]
+
+For more information try --help
+
+1665661383137	geckodriver	INFO	Listening on 127.0.0.1:63803
+1665661386492	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "--marionette" "--remote-debugging-port" "63804" "--remote-allow-hosts" "localhost" "-no-remote" "-profile" "C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileAm6jGz"
+1665661392992	Marionette	INFO	Marionette enabled
+1665661393081	Marionette	INFO	Listening on port 63816
+Read port: 63816
+WebDriver BiDi listening on ws://127.0.0.1:63804
+1665661393618	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\ps\\AppData\\Local\\Temp\\rust_mozprofileAm6jGz\\search.json.mozlz4", (void 0)))
+DevTools listening on ws://127.0.0.1:63804/devtools/browser/2cb18b5b-2c84-4d59-85c9-df5493c1c3ec
+JavaScript warning: https://www.amazon.com/Krylon-K02203-General-Purpose-Metallic/dp/B0042T7TRC/ref=cm_cr_arp_d_product_top?ie=UTF8&th=1 line 8815 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/stores/Krylon%C2%AE/page/24B88F03-EED1-4375-9ED3-D29866B63628?ref_=ast_bln line 1874 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/Krylon-K02203-General-Purpose-Metallic/dp/B0042T7TRC/ref=cm_cr_arp_d_product_top?ie=UTF8&th=1 line 8815 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+console.error: "Unable to find target with innerWindowId:4294967324"
+console.error: "Unable to find target with innerWindowId:4294967324"
+console.error: "Unable to find target with innerWindowId:4294967324"
+JavaScript warning: https://www.amazon.com/Krylon-K02203-General-Purpose-Metallic/product-reviews/B0042T7TRC/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews line 3223 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+console.warn: "Async method failed in safeAsyncMethod" (new Error("Connection closed, pending request to server0.conn0.windowGlobal4294967345/layout23, type getGrids failed\n\nRequest stack:\nrequest@resource://devtools/shared/protocol/Front.js:300:14\ngenerateRequestMethods/</frontProto[name]@resource://devtools/shared/protocol/Front/FrontClassWithSpec.js:48:19\ngetAllGrids@resource://devtools/client/fronts/layout.js:171:17\nexports.safeAsyncMethod/<@resource://devtools/shared/async-utils.js:61:25\ngetGrids@resource://devtools/client/inspector/grids/grid-inspector.js:448:35\n", "resource://devtools/shared/protocol/Front.js", 106))
+console.warn: "Listener for event 'frame' did not return a promise."
+console.warn: "Listener for event 'frame' did not return a promise."
+console.warn: "Listener for event 'frame' did not return a promise."
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: resource://gre/modules/AsyncShutdown.jsm, line 576: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+1665661967974	Marionette	INFO	Stopped listening JavaScript warning: https://www.amazon.com/Krylon-K02203-General-Purpose-Metallic/dp/B0042T7TRC/ref=cm_cr_arp_d_product_top?ie=UTF8&th=1 line 8809 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/stores/Krylon%C2%AE/page/24B88F03-EED1-4375-9ED3-D29866B63628?ref_=ast_bln line 1885 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/Krylon-K02203-General-Purpose-Metallic/dp/B0042T7TRC/ref=cm_cr_arp_d_product_top?ie=UTF8&th=1 line 8809 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/Krylon-K02203-General-Purpose-Metallic/product-reviews/B0042T7TRC/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews line 3222 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/Krylon-K02203-General-Purpose-Metallic/dp/B0042T7TRC/ref=cm_cr_arp_d_product_top?ie=UTF8&th=1 line 8809 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/Krylon-K02203-General-Purpose-Metallic/product-reviews/B0042T7TRC/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews line 3222 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/Krylon-K02203-General-Purpose-Metallic/dp/B0042T7TRC/ref=cm_cr_arp_d_product_top?ie=UTF8 line 8645 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+console.warn: LoginRecipes: "Falling back to a synchronous message for: https://www.amazon.com."
+JavaScript warning: https://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=Krylon+K02203&crid=LC6YX2MKN17G&sprefix=krylon+k02203%2Caps%2C1276 line 3997 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/Krylon-K02702007-Fusion-Spray-Paint/dp/B07LFZ884F/ref=sr_1_5?crid=LC6YX2MKN17G&keywords=Krylon+K02203&qid=1665663055&qu=eyJxc2MiOiIwLjAwIiwicXNhIjoiMC4wMCIsInFzcCI6IjAuMDAifQ%3D%3D&sprefix=krylon+k02203%2Caps%2C1276&sr=8-5 line 8968 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/sp?seller=A21M8JQ0I9SF78&sshmPath=shipping-rates line 2662 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/sp?seller=A21M8JQ0I9SF78&sshmPath=shipping-rates line 2662 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/Krylon-K02702007-Fusion-Spray-Paint/dp/B07LFZ884F/ref=sr_1_5?crid=LC6YX2MKN17G&keywords=Krylon%2BK02203&qid=1665663055&qu=eyJxc2MiOiIwLjAwIiwicXNhIjoiMC4wMCIsInFzcCI6IjAuMDAifQ%3D%3D&sprefix=krylon%2Bk02203%2Caps%2C1276&sr=8-5&th=1 line 9024 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/Krylon-K02702007-Fusion-Spray-Paint/dp/B07LFZ884F/ref=sr_1_5?crid=LC6YX2MKN17G&keywords=Krylon%2BK02203&qid=1665663055&qu=eyJxc2MiOiIwLjAwIiwicXNhIjoiMC4wMCIsInFzcCI6IjAuMDAifQ%3D%3D&sprefix=krylon%2Bk02203%2Caps%2C1276&sr=8-5&th=1 line 9018 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/gp/help/customer/display.html?ref_=v_sp_atoz_help&nodeId=GQ37ZCNECJKTFYQV line 3029 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript warning: https://www.amazon.com/s?ie=UTF8&marketplaceID=ATVPDKIKX0DER&me=A21M8JQ0I9SF78 line 3134 > injectedScript, line 1: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
+JavaScript error: resource://gre/modules/PromiseWorker.jsm, line 108: Error: Could not get children of file(C:\Users\ps\AppData\Local\Temp\rust_mozprofileLMU5hW\thumbnails) because it does not exist
+1665670583259	Marionette	INFO	Stopped listening on port 62621
