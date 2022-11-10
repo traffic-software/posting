@@ -1,3 +1,4 @@
+from logging import exception
 import sqlite3
 import json
 import os
@@ -44,7 +45,8 @@ class accounts:
 
             print(r.json())
             return r.json()
-        except:
+        except Exception as e:
+            print(e)
             print('network request timeout in 15 second')
         return None
 

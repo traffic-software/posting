@@ -45,6 +45,8 @@ def main(account_data, postinfo, packages_id, body_mail):
     worker_acc = accounts()
     settings = table()
     worker_token = worker_acc.get_token(account_data)
+    print(worker_token)
+    
 
     b = browser(account_id, pva=account_data)
     time.sleep(5)
