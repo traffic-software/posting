@@ -39,13 +39,13 @@ def days_between(d1, d2):
     return abs((d2 - d1).days)
 
 
-if days_between(d1, d2) >= 30:
-    print("""
-              wellcome to pointssoft.com 
-              new update available
-              """)
-    time.sleep(60)
-    exit()
+# if days_between(d1, d2) >= 30:
+#     print("""
+#               wellcome to pointssoft.com
+#               new update available
+#               """)
+#     time.sleep(60)
+#     exit()
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)

@@ -4,7 +4,7 @@
 block_cipher = None
 
 
-a = Analysis(['Gmail-varify.py'],
+a = Analysis(['gmail-varify.py'],
              pathex=['E:\\traffic softwar\\posting'],
              binaries=[],
              datas=[],
@@ -22,7 +22,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='Gmail-varify',
+          name='gmail-varify',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -35,4 +35,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='Gmail-varify')
+               name='gmail-varify')
