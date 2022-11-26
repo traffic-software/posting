@@ -158,10 +158,9 @@ def main():
                 By.XPATH, ("//button[@class='VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-k8QpJ VfPpkd-LgbsSe-OWXEXe-dgl2Hf nCP5yc AjY5Oe DuMIQc LQeN7 qIypjc TrZEUc lw1w4b']//span[@class='VfPpkd-vQzf8d']"))
             next.click()
     except:
-        b.exit()
+        # b.exit()
         print('recovery typing problem')
         time.sleep(20)
-        return False
 
     try:
 

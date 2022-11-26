@@ -158,10 +158,11 @@ def main():
                 By.XPATH, ("//button[@class='VfPpkd-LgbsSe VfPpkd-LgbsSe-OWXEXe-k8QpJ VfPpkd-LgbsSe-OWXEXe-dgl2Hf nCP5yc AjY5Oe DuMIQc LQeN7 qIypjc TrZEUc lw1w4b']//span[@class='VfPpkd-vQzf8d']"))
             next.click()
     except:
-        b.exit()
-        print('recovery typing problem')
-        time.sleep(20)
-        return False
+        # b.exit()
+        # print('recovery typing problem')
+        # time.sleep(20)
+        # return False
+        pass
 
     try:
 
@@ -174,9 +175,10 @@ def main():
             By.XPATH, ("//input[@class='VfPpkd-fmcmS-wGMbrd CtvUB']"))
         rec_mail.clear()
         rec_mail.send_keys(mailinfo[3])
-        rec_next = b.driver.find_element(
-            By.XPATH, "(//form//input[@type='text'])[last()]")
-        rec_next.send_keys(Keys.ENTER)
+        rec_mail.send_keys(Keys.ENTER)
+        # rec_next = b.driver.find_element(
+        #     By.XPATH, "(//form//input[@type='text'])[last()]")
+        # rec_next.send_keys(Keys.ENTER)
         update_rec = mailinfo[3]
         time.sleep(15)
     except:
