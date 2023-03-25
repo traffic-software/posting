@@ -176,7 +176,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                     # except Exception as e:
                     #     print(e)
                     #     pass
-                    print(passwordtype, mailpass)
+                    # print(passwordtype, mailpass)
                     password.clear()
                     password.send_keys(mailpass)
                     # time.sleep(5)
@@ -185,11 +185,13 @@ def main(account_data, postinfo, packages_id, body_mail):
                         'css', '[id="passwordNext"] button')
 
                     passwordNext.click()
-
-                    time.sleep(1)
+                    # print(b.driver.requests)
+                    # print(datetime.now())
+                    time.sleep(5)
+                    # print(datetime.now())
 
                     # if b.visibil_element('xpath', '//*[@width="16px"][@height="16px"]', wait=10):
-                    if b.visibil_element('xpath', '//input[@name="Passwd"]', wait=10):
+                    if b.visibil_element('xpath', '//input[@name="Passwd"]', wait=2):
                         # worker_acc.save_account(data=mailpass, soft_token=account_data['password'])
                         print('not match: {0}'.format(mailpass))
                         if passwordtype == 3:
@@ -213,6 +215,16 @@ def main(account_data, postinfo, packages_id, body_mail):
                     b.get_url(loginurl)
                     continueyes = True
                     break
+        try:
+            imgcapch = b.visibil_element(
+                'id', "captchaimg", wait=1)
+
+            if imgcapch.get_attribute('src'):
+                b.get_url(loginurl)
+                continue
+        except Exception as e:
+            # print(e)
+            pass
         if continueyes:
             b.get_url(loginurl)
             continue
