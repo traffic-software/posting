@@ -117,7 +117,6 @@ class imap:
 
                 st = ps_str(m['body'])
                 print('link search')
-                # https://torino.bakecaincontrii.com/fe/main.php?page=post_publish&idp=1de787b50fac053f65223f333d24b16a
                 for text in condition:
                     url = st.find_urls(text)
                     if url != None:

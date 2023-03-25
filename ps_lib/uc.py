@@ -106,6 +106,7 @@ class ucbrowser:
 
         self.driver = uc.Chrome(
             driver_executable_path=driverUrl, options=self.options, use_subprocess=True)
+        self.driver.set_window_size(500, 600)
 
     def exit(self):
         try:
@@ -447,7 +448,7 @@ class ucbrowser:
             element = False
         if element == False:
             pass
-            # print("element not find: ", selector)
+            print("element not find: ", selector)
 
         return element
 
