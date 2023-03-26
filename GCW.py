@@ -255,6 +255,18 @@ def main(account_data, postinfo, packages_id, body_mail):
             b.driver.delete_all_cookies()
 
             b.get_url(loginurl)
+        if 'challenge/selection' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'challenge/iap' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'speedbump/changepassword' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
         if 'identifier' in b.current_url():
             # print('identifier')
 
