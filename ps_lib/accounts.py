@@ -30,7 +30,7 @@ class accounts:
             return None
         return r.json()["data"]
 
-    def save_account(self, data='no data', soft_token=False):
+    def save_account(self, password='no_pass', data='no_data', soft_token=False):
         if soft_token == False:
             token = self.software.software_token()
         else:
@@ -39,7 +39,7 @@ class accounts:
         url = 'https://{host}/api/v1/post/account/save/{token}'.format(
             host=self.software.host_verify(), token=token)
 
-        r = requests.post(url, json={'data': data})
+        r = requests.post(url, json={'number': data, 'password': password})
         if "error" in r.json():
             print("error", r.json())
             return None

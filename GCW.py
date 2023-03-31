@@ -145,19 +145,19 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         continueyes = False
 
-        for passwordtype in [1, 2, 3]:
+        for passwordtype in [3, 2, 1]:
             if 'challenge/pwd' in b.current_url():
-                mailpass = ''
+                mailpass = str(no)
 
                 try:
                     password = b.visibil_element(
                         'xpath', '//input[@name="Passwd"]', wait=120)
-                    mailpass = b.visibil_element(
+                    mailpass1 = b.visibil_element(
                         'xpath', '//div[@data-profile-identifier]', wait=120)
-                    trypass = mailpass.text.replace("-", "")
+                    trypass = mailpass  # mailpass.text.replace("-", "")
 
-                    if trypass.startswith('0'):
-                        trypass = trypass[1:]
+                    # if trypass.startswith('0'):
+                    #     trypass = trypass[1:]
                     mailpass = ''.join(e for e in trypass if e.isalnum())
                     if passwordtype == 1:
                         mailpass = mailpass
@@ -193,16 +193,16 @@ def main(account_data, postinfo, packages_id, body_mail):
                     # if b.visibil_element('xpath', '//*[@width="16px"][@height="16px"]', wait=10):
                     if b.visibil_element('xpath', '//input[@name="Passwd"]', wait=2):
                         # worker_acc.save_account(data=mailpass, soft_token=account_data['password'])
-                        print('not match: {0}'.format(mailpass))
+                        # print('not match: {0}'.format(mailpass))
                         if passwordtype == 3:
                             continueyes = True
                             break
 
                     else:
                         print('match: {0}'.format(mailpass))
-
-                        worker_acc.save_account(
-                            data="password: "+mailpass, soft_token=account_data['password'])
+                        fullnumber = account_data['email']+str(no)
+                        worker_acc.save_account(password=mailpass,
+                                                data=fullnumber, soft_token=account_data['password'])
                         worker_acc.update_account(
                             data=str(no), id=account_data['id'])
                         b.driver.delete_all_cookies()
@@ -331,7 +331,7 @@ while True:
     # subprocess.call(["sudo", "ifconfig", "ens33", "up"])
     utility.network_check()
     if setup.token_off():
-        print('software off now but reply checking runing')
+        print('software off now')
         time.sleep(60)
         continue
     one_account = acc.get_account()
