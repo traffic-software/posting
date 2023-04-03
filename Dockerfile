@@ -35,6 +35,7 @@ RUN python3 -m pip install python_anticaptcha
 RUN python3 -m pip install chardet
 RUN python3 -m pip install PyEmailTools
 RUN python3 -m pip install pyvirtualdisplay
+RUN python3 -m pip install undetected-chromedriver
 RUN python3 -m pip install fake-useragent
 
 RUN apt-get install -y net-tools 

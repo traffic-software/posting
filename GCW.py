@@ -144,6 +144,7 @@ def main(account_data, postinfo, packages_id, body_mail):
             # b.get_url(loginurl)
 
         continueyes = False
+        print('no:', str(no))
 
         for passwordtype in [3, 2, 1]:
             if 'challenge/pwd' in b.current_url():
@@ -165,6 +166,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                         mailpass = mailpass[2:]
                     if passwordtype == 3:
                         mailpass = mailpass[:-2]
+                    print('try : ', mailpass)
                     # try:
                     #     imgcapch = b.visibil_element(
                     #         'id', "captchaimg", wait=1)
@@ -194,7 +196,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                     if b.visibil_element('xpath', '//input[@name="Passwd"]', wait=2):
                         # worker_acc.save_account(data=mailpass, soft_token=account_data['password'])
                         # print('not match: {0}'.format(mailpass))
-                        if passwordtype == 3:
+                        if passwordtype == 1:
                             continueyes = True
                             break
 
