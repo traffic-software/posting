@@ -61,14 +61,14 @@ class ucbrowser:
             self.PROXY_TYPE = 'PROXY'
 
             # ............Normal rotating proxy......................
-        if self.proxy():
+        # if self.proxy():
 
-            print("done: proxy set")
-            if self.use_proxy:
-                # self.proxy_auth_plugin()
-                self.proxy_auth_plugin_pac_script()
-            else:
-                self.PROXY_PASS = False
+        #     print("done: proxy set")
+        #     if self.use_proxy:
+        #         # self.proxy_auth_plugin()
+        #         self.proxy_auth_plugin_pac_script()
+        #     else:
+        #         self.PROXY_PASS = False
 
         if sys.platform in ['Windows', 'win32', 'cygwin']:
             driverUrl = 'chromedriver.exe'
@@ -98,15 +98,15 @@ class ucbrowser:
         # self.options.add_argument("--lang=it-IT")
         # self.options.add_argument("--no-sandbox")
         if profile_dir:
-            self.options.add_argument("--user-data-dir={}".format(profile_dir))
+            # self.options.add_argument("--user-data-dir={}".format(profile_dir))
+            pass
 
         else:
             # self.options.add_argument("--use-temporary-user-data-dir")
             pass
-
-        self.driver = uc.Chrome(
-            driver_executable_path=driverUrl, options=self.options, use_subprocess=True)
-        self.driver.set_window_size(500, 600)
+        self.driver = uc.Chrome(driver_executable_path=driverUrl, use_subprocess=True)
+        #self.driver = uc.Chrome(driver_executable_path=driverUrl, options=self.options, use_subprocess=True)
+        # self.driver.set_window_size(500, 600)
 
     def exit(self):
         try:
