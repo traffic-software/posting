@@ -10,7 +10,6 @@ from ps_lib.helper import helper
 from ps_lib.accounts import accounts
 from ps_lib.uc import ucbrowser
 from ps_lib.browser import browser
-from ps_lib.firefox import firefoxBrowser
 from datetime import datetime
 from pyvirtualdisplay import Display
 from os import path
@@ -18,12 +17,6 @@ import sys
 import shutil
 import random
 import time
-from pynput.keyboard import Key, Controller
-from turtle import back
-# mailpass = '1234567890'
-# print(mailpass[3:])
-# print(mailpass[:-3])
-# exit()
 
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
@@ -31,8 +24,6 @@ os.chdir(dname)
 bundle_dir = path.abspath(path.dirname(__file__))
 os.path.dirname(os.path.abspath(__file__))
 
-keyboard = Controller()
-# keyboard.type(str(258956856))
 
 
 def numbercheck(number):
@@ -107,12 +98,12 @@ def main(account_data, postinfo, packages_id, body_mail):
     # b = firefoxBrowser(account_id, pva=account_data)
     b = ucbrowser(account_id, pva=account_data)
 
-    if b.PROXY_PASS == False and b.use_proxy == True:
-        b.exit()
-        print('proxy condition not fulfilled')
-        # worker_acc.ban_3(account_id, 5)
-        time.sleep(10)
-        return False
+    # if b.PROXY_PASS == False and b.use_proxy == True:
+    #     b.exit()
+    #     print('proxy condition not fulfilled')
+    #     # worker_acc.ban_3(account_id, 5)
+    #     time.sleep(10)
+    #     return False
 
     try:
         loginurl = 'https://accounts.google.com/signin/v2/identifier'
@@ -145,10 +136,12 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         continueyes = False
         print('no:', str(no))
+        b.get_screenshot(str(no)+'.png')
 
         for passwordtype in [3, 2, 1]:
             if 'challenge/pwd' in b.current_url():
                 mailpass = str(no)
+                b.get_screenshot(str(mailpass)+'-type-'+str(passwordtype)+'.png')
 
                 try:
                     password = b.visibil_element(
@@ -331,7 +324,7 @@ while True:
     # subprocess.call(["sudo", "ifconfig", "ens33", "hw",
     #                 "ether", "00:11:22:33:44:55"])
     # subprocess.call(["sudo", "ifconfig", "ens33", "up"])
-    utility.network_check()
+    # utility.network_check()
     if setup.token_off():
         print('software off now')
         time.sleep(60)

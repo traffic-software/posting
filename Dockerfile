@@ -44,9 +44,9 @@ ADD . /mydir/
 
 RUN sudo apt-get install -y supervisor
 # RUN touch /mydir/worker.log
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
+# CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf"]
 
 
 
