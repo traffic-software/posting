@@ -252,7 +252,7 @@ class table:
         host = self.host_get()
         if host == None:
             # str(input("please enter your api_token : "))
-            self.host = 'post.pointssoft.com'
+            self.host = os.environ['PS_HOST']
             self.host_save()
         return host
 

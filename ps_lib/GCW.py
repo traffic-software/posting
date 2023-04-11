@@ -116,7 +116,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     count = 0
 
     for no in range(int(account_data['extra']), int(account_data['extra'])+5000):
-        time.sleep(1)
+        time.sleep(2)
 
         # rejeted
         # https://accounts.google.com/signin/v2/deniedsigninrejected
@@ -152,8 +152,8 @@ def main(account_data, postinfo, packages_id, body_mail):
                     trypass =   mailpass.text.replace("-", "")#mailpass
                     b.get_screenshot(str(trypass)+'-type-'+str(passwordtype)+'.png')
 
-                    if trypass.startswith('0'):
-                        trypass = trypass[1:]
+                    # if trypass.startswith('0'):
+                    #     trypass = trypass[1:]
                     mailpass = ''.join(e for e in trypass if e.isalnum())
                     if passwordtype == 1:
                         mailpass = mailpass

@@ -84,7 +84,7 @@ class ucbrowser:
 
             self.options.add_argument("--disable-dev-shm-usage")
             self.options.add_argument("--disable-infobars")
-            # self.options.add_argument("start-maximized")
+            self.options.add_argument("start-maximized")
             self.options.add_experimental_option(
                 "useAutomationExtension", False)
             self.options.add_experimental_option(
@@ -105,7 +105,8 @@ class ucbrowser:
             # self.options.add_argument("--use-temporary-user-data-dir")
             pass
         self.driver = uc.Chrome(driver_executable_path=driverUrl, use_subprocess=True)
-        #self.driver = uc.Chrome(driver_executable_path=driverUrl, options=self.options, use_subprocess=True)
+        self.driver.maximize_window()
+        # self.driver = uc.Chrome(driver_executable_path=driverUrl, options=self.options, use_subprocess=True)
         # self.driver.set_window_size(500, 600)
 
     def exit(self):

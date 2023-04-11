@@ -4,13 +4,13 @@ sysctl -p
 route -n
 # docker system prune
 # docker build . -t pkey
-# docker save -o bk.tar ps_bk
+# docker save -o pkey.tar pkey
 # docker load -i bk.tar
 docker network create -d macvlan \
   --subnet=192.168.0.0/24 \
   --gateway=192.168.0.1 \
   -o parent=enp0s25 router_net
-docker run  -d -it --env PS_KEY=cAHd0tNSTN4H pkey 
+docker run  -d -it --env PS_KEY=cAHd0tNSTN4H --env PS_HOST=post.pointssoft.com pkey 
 docker run  -d -it --restart=always \
  --network router_net -p 22:22 \
  --hostname worker-4 \
