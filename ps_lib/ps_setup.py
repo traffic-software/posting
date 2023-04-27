@@ -242,6 +242,7 @@ class table:
             host=self.host_get(), token=self.token)
 
         r = requests.get(url)
+        print(r.content)
 
         if "off" in r.json():
             return True
