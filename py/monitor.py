@@ -20,7 +20,7 @@ def main():
     # docker run --rm -it -v ${PWD}:/data  --env PS_KEY=cAHd0tNSTN4H --env PS_HOST=post.pointssoft.com  ultrafunk/undetected-chromedriver ipython data/GCW.py
     subprocess.call(["docker", "container", 'stop', "worker-1"])
     time.sleep(60)
-    subprocess.call(["docker", "run", '--rm', "-d", "-it", '-v', "{0}:/data".format(dname),  '--env', 'PS_KEY=gBkpVbSMRJdf',
+    subprocess.call(["docker", "run", '--rm', "-d", "-it", '-v', "{0}:/data".format(dname),  '--env', 'PS_KEY=ONeR6BXX5Xbu',
                     '--env', 'PS_HOST=post.pointssoft.com', '--name', 'worker-1', 'ultrafunk/undetected-chromedriver', 'ipython', 'data/GCW.py'])
 
 
