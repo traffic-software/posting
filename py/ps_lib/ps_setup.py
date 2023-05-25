@@ -253,7 +253,10 @@ class table:
         host = self.host_get()
         if host == None:
             # str(input("please enter your api_token : "))
-            self.host = os.environ['PS_HOST']
+            if sys.platform not in ['Windows', 'win32', 'cygwin']:
+                self.host = os.environ['PS_HOST']
+            else:
+                self.host = str(input("please enter your hosturl : "))
             self.host_save()
         return host
 

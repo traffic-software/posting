@@ -8,6 +8,10 @@ dname = os.path.dirname(abspath)
 # print(' '.join(["docker", "run", '--rm', "-d", "-it", '-v', "{0}:/data".format(dname),  '--env', 'PS_KEY=cAHd0tNSTN4H',
 # '--env', 'PS_HOST=post.pointssoft.com', '--name', 'worker-1', 'ultrafunk/undetected-chromedriver', 'ipython', 'data/GCW.py']))
 
+os.environ['PS_HOST'] = 'post.pointssoft.com'
+os.environ['PS_KEY'] = 'Qj7hl8ocnXX0'
+exit()
+
 
 def main():
     # docker run --rm -d -it --memory="300m" malaknoyn/clf

