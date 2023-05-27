@@ -126,9 +126,13 @@ class accounts:
 
         return password
 
-    def get_account(self):
+    def get_account(self, one_token=False):
+        if one_token:
+            tokenifo = one_token
+        else:
+            tokenifo = self.software.software_token()
         url = 'http://{host}/api/v1/post/account/{token}'.format(
-            host=self.software.host_verify(), token=self.software.software_token())
+            host=self.software.host_verify(), token=tokenifo)
 
         try:
             r = requests.get(url, timeout=15)

