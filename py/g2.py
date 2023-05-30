@@ -72,7 +72,8 @@ def main(account_data):
         # login page
         # india
 
-        loginurl = 'https://accounts.google.com/AccountChooser/signinchooser'
+        # loginurl = 'https://accounts.google.com/AccountChooser/signinchooser'
+        loginurl = 'https://accounts.google.com/signin/v2/identifier?continue=https%3A%2F%2Fmyaccount.google.com%2Fsigninoptions%2Frescuephone&osid=1&rart=ANgoxcfbj5MICImsby3i6E4WliB4NiCObSuRKGTYLSt03bQVr5EN0ekxnuxLrRGkyz5DKW13ZqMxZkUoZn1oMKAXz3u6m-8mXw&service=accountsettings&flowName=GlifWebSignIn&flowEntry=ServiceLogin'
         # password page
         # https://accounts.google.com/signin/v2/challenge/pwd
         count = count+1
