@@ -80,9 +80,8 @@ def main(account_data, postinfo, packages_id, body_mail):
         b.wait('//*[@title="thanks for flagging!"]')
         time.sleep(2)
 
-    
     b.ipinfo_save(software_name='clf')
-    
+
     b.exit()
     print('browser close')
 
@@ -123,7 +122,7 @@ while True:
     utility.network_check()
     if setup.token_off():
         print('software off now but reply checking runing')
-        time.sleep(60)
+        time.sleep(10)
         continue
     one_account = acc.get_account()
 
