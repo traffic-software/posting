@@ -62,15 +62,24 @@ def main(account_data, postinfo, packages_id, body_mail):
         b.get_url(account_data['email'])
     except:
         b.exit()
+    print('finding flaging button')
 
-    if b.try_xpath("//*[contains(text(),'posting has been flagged')]"):
+    # if b.try_xpath("//*[contains(text(),'posting has been flagged')]"):
+    if b.driver.execute_script(
+    """return document.evaluate('//*[contains(text(),"posting has been flagged")]/../parent::div', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;"""):
         print('This posting has been flagged for removal')
         worker_acc.ban_3(account_id, status=3)
     else:
         # time.sleep(150)
+        # b.get_screenshot(str(account_id)+'.png')
+        
+        # fileToWrite = open("page_source.html", "w")
+        # fileToWrite.write(str(b.driver.page_source.encode('utf-8')))
+        # fileToWrite.close()
 
-        nextpage = b.select_element_xpath(
-            '//*[@class="flag-action"]', 'flag button')
+        # nextpage = b.select_element_xpath('//*[@class="flag-action"]', 'flag button')
+        nextpage = b.driver.execute_script(
+    """return document.evaluate('//*[contains(text(),"flag")]/../parent::div', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;""")
 
         nextpage.click()
 
@@ -78,6 +87,8 @@ def main(account_data, postinfo, packages_id, body_mail):
             account_id, "flag action try", software_type='clf')
         #title="thanks for flagging!"
         b.wait('//*[@title="thanks for flagging!"]')
+        # time.sleep(150)
+        # b.get_screenshot(str(account_id)+'.png')
         time.sleep(2)
 
     b.ipinfo_save(software_name='clf')

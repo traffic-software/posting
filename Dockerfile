@@ -39,7 +39,7 @@ RUN python3 -m pip install fake-useragent
 
 RUN apt-get install -y net-tools 
 ADD . /mydir/
-RUN sudo rm /mydir/ps_lib/databases.db
+# RUN sudo rm /mydir/ps_lib/databases.db
 # prossess meneger
 
 

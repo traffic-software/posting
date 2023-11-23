@@ -90,8 +90,8 @@ class browser:
 
         else:
             self.options.add_argument("--use-temporary-user-data-dir")
-
-        self.driver = webdriver.Chrome(driverUrl, chrome_options=self.options)
+        service = Service(executable_path=driverUrl)
+        self.driver = webdriver.Chrome(service=service, options=self.options)
 
     def exit(self):
         try:

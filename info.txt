@@ -69,6 +69,7 @@ sudo supervisorctl status
 sudo supervisorctl stop  all
 docker container rm -f $(docker ps -a -q)
 docker image rm -f $(docker images -a -q)
+docker image push malaknoyn/clf:proxy
 docker image pull malaknoyn/clf:proxy
 sudo supervisorctl restart all
 docker ps
