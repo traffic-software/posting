@@ -1,0 +1,82 @@
+name: vps deply
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vps-deep-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/deep-worker'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment: vps
+    env:
+      VPS_HOST: ${{ vars.VPS_HOST }}
+      VPS_USER: ${{ vars.VPS_USER }}
+      VPS_SSH_PORT: ${{ vars.VPS_SSH_PORT || '22' }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+      REVISION: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - name: Run tests
+        run: |
+          python -m pip install -r requirements.lock
+          python -m pytest -q tests
+      - name: Check deployment settings
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in VPS_HOST VPS_USER VPS_SSH_KEY VPS_KNOWN_HOSTS; do
+            if [ -z "${!name}" ]; then
+              echo "Missing $name; configure the vps environment" >&2
+              exit 1
+            fi
+          done
+          [[ "$VPS_HOST" =~ ^[a-zA-Z0-9.-]+$ ]] || { echo 'Invalid VPS_HOST' >&2; exit 1; }
+          [[ "$VPS_USER" =~ ^[a-zA-Z_][a-zA-Z0-9_-]*$ ]] || { echo 'Invalid VPS_USER' >&2; exit 1; }
+          [[ "$VPS_SSH_PORT" =~ ^[0-9]{1,5}$ ]] && (( 10#$VPS_SSH_PORT >= 1 && 10#$VPS_SSH_PORT <= 65535 )) || { echo 'Invalid VPS_SSH_PORT' >&2; exit 1; }
+      - name: Build Linux image
+        run: docker build --platform linux/amd64 --build-arg "VCS_REF=$REVISION" -t "posting-app:sha-$REVISION" .
+      - name: Load image and deploy on VPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$VPS_SSH_KEY" > "$HOME/.ssh/vps_key"
+          chmod 600 "$HOME/.ssh/vps_key"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          ssh_opts=(-i "$HOME/.ssh/vps_key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -p "$VPS_SSH_PORT")
+          target="$VPS_USER@$VPS_HOST"
+          ssh "${ssh_opts[@]}" "$target" 'test -f /opt/posting/.env && docker compose version >/dev/null && docker info >/dev/null'
+          scp -i "$HOME/.ssh/vps_key" -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -P "$VPS_SSH_PORT" compose.vps.yaml "$target:/opt/posting/compose.vps.yaml"
+          docker save "posting-app:sha-$REVISION" | ssh "${ssh_opts[@]}" "$target" 'docker load'
+          ssh "${ssh_opts[@]}" "$target" "bash -se -- '$REVISION'" <<'REMOTE'
+          set -euo pipefail
+          cd /opt/posting
+          revision="$1"
+          export APP_IMAGE="posting-app:sha-$revision"
+          docker compose -f compose.vps.yaml up -d --no-build --remove-orphans --wait --wait-timeout 180
+          for attempt in $(seq 1 30); do
+            if docker compose -f compose.vps.yaml exec -T app python -c 'import json, sys, urllib.request; data=json.load(urllib.request.urlopen("http://localhost:8000/ready", timeout=5)); assert data["revision"] == sys.argv[1]' "$revision" >/dev/null 2>&1; then
+              echo "VPS is serving revision $revision"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'VPS did not become ready with the requested revision' >&2
+          docker compose -f compose.vps.yaml ps >&2
+          exit 1
+          REMOTE
