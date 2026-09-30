@@ -1,6 +1,6 @@
 # Browser Task API
 
-এই repository-র পুরোনো `GCW.py` / `ps_lib/` worker অপরিবর্তিত রেখে নতুন FastAPI + Deep Agents + Selenium Standalone Chrome task API যোগ করা হয়েছে। আর্কিটেকচার ও DFD: [plan/implementation-plan.md](plan/implementation-plan.md), [plan/dfd.md](plan/dfd.md)। GHCR ও Railway deployment: [docs/railway-deployment.md](docs/railway-deployment.md)।
+এই repository-র পুরোনো `GCW.py` / `ps_lib/` worker অপরিবর্তিত রেখে নতুন FastAPI + Deep Agents + Selenium Standalone Chrome task API যোগ করা হয়েছে। আর্কিটেকচার ও DFD: [plan/implementation-plan.md](plan/implementation-plan.md), [plan/dfd.md](plan/dfd.md)। GHCR ও Railway deployment: [docs/railway-deployment.md](docs/railway-deployment.md)। VPS deployment: [docs/vps-deployment.md](docs/vps-deployment.md)।
 
 ## চালু করা
 
