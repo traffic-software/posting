@@ -35,7 +35,6 @@ jobs:
       - name: Check deployment settings
         shell: bash
         env:
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
           VPS_SSH_PASSWORD: ${{ secrets.VPS_SSH_PASSWORD }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
         run: |
@@ -46,8 +45,8 @@ jobs:
               exit 1
             fi
           done
-          if [ -z "$VPS_SSH_KEY" ] && [ -z "$VPS_SSH_PASSWORD" ]; then
-            echo 'Configure VPS_SSH_PASSWORD or VPS_SSH_KEY in the vps environment' >&2
+          if [ -z "$VPS_SSH_PASSWORD" ]; then
+            echo 'Configure VPS_SSH_PASSWORD in the vps environment' >&2
             exit 1
           fi
           [[ "$VPS_HOST" =~ ^[a-zA-Z0-9.-]+$ ]] || { echo 'Invalid VPS_HOST' >&2; exit 1; }
@@ -58,7 +57,6 @@ jobs:
       - name: Load image and deploy on VPS
         shell: bash
         env:
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
           VPS_SSH_PASSWORD: ${{ secrets.VPS_SSH_PASSWORD }}
           VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
         run: |
@@ -66,28 +64,15 @@ jobs:
           install -m 700 -d "$HOME/.ssh"
           printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/known_hosts"
-          ssh_cmd=(ssh)
-          scp_cmd=(scp)
-          ssh_opts=(-o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -p "$VPS_SSH_PORT")
-          scp_opts=(-o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -P "$VPS_SSH_PORT")
-          if [ -n "$VPS_SSH_KEY" ]; then
-            printf '%s\n' "$VPS_SSH_KEY" > "$HOME/.ssh/vps_key"
-            chmod 600 "$HOME/.ssh/vps_key"
-            ssh_opts+=(-i "$HOME/.ssh/vps_key" -o BatchMode=yes)
-            scp_opts+=(-i "$HOME/.ssh/vps_key" -o BatchMode=yes)
-          else
-            sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
-            export SSHPASS="$VPS_SSH_PASSWORD"
-            ssh_cmd=(sshpass -e ssh)
-            scp_cmd=(sshpass -e scp)
-            ssh_opts+=(-o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1)
-            scp_opts+=(-o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1)
-          fi
+          sudo apt-get update -qq && sudo apt-get install -y -qq sshpass
+          export SSHPASS="$VPS_SSH_PASSWORD"
+          ssh_opts=(-o StrictHostKeyChecking=yes -o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1 -p "$VPS_SSH_PORT")
+          scp_opts=(-o StrictHostKeyChecking=yes -o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1 -P "$VPS_SSH_PORT")
           target="$VPS_USER@$VPS_HOST"
-          "${ssh_cmd[@]}" "${ssh_opts[@]}" "$target" 'test -f /opt/posting/.env && docker compose version >/dev/null && docker info >/dev/null'
-          "${scp_cmd[@]}" "${scp_opts[@]}" compose.vps.yaml "$target:/opt/posting/compose.vps.yaml"
-          docker save "posting-app:sha-$REVISION" | "${ssh_cmd[@]}" "${ssh_opts[@]}" "$target" 'docker load'
-          "${ssh_cmd[@]}" "${ssh_opts[@]}" "$target" "bash -se -- '$REVISION'" <<'REMOTE'
+          sshpass -e ssh "${ssh_opts[@]}" "$target" 'test -f /opt/posting/.env && docker compose version >/dev/null && docker info >/dev/null'
+          sshpass -e scp "${scp_opts[@]}" compose.vps.yaml "$target:/opt/posting/compose.vps.yaml"
+          docker save "posting-app:sha-$REVISION" | sshpass -e ssh "${ssh_opts[@]}" "$target" 'docker load'
+          sshpass -e ssh "${ssh_opts[@]}" "$target" "bash -se -- '$REVISION'" <<'REMOTE'
           set -euo pipefail
           cd /opt/posting
           revision="$1"
