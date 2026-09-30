@@ -69,7 +69,25 @@ jobs:
           ssh_opts=(-o StrictHostKeyChecking=yes -o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1 -p "$VPS_SSH_PORT")
           scp_opts=(-o StrictHostKeyChecking=yes -o PreferredAuthentications=password -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1 -P "$VPS_SSH_PORT")
           target="$VPS_USER@$VPS_HOST"
-          sshpass -e ssh "${ssh_opts[@]}" "$target" 'test -f /opt/posting/.env && docker compose version >/dev/null && docker info >/dev/null'
+          sshpass -e ssh "${ssh_opts[@]}" "$target" 'bash -se' <<'CHECK'
+          set -euo pipefail
+          if [ ! -f /opt/posting/.env ]; then
+            echo 'Missing /opt/posting/.env on VPS; create the app configuration before deploying' >&2
+            exit 1
+          fi
+          if [ ! -w /opt/posting ]; then
+            echo 'Deployment user cannot write to /opt/posting on VPS' >&2
+            exit 1
+          fi
+          if ! docker compose version >/dev/null; then
+            echo 'Docker Compose plugin is unavailable on VPS' >&2
+            exit 1
+          fi
+          if ! docker info >/dev/null; then
+            echo 'Deployment user cannot access Docker daemon on VPS' >&2
+            exit 1
+          fi
+          CHECK
           sshpass -e scp "${scp_opts[@]}" compose.vps.yaml "$target:/opt/posting/compose.vps.yaml"
           docker save "posting-app:sha-$REVISION" | sshpass -e ssh "${ssh_opts[@]}" "$target" 'docker load'
           sshpass -e ssh "${ssh_opts[@]}" "$target" "bash -se -- '$REVISION'" <<'REMOTE'
