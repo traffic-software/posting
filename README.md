@@ -1,6 +1,6 @@
 # Browser Task API
 
-এই repository-র পুরোনো `GCW.py` / `ps_lib/` worker অপরিবর্তিত রেখে নতুন FastAPI + Deep Agents + Selenium Standalone Chrome task API যোগ করা হয়েছে। আর্কিটেকচার ও DFD: [plan/implementation-plan.md](plan/implementation-plan.md), [plan/dfd.md](plan/dfd.md)।
+এই repository-র পুরোনো `GCW.py` / `ps_lib/` worker অপরিবর্তিত রেখে নতুন FastAPI + Deep Agents + Selenium Standalone Chrome task API যোগ করা হয়েছে। আর্কিটেকচার ও DFD: [plan/implementation-plan.md](plan/implementation-plan.md), [plan/dfd.md](plan/dfd.md)। GHCR ও Railway deployment: [docs/railway-deployment.md](docs/railway-deployment.md)।
 
 ## চালু করা
 
@@ -20,7 +20,7 @@ curl -sS http://127.0.0.1:8000/task-status/YOUR_TASK_ID \
 # status: PENDING / PROCESSING / COMPLETED / FAILED
 ```
 
-`TASK_API_TOKEN` ফাঁকা থাকলে উদাহরণের Authorization header বাদ দিতে পারেন, তবে তখন শুধু trusted local environment ব্যবহার করুন। `GET /health` API ও task DB/worker-এর readiness জানায়; Selenium-এর health Compose-এ আলাদা। ভুল UUID-তে 422, অজানা UUID-তে 404, capacity পূর্ণ হলে 429। API-তে কোনো ফল সফলভাবে সেভ হলে app restart-এর পরেও একই ID-তে পাওয়া যায়।
+`TASK_API_TOKEN` ফাঁকা থাকলে উদাহরণের Authorization header বাদ দিতে পারেন, তবে তখন শুধু trusted local environment ব্যবহার করুন। Railway deployment-এ `REQUIRE_TASK_API_TOKEN=true` বাধ্যতামূলক। `GET /health` API ও task DB/worker পরীক্ষা করে; `GET /ready` অতিরিক্তভাবে Selenium Grid readiness পরীক্ষা করে। ভুল UUID-তে 422, অজানা UUID-তে 404, capacity পূর্ণ হলে 429। API-তে কোনো ফল সফলভাবে সেভ হলে app restart-এর পরেও একই ID-তে পাওয়া যায়।
 
 ## Browser policy ও সীমা
 

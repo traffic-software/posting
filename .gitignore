@@ -11,6 +11,7 @@ docker
 .venv/
 .pytest_cache/
 .claude/
+.railway/
 *.log
 *.sqlite3
 *.db-*

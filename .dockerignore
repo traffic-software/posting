@@ -1,6 +1,9 @@
 .git/
+.github/
 .claude/
 .vscode/
+tests/
+plan/
 .venv/
 .env
 *.db

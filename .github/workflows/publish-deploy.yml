@@ -1,0 +1,107 @@
+name: Build, publish, and deploy
+
+on:
+  push:
+    branches: [deep-worker]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deep-worker
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.ref == 'refs/heads/deep-worker'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - name: Install dependencies and run tests
+        run: |
+          python -m pip install -r requirements.lock
+          python -m pytest -q tests
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Sign in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish Linux image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/traffic-software/posting-app:deep-worker
+            ghcr.io/traffic-software/posting-app:sha-${{ github.sha }}
+          build-args: |
+            VCS_REF=${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: publish
+    if: github.ref == 'refs/heads/deep-worker' && vars.RAILWAY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
+      RAILWAY_ENVIRONMENT_ID: ${{ vars.RAILWAY_ENVIRONMENT_ID }}
+      RAILWAY_APP_SERVICE_ID: ${{ vars.RAILWAY_APP_SERVICE_ID }}
+      APP_URL: ${{ vars.RAILWAY_APP_URL }}
+      EXPECTED_REVISION: ${{ github.sha }}
+    steps:
+      - name: Check deployment settings
+        run: |
+          for name in RAILWAY_TOKEN RAILWAY_PROJECT_ID RAILWAY_ENVIRONMENT_ID RAILWAY_APP_SERVICE_ID APP_URL; do
+            if [ -z "${!name}" ]; then
+              echo "Missing $name; configure Railway before enabling deployment" >&2
+              exit 1
+            fi
+          done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Railway CLI
+        run: npm install --global @railway/cli@5.28.1
+      - name: Deploy current GHCR image
+        run: |
+          railway redeploy --from-source --yes \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT_ID" \
+            --service "$RAILWAY_APP_SERVICE_ID"
+      - name: Wait for new revision and browser readiness
+        run: |
+          url="${APP_URL%/}/ready"
+          for attempt in $(seq 1 45); do
+            response=$(curl --fail --silent --show-error --max-time 5 "$url" 2>/dev/null) || true
+            if [ -n "$response" ] && [ "$(jq -r '.revision // empty' <<< "$response")" = "$EXPECTED_REVISION" ]; then
+              echo "Railway is serving revision $EXPECTED_REVISION"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Railway did not become ready with the published revision" >&2
+          exit 1

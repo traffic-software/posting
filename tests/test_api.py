@@ -37,7 +37,7 @@ def await_final(client, task_id):
 def test_submit_poll_and_reopen_database(tmp_path):
     settings = settings_for(tmp_path)
     with TestClient(create_app(settings, runner=lambda prompt, _: {"output": prompt.upper()})) as client:
-        assert client.get("/health").json() == {"status": "ok"}
+        assert client.get("/health").json() == {"status": "ok", "revision": "local"}
         accepted = client.post("/run-task", json={"prompt": "hello"}, headers=headers())
         assert accepted.status_code == 202
         task_id = accepted.json()["task_id"]
@@ -73,6 +73,41 @@ def test_unconfigured_service_rejects_submission(tmp_path):
     settings = Settings(_env_file=None, database_path=tmp_path / "tasks.db", allowed_hosts="")
     with TestClient(create_app(settings, runner=lambda *_: {})) as client:
         assert client.post("/run-task", json={"prompt": "test"}).status_code == 503
+
+
+def test_readiness_checks_browser_without_exposing_tasks(tmp_path, monkeypatch):
+    import httpx
+
+    settings = settings_for(tmp_path)
+    settings.app_revision = "abc123"
+    with TestClient(create_app(settings, runner=lambda *_: {})) as client:
+        def unavailable(*_args, **_kwargs):
+            raise httpx.ConnectError("Grid unavailable")
+
+        monkeypatch.setattr(httpx, "get", unavailable)
+        assert client.get("/ready").status_code == 503
+        assert client.get("/health").json()["revision"] == "abc123"
+
+        class ReadyResponse:
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {"value": {"ready": True}}
+
+        monkeypatch.setattr(httpx, "get", lambda *_args, **_kwargs: ReadyResponse())
+        assert client.get("/ready").json() == {"status": "ok", "revision": "abc123"}
+
+
+def test_public_mode_requires_api_token(tmp_path):
+    import pytest
+
+    settings = settings_for(tmp_path)
+    settings.require_task_api_token = True
+    settings.task_api_token = ""
+    with pytest.raises(RuntimeError, match="TASK_API_TOKEN is required"):
+        with TestClient(create_app(settings, runner=lambda *_: {})):
+            pass
 
 
 def test_processing_task_limits_admission(tmp_path):

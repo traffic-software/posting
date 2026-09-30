@@ -1,8 +1,10 @@
 import hmac
 from collections.abc import Callable
 from contextlib import asynccontextmanager
+from urllib.parse import urlsplit
 from uuid import UUID
 
+import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 
 from app.agent import run_task
@@ -19,6 +21,8 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        if settings.require_task_api_token and not settings.task_api_token:
+            raise RuntimeError("TASK_API_TOKEN is required for public deployment")
         store.initialize()
         worker.start()
         try:
@@ -63,7 +67,22 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
     def health():
         if not worker.alive or not store.healthy():
             raise HTTPException(status_code=503, detail="Task service unavailable")
-        return {"status": "ok"}
+        return {"status": "ok", "revision": settings.app_revision}
+
+    @app.get("/ready")
+    def ready():
+        health()
+        remote = urlsplit(settings.selenium_remote_url)
+        if remote.scheme not in ("http", "https") or not remote.netloc:
+            raise HTTPException(status_code=503, detail="Browser service unavailable")
+        try:
+            response = httpx.get(f"{remote.scheme}://{remote.netloc}/status", timeout=3)
+            response.raise_for_status()
+            if response.json().get("value", {}).get("ready") is not True:
+                raise ValueError("Selenium is not ready")
+        except (httpx.HTTPError, ValueError):
+            raise HTTPException(status_code=503, detail="Browser service unavailable") from None
+        return {"status": "ok", "revision": settings.app_revision}
 
     return app
 

@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     openai_base_url: str = ""
     model_name: str = ""
     task_api_token: str = ""
+    require_task_api_token: bool = False
+    app_revision: str = "local"
     allowed_hosts: str = ""
     enable_write_actions: bool = False
     database_path: Path = Path("data/tasks.db")
