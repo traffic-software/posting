@@ -14,14 +14,13 @@ Create the GitHub environment `vps`. Configure these **environment** secrets and
 
 | Type | Name | Value |
 | --- | --- | --- |
-| Secret | `VPS_SSH_PASSWORD` | SSH password for the deployment user (use this **or** `VPS_SSH_KEY`) |
-| Secret | `VPS_SSH_KEY` | Optional private key instead of a password; preferred when available |
+| Secret | `VPS_SSH_PASSWORD` | SSH password for the deployment user; required |
 | Secret | `VPS_KNOWN_HOSTS` | Verified SSH host key entry for the VPS, including the port when non-default |
 | Variable | `VPS_HOST` | VPS DNS hostname or IPv4 address |
 | Variable | `VPS_USER` | SSH deployment username |
 | Variable | `VPS_SSH_PORT` | Optional SSH port; defaults to 22 |
 
-Verify the server fingerprint using a trusted channel before saving the known-hosts entry. For port 22 use `hostname ssh-ed25519 ...`; for a custom port use `[hostname]:port ssh-ed25519 ...`. `ssh-keyscan` can retrieve a candidate key, but its output **must** be fingerprint-checked independently before trusting it. For password login, the VPS SSH server must allow password authentication for `VPS_USER`. Store the password only in the GitHub secret, never in a workflow file or repository variable. If using the safer key option instead, add the public half of the deployment key to that user's `authorized_keys`. When both secrets are set, key authentication takes precedence.
+Verify the server fingerprint using a trusted channel before saving the known-hosts entry. For port 22 use `hostname ssh-ed25519 ...`; for a custom port use `[hostname]:port ssh-ed25519 ...`. `ssh-keyscan` can retrieve a candidate key, but its output **must** be fingerprint-checked independently before trusting it. For password login, the VPS SSH server must allow password authentication for `VPS_USER`. Store the password only in the GitHub secret, never in a workflow file or repository variable. This workflow uses password authentication only; `VPS_SSH_KEY` is not needed.
 
 ## Deploy and verify
 
