@@ -4,7 +4,7 @@ The separate **vps deply** GitHub Action builds the app image on GitHub's Linux 
 
 ## Prepare the VPS
 
-Use an **amd64 Linux** server with Docker Engine and the `docker compose` plugin installed. Allocate enough memory for Chrome (the Selenium container reserves 2 GB shared memory). Create an SSH deployment user with permission to run Docker, then create `/opt/posting` owned by that user. Docker group membership effectively grants root-level access; use a dedicated account and protect its SSH key. Ensure port 8000 on the host is free. No public ports are required: app binds to `127.0.0.1:8000`, Selenium is only on the Compose network.
+Use an **amd64 Linux** server with Docker Engine and the `docker compose` plugin installed. Allocate enough memory for Chrome (the Selenium container reserves 2 GB shared memory). Create an SSH deployment user with permission to run Docker, then create `/opt/posting` owned by that user. Docker group membership effectively grants root-level access; use a dedicated account and protect its SSH credentials. Ensure port 8000 on the host is free. No public ports are required: app binds to `127.0.0.1:8000`, Selenium is only on the Compose network.
 
 Create `/opt/posting/.env` on the VPS, readable only by the deployment user (for example `chmod 600 /opt/posting/.env`). Use [`.env.example`](../.env.example) as a template, supplying real `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME`, `ALLOWED_HOSTS` (approved exact hostnames), and a long random `TASK_API_TOKEN`. Set `ENABLE_WRITE_ACTIONS=false` unless explicitly needed for approved targets. The VPS Compose file sets `REQUIRE_TASK_API_TOKEN=true`; a missing token prevents the app from starting. Never commit or send this `.env` through GitHub Actions. If exposing the API externally, configure a separate HTTPS reverse proxy with rate limiting and authentication; do not change the localhost binding or publish Selenium directly.
 
@@ -14,13 +14,14 @@ Create the GitHub environment `vps`. Configure these **environment** secrets and
 
 | Type | Name | Value |
 | --- | --- | --- |
-| Secret | `VPS_SSH_KEY` | Private key for the dedicated VPS deployment user |
+| Secret | `VPS_SSH_PASSWORD` | SSH password for the deployment user (use this **or** `VPS_SSH_KEY`) |
+| Secret | `VPS_SSH_KEY` | Optional private key instead of a password; preferred when available |
 | Secret | `VPS_KNOWN_HOSTS` | Verified SSH host key entry for the VPS, including the port when non-default |
 | Variable | `VPS_HOST` | VPS DNS hostname or IPv4 address |
 | Variable | `VPS_USER` | SSH deployment username |
 | Variable | `VPS_SSH_PORT` | Optional SSH port; defaults to 22 |
 
-Verify the server fingerprint using a trusted channel before saving the known-hosts entry. For port 22 use `hostname ssh-ed25519 ...`; for a custom port use `[hostname]:port ssh-ed25519 ...`. `ssh-keyscan` can retrieve a candidate key, but its output **must** be fingerprint-checked independently before trusting it. Add the public half of the deployment key to the VPS user's `authorized_keys`.
+Verify the server fingerprint using a trusted channel before saving the known-hosts entry. For port 22 use `hostname ssh-ed25519 ...`; for a custom port use `[hostname]:port ssh-ed25519 ...`. `ssh-keyscan` can retrieve a candidate key, but its output **must** be fingerprint-checked independently before trusting it. For password login, the VPS SSH server must allow password authentication for `VPS_USER`. Store the password only in the GitHub secret, never in a workflow file or repository variable. If using the safer key option instead, add the public half of the deployment key to that user's `authorized_keys`. When both secrets are set, key authentication takes precedence.
 
 ## Deploy and verify
 
