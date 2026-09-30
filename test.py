@@ -3,35 +3,37 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import os
 import time
+from ps_lib.uc import ucbrowser
 from ps_lib.accounts import accounts
-acc = accounts()
-account_data=acc.get_account()
-for x in range(0, 5):
+# acc = accounts()
+# account_data=acc.get_account()
+# for x in range(0, 5):
 
-    # if account_data['extra'][0:1]==0:
+#     # if account_data['extra'][0:1]==0:
         
         
-    print(00+int(account_data['extra'])-x)
-    print('................{0}..............'.format(x))
+#     print(00+int(account_data['extra'])-x)
+#     print('................{0}..............'.format(x))
 
-exit()
+bundle_dir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Main:
     def __init__(self):
         self.url = 'https://accounts.google.com/ServiceLogin'
-        self.driver = uc.Chrome(use_subprocess=True)
-        self.time = 60
+        one_account=234
+        profile_dir=bundle_dir+"\{0}\{1}".format("profiles",str(one_account))
+        if os.path.isdir(bundle_dir+"\{0}\{1}".format("profiles",str(one_account))) == False:
+    
+            profile_dir=bundle_dir+"\{0}\{1}".format("profiles",str(one_account))
+        self.driver = ucbrowser(one_account,use_proxy=True, headless=False,profile_dir=profile_dir,image_bock=False)
+        self.time = 6000
 
     def login(self, email, password):
-        self.driver.get(self.url)
-        WebDriverWait(self.driver, 20).until(
-            EC.visibility_of_element_located((By.NAME, 'identifier'))).send_keys(email)
-        WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, '#identifierNext button[type="button"]'))).click()
-        WebDriverWait(self.driver, 20).until(
-            EC.visibility_of_element_located((By.NAME, 'password'))).send_keys(password)
+        self.driver.get_url(self.url)
+        
 
         self.code()
 
@@ -41,6 +43,9 @@ class Main:
 
 
 if __name__ == "__main__":
+    import re
+    rtcExtensiion= line = re.sub(r"\d+", "", 'http://pubproxy.com/api/proxy?&format=json&https=true&type=https&contry=IT/485785')
+    print(rtcExtensiion)
     #  ---------- EDIT ----------
     email = '1706973461'  # replace email
     password = '1706973461'  # replace password

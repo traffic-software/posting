@@ -12,6 +12,8 @@ from ps_lib.accounts import accounts
 import json
 import requests
 import os
+import re
+from os import path
 import time
 from ps_lib.ps_str import ps_str
 from ps_lib.proxy import ps_proxy
@@ -29,7 +31,7 @@ import string
 class ucbrowser:
     account_id = None
 
-    def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None, image_bock=True, headless=False):
+    def __init__(self, pofileLocation, use_proxy=True, profile_dir=False, pva=None, image_bock=True, headless=False,debuggerAddress=None):
 
         self.proxy_country = "IT"
         self.proxy_city = None
@@ -43,6 +45,7 @@ class ucbrowser:
         self.proxy_company = 'proxyrotator'
         self.pva = pva
         self.account_id = pofileLocation
+        self.profile_dir = profile_dir
         self.use_proxy = use_proxy
         self.image_bock = image_bock
         warnings.filterwarnings('ignore')
@@ -78,35 +81,51 @@ class ucbrowser:
         self.a = random.choice(l)
 
         # self.options.add_argument(f'user-agent={self.a}')
+        self.options.add_argument('--blink-settings=imagesEnabled=false')
         print('user set')
 
         if sys.platform not in ['Windows', 'win32', 'cygwin']:
 
             self.options.add_argument("--disable-dev-shm-usage")
             self.options.add_argument("--disable-infobars")
-            # self.options.add_argument("start-maximized")
+            self.options.add_argument("start-maximized")
             self.options.add_experimental_option(
                 "useAutomationExtension", False)
             self.options.add_experimental_option(
                 "excludeSwitches", ["enable-automation"])
+            if debuggerAddress:
+                self.options.add_experimental_option("debuggerAddress", "localhost:9222")
+                # self.options.add_argument("--remote-debugging-port=9222")
             # "--disable-web-security", "--user-data-dir=true", "--allow-running-insecure-content"
 
         if headless:
             self.options.add_argument('--headless')
             self.options.add_argument('--disable-gpu')
+            
+
+        # partially disable webrtc
+        preferences = {
+            "webrtc.ip_handling_policy" : "disable_non_proxied_udp",
+            "webrtc.multiple_routes_enabled": False,
+            "webrtc.nonproxied_udp_enabled" : False
+        }
+        self.options.add_experimental_option("prefs", preferences)
 
         # self.options.add_argument("--lang=it-IT")
         # self.options.add_argument("--no-sandbox")
         if profile_dir:
-            self.options.add_argument("--user-data-dir={}".format(profile_dir))
+            self.options.user_data_dir = profile_dir
+            self.options.add_argument(r'--profile-directory=Profile {}'.format(self.account_id))
 
         else:
             # self.options.add_argument("--use-temporary-user-data-dir")
             pass
-
-        self.driver = uc.Chrome(
-            driver_executable_path=driverUrl, options=self.options, use_subprocess=True)
-        self.driver.set_window_size(500, 600)
+        service = Service(executable_path=driverUrl)
+        self.driver = uc.Chrome(service=service, options=self.options,use_subprocess=True)
+        print('driver start')
+        # self.driver = uc.Chrome(
+        #     driver_executable_path=driverUrl, options=self.options, use_subprocess=True)
+        # self.driver.set_window_size(1920, 1080)
 
     def exit(self):
         try:
@@ -136,6 +155,7 @@ class ucbrowser:
         try:
 
             proxyinfo = self.account.get_proxy_list()
+            print(proxyinfo)
             #............. check for use defaultProxy.............#
             dProxy = proxyinfo['defaultProxy']
 
@@ -499,33 +519,50 @@ class ucbrowser:
             self.exit()
         return element
 
-    def upload_multiple(self, element, profile_id):
-        try:
-            sleep_time = 5
+    def upload_multiple(self,element, profile_id):
+            sleep_time=2
+            try:
+                imge_dir = os.getcwd() + "\img\{}".format(profile_id)
+                if os.path.exists(imge_dir):
+                    for i in os.listdir(imge_dir):
+                        element=self.driver.execute_script("""return document.evaluate('//input[@name="file"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;""")
+                
+                    
+                        if i.find('.') > 0:
+                            
+                            time.sleep(4)
+                            # path of File
+                            try:
+                                print(r""+imge_dir+"\{}".format(i))
+                                element.send_keys(r""+imge_dir+"\{}".format(i))
+                                time.sleep(5)
 
-            imge_dir = os.getcwd() + "\img\{}".format(profile_id)
-            if os.path.exists(imge_dir):
-                for i in os.listdir(imge_dir):
-                    if i.find('.') > 1:
-                        element.click()
-                        time.sleep(4)
-                        # path of File
-                        pyautogui.write(r""+imge_dir+"\{}".format(i))
-                        pyautogui.press('enter')
-                        sleep_time += 5
-                        time.sleep(10)
-            else:
-                for i in os.listdir(os.getcwd() + "\img"):
-                    if i.find('.') > 1:
-                        element.click()
-                        time.sleep(4)
-                        pyautogui.write(r""+os.getcwd() + "\img\{}".format(i))
-                        pyautogui.press('enter')
-                        sleep_time += 5
-                        time.sleep(10)
-        except OSError:
-            pass
-        return sleep_time
+                            except OSError as e:
+                                print(e)
+                            
+                            # sleep_time += 5
+                            # time.sleep(10)
+                else:
+                    for i in os.listdir(os.getcwd() + "\img"):
+                        element=self.driver.execute_script("""return document.evaluate('//input[@name="file"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;""")
+                        
+                        if i.find('.') > 0:
+                            
+                            
+                            # time.sleep(4)
+                            try:
+                                print(r""+os.getcwd() + "\img\{}".format(i))
+                                element.send_keys(r""+os.getcwd() + "\img\{}".format(i))
+                                time.sleep(5)
+
+                            except OSError as e:
+                                print(e)
+                            
+                            # sleep_time += 5
+                            # time.sleep(10)
+            except OSError as e:
+                print(e)
+            return sleep_time
 
     def try_xpath(self, selector, mesasage="genarl work"):
         try:
@@ -905,14 +942,29 @@ class ucbrowser:
 					['blocking']
 		);
 		""" % (self.PROXY_TYPE, self.PROXY_HOST, self.PROXY_PORT, self.PROXY_USER, self.PROXY_PASS)
-        pluginfile = 'proxy_auth_plugin.zip'
-        zp = zipfile.ZipFile(pluginfile, 'w')
+        
+        # self.options.add_extension(pluginfile)
+        extension_locatoion=self.profile_dir.replace('profiles','extension')
+        rtcExtensiion= re.sub(r"\d+", "", extension_locatoion)
+        rtcExtensiion=rtcExtensiion+"webrtc"
+        # self.options.add_argument('--disable-extensions-except={0}'.format(rtcExtensiion))
+        self.options.add_argument('--load-extension={0}'.format(rtcExtensiion))
+        # extension_locatoion=path.abspath(path.dirname(__file__))+"\{0}\{1}".format("extension",str(self.account_id))
+        rules_file =extension_locatoion+"{0}".format("\\rules.json")
+        rules =open(rules_file,'w')
         if self.image_bock:
-            zp.writestr("rules.json", rules_json)
+           rules.write(rules_json)
         else:
-            zp.writestr("rules.json", block_rules_json)
-
-        zp.writestr("manifest.json", manifest_json)
-
-        zp.writestr("background.js", background_js)
-        self.options.add_extension(pluginfile)
+            rules.write(block_rules_json)
+            
+        
+        rules.close()
+        manifest_file =extension_locatoion+"{0}".format("\\manifest.json")
+        manifest =open(manifest_file,'w')
+        manifest.write(manifest_json)
+        manifest.close()
+        backgroundjs_file =extension_locatoion+"{0}".format("\\background.js")
+        backgroundjs =open(backgroundjs_file,'w')
+        backgroundjs.write(background_js)
+        backgroundjs.close()
+        self.options.add_argument('--load-extension={0}'.format(extension_locatoion))

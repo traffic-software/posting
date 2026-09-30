@@ -1,0 +1,8 @@
+imapclient
+selenium
+pyautogui
+python_anticaptcha
+pyvirtualdisplay
+undetected-chromedriver
+keyboard
+chardet

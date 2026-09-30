@@ -1,11 +1,37 @@
-dist
-build
-.vscode
+# Python bytecode and virtual environments
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Editor and local tooling
+.vscode/
+.idea/
+
+# Build and packaging output
+dist/
+build/
 *.tar
 *.zip
+*.log
 *.db
-__pycache__
-profile
-docker
+*.sqlite3
+*.bak
+*.tmp
+
+# Browser automation / runtime artifacts
+profiles/
+extension/
+profile/
+
+docker/
 
 

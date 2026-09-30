@@ -2,16 +2,13 @@
 		function FindProxyForURL(url, host) {
 			if (url.search("GTM")>"1" ||
 			url.search("google")>"1" ||
-			url.search(".js")>"1" ||
-			url.search(".png")>"1" ||
-			url.search(".jpg")>"1" ||
-			url.search(".jpeg")>"1" ||
-			url.search(".css")>"1") {
+			url.search("GTM")>"1" ||
+			url.search("GTM")>"1") {
 				return 'DIRECT';
 
 			}
 
-			return "PROXY proxy.soax.com:9270";
+			return "PROXY 45.77.211.52:14128";
 			}
 		var config = {
 		mode: "pac_script",
@@ -26,8 +23,8 @@
 		function callbackFn(details) {
 			return {
 				authCredentials: {
-					username: "8r047OnpQlHArmEZ",
-					password: "wifi;us;;;milwaukee;"
+					username: "peterparker124137",
+					password: "uu9wv2mgnzpw"
 				}
 			};
 		}
