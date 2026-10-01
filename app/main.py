@@ -43,9 +43,7 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
 
     @app.post("/run-task", response_model=TaskAccepted, status_code=status.HTTP_202_ACCEPTED)
     def run(request: TaskRequest, _: None = Depends(authorize)) -> TaskAccepted:
-        if not settings.host_allowlist or not all(
-            (settings.openai_api_key, settings.openai_base_url, settings.model_name)
-        ):
+        if not all((settings.openai_api_key, settings.openai_base_url, settings.model_name)):
             raise HTTPException(status_code=503, detail="Task service is not configured")
         if not worker.alive:
             raise HTTPException(status_code=503, detail="Task worker is unavailable")

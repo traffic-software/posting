@@ -35,7 +35,7 @@ def test_agent_closes_its_browser_after_result(monkeypatch):
     monkeypatch.setattr(agent, "create_deep_agent", lambda **_: FakeAgent())
     settings = Settings(
         _env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1",
-        model_name="test-model", allowed_hosts="example.com"
+        model_name="test-model"
     )
     assert agent.run_task("Get title", settings) == {"output": "Page title: Example"}
     assert browser.closed
@@ -54,7 +54,7 @@ def test_agent_closes_its_browser_after_error(monkeypatch):
     monkeypatch.setattr(agent, "create_deep_agent", lambda **_: FakeAgent())
     settings = Settings(
         _env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1",
-        model_name="test-model", allowed_hosts="example.com"
+        model_name="test-model"
     )
     with pytest.raises(RuntimeError):
         agent.run_task("Get title", settings)

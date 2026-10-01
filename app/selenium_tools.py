@@ -1,4 +1,5 @@
 import ipaddress
+import socket
 import time
 from urllib.parse import urlsplit
 
@@ -11,33 +12,43 @@ from selenium.webdriver.support.ui import WebDriverWait
 from app.config import Settings
 
 
-def check_url(url: str, allowed_hosts: frozenset[str]) -> None:
+def check_url(url: str) -> None:
     try:
         parsed = urlsplit(url)
         host = (parsed.hostname or "").lower().rstrip(".")
+        port = parsed.port
     except ValueError as exc:
         raise ToolException("Invalid URL") from exc
-    if parsed.scheme not in ("http", "https") or not host or parsed.username or parsed.password:
-        raise ToolException("Only approved HTTP(S) URLs without embedded credentials are allowed")
-    if host not in allowed_hosts or host == "localhost" or host.endswith(".local"):
-        raise ToolException("This website is not on the approved host list")
+    if (
+        parsed.scheme not in ("http", "https") or not host
+        or parsed.username is not None or parsed.password is not None
+        or port == 0 or "\\" in parsed.netloc or "%" in host
+    ):
+        raise ToolException("Only public HTTP(S) URLs without embedded credentials are allowed")
+    if host == "localhost" or host.endswith((".localhost", ".local")) or host == "local":
+        raise ToolException("Local destinations are not allowed")
     try:
-        address = ipaddress.ip_address(host)
+        addresses = [ipaddress.ip_address(host)]
     except ValueError:
-        return
-    if not address.is_global:
+        try:
+            answers = socket.getaddrinfo(
+                host, port or (443 if parsed.scheme == "https" else 80),
+                type=socket.SOCK_STREAM,
+            )
+            addresses = [ipaddress.ip_address(answer[4][0]) for answer in answers]
+        except (OSError, ValueError, UnicodeError) as exc:
+            raise ToolException("Could not verify public destination addresses") from exc
+    if not addresses or any(not address.is_global or address.is_multicast for address in addresses):
         raise ToolException("Private and non-public IP addresses are not allowed")
 
 
 def browser_tools(driver, settings: Settings, deadline: float):
-    allowed_hosts = settings.host_allowlist
-
     def check_session() -> None:
         if time.monotonic() >= deadline:
             raise ToolException("Task time limit reached")
         current = driver.current_url
         if current and current != "data:," and not current.startswith("about:blank"):
-            check_url(current, allowed_hosts)
+            check_url(current)
 
     def find_element(selector: str, clickable: bool = False):
         if len(selector) > 300 or not selector.strip():
@@ -53,8 +64,8 @@ def browser_tools(driver, settings: Settings, deadline: float):
 
     @tool
     def navigate_to_page(url: str) -> str:
-        """Navigate to a URL on the approved website list and report the resulting page title."""
-        check_url(url, allowed_hosts)
+        """Navigate to a public HTTP(S) URL and report the resulting page title."""
+        check_url(url)
         check_session()
         try:
             driver.get(url)
@@ -78,7 +89,7 @@ def browser_tools(driver, settings: Settings, deadline: float):
     if settings.enable_write_actions:
         @tool
         def click_element(selector: str) -> str:
-            """Click the first clickable element matching a CSS selector on the approved site."""
+            """Click the first clickable element matching a CSS selector on the public website."""
             element = find_element(selector, clickable=True)
             try:
                 element.click()
@@ -89,7 +100,7 @@ def browser_tools(driver, settings: Settings, deadline: float):
 
         @tool
         def fill_element(selector: str, value: str) -> str:
-            """Replace an input field's text with a provided value on the approved site."""
+            """Replace an input field's text with a provided value on the public website."""
             if len(value) > 2000:
                 raise ToolException("Input is too long")
             element = find_element(selector)

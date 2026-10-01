@@ -6,7 +6,6 @@ services:
     environment:
       DATABASE_PATH: /data/tasks.db
       SELENIUM_REMOTE_URL: http://selenium:4444/wd/hub
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-}
       ENABLE_WRITE_ACTIONS: ${ENABLE_WRITE_ACTIONS:-false}
       TASK_API_TOKEN: ${TASK_API_TOKEN:-}
     ports:

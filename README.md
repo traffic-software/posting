@@ -4,7 +4,7 @@
 
 ## চালু করা
 
-1. `.env.example` অনুসরণ করে **নিজের** `.env` তৈরি করুন। আপনার বিদ্যমান `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME` রেখে `ALLOWED_HOSTS`-এ অনুমোদিত সাইটগুলোর সঠিক hostname (কমা দিয়ে) লিখুন, যেমন `example.com`। Base URL-র model-কে tool calling সমর্থন করতে হবে। `.env` Git বা Docker image-এ যায় না।
+1. `.env.example` অনুসরণ করে **নিজের** `.env` তৈরি করুন। আপনার বিদ্যমান `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME` রাখুন। Public website browse করার জন্য domain allowlist configure করতে হবে না। Base URL-র model-কে tool calling সমর্থন করতে হবে। `.env` Git বা Docker image-এ যায় না।
 2. `docker compose up --build -d` চালান। App `127.0.0.1:8000`-তে, Selenium শুধু Compose-এর private network-এ। `docker compose ps`-এ দুই service healthy হওয়া পর্যন্ত অপেক্ষা করুন।
 3. `.env`-এ `TASK_API_TOKEN` সেট করলে প্রতিটি task request-এ `Authorization: Bearer <token>` পাঠাতে হবে। Public interface-এ publish করার আগে token, reverse proxy/TLS এবং rate limiting নিশ্চিত করুন; ডিফল্ট localhost binding রেখে দিন।
 
@@ -24,7 +24,8 @@ curl -sS http://127.0.0.1:8000/task-status/YOUR_TASK_ID \
 
 ## Browser policy ও সীমা
 
-- `ALLOWED_HOSTS` খালি থাকলে POST গ্রহণ করে না; অনুমোদন ছাড়া কোনো default destination নেই। Hostname exact-match; HTTP(S) ছাড়া অন্য scheme, embedded credentials, localhost/private IP নিষিদ্ধ। Redirect-এর পরে host যাচাই করা হয়; **redirect request আগেই পাঠানো হতে পারে**, তাই allowlist-এ শুধু trusted সাইট দিন এবং browser container-কে network-level access restriction ছাড়া hostile content-এ ব্যবহার করবেন না।
+- যেকোনো public HTTP(S) website browse করা যায়; domain allowlist লাগে না। Embedded credentials, localhost/local নাম ও non-public IP নিষিদ্ধ। DNS-এর কোনো address private/non-public হলে URL reject হয়। Website-এর login, access control বা anti-bot restriction bypass করা হয় না।
+- URL validation সম্পূর্ণ SSRF isolation নয়: **redirect request আগেই পাঠানো হতে পারে**, browser subresource request আলাদাভাবে যাচাই হয় না এবং DNS rebinding সম্ভব। Public deployment-এ Selenium container-এর জন্য network-level egress firewall/proxy দিয়ে private/internal, loopback, link-local, metadata ও non-public network access আটকাতে হবে। App-side DNS check Chrome-এর connection-এর বিকল্প নয়।
 - ডিফল্টে শুধু `navigate_to_page` ও `extract_text` আছে। `ENABLE_WRITE_ACTIONS=true` দিলে `click_element` ও `fill_element` tool পাওয়া যাবে; এরা form submit/বাহ্যিক side effect ঘটাতে পারে। অনুমোদিত test site ছাড়া enable করবেন না। CAPTCHA bypass বা legacy worker tool দেওয়া হয়নি।
 - প্রতিটি task আলাদা Remote WebDriver session ব্যবহার করে। Model request, page load ও agent step-এর সীমা আছে; task wall-clock budget **hard kill নয়**—কোনো external call আটকে থাকলে thread তাৎক্ষণিক বন্ধ হবে না। Provider-এর error/credentials API response-এ ফেরত দেওয়া হয় না।
 - Task DB named volume `tasks_data`-তে `/data/tasks.db`; `docker compose down` এটি রাখে, কিন্তু `docker compose down -v` volume **মুছে দেয়**। আগে backup করুন। পুরোনো `ps_lib/databases.db` এই নতুন task DB নয়। User prompt ও final output DB-তে থাকে; sensitive prompt পাঠানো ও retention policy আলাদাভাবে বিবেচনা করুন। Restart-এ মাঝপথে থাকা PROCESSING task FAILED হয়, PENDING task আবার worker নেয়; write operation-এ duplicate side effect এড়াতে automatic retry হয় না।
@@ -39,4 +40,4 @@ uv pip install --python .venv/Scripts/python.exe -r requirements.lock  # Windows
 # Linux/macOS: .venv/bin/python -m pytest -q tests
 ```
 
-Tests fake model/browser ব্যবহার করে, তাই credentials, live site বা network লাগে না। Live smoke test করার আগে একটি অনুমোদিত domain এবং tool-calling endpoint configure করুন; তারপর POST ও GET দিয়ে result যাচাই করুন। Deploy/cleanup-এর আগে [plan/unnecessary-files.md](plan/unnecessary-files.md)-এ তালিকাভুক্ত পুরোনো ফাইল ও বর্তমান tracked deletion যাচাই করুন—এই feature কোনো legacy file মুছে দেয়নি।
+Tests fake model/browser ব্যবহার করে, তাই credentials, live site বা network লাগে না। Live smoke test করার আগে একটি public test URL নির্বাচন ও tool-calling endpoint configure করুন; তারপর POST ও GET দিয়ে result যাচাই করুন। Deploy/cleanup-এর আগে [plan/unnecessary-files.md](plan/unnecessary-files.md)-এ তালিকাভুক্ত পুরোনো ফাইল ও বর্তমান tracked deletion যাচাই করুন—এই feature কোনো legacy file মুছে দেয়নি।

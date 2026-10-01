@@ -16,7 +16,6 @@ def settings_for(tmp_path):
         openai_api_key="test-key",
         openai_base_url="https://model.example/v1",
         model_name="test-model",
-        allowed_hosts="example.com",
         task_api_token="test-token",
     )
 
@@ -70,9 +69,10 @@ def test_runner_failure_is_sanitized(tmp_path):
 
 
 def test_unconfigured_service_rejects_submission(tmp_path):
-    settings = Settings(_env_file=None, database_path=tmp_path / "tasks.db", allowed_hosts="")
+    settings = settings_for(tmp_path)
+    settings.model_name = ""
     with TestClient(create_app(settings, runner=lambda *_: {})) as client:
-        assert client.post("/run-task", json={"prompt": "test"}).status_code == 503
+        assert client.post("/run-task", json={"prompt": "test"}, headers=headers()).status_code == 503
 
 
 def test_readiness_checks_browser_without_exposing_tasks(tmp_path, monkeypatch):

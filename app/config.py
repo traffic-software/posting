@@ -12,7 +12,6 @@ class Settings(BaseSettings):
     task_api_token: str = ""
     require_task_api_token: bool = False
     app_revision: str = "local"
-    allowed_hosts: str = ""
     enable_write_actions: bool = False
     database_path: Path = Path("data/tasks.db")
     selenium_remote_url: str = "http://selenium:4444/wd/hub"
@@ -21,7 +20,3 @@ class Settings(BaseSettings):
     browser_timeout_seconds: int = 20
     task_timeout_seconds: int = 180
     max_agent_steps: int = 20
-
-    @property
-    def host_allowlist(self) -> frozenset[str]:
-        return frozenset(host.strip().lower().rstrip(".") for host in self.allowed_hosts.split(",") if host.strip())

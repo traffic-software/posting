@@ -29,12 +29,11 @@ PORT=8000
 RAILWAY_RUN_UID=0
 REQUIRE_TASK_API_TOKEN=true
 ENABLE_WRITE_ACTIONS=false
-ALLOWED_HOSTS=<only approved exact hostnames>
 ```
 
 Railway volumes mount as root; `RAILWAY_RUN_UID=0` lets this image write `/data/tasks.db` despite its default non-root `USER app`. Treat the mounted SQLite volume (which contains prompts/results) as sensitive; Railway volume data persists across redeploys, but a volume service has downtime during redeploy. Do not use an app replica count above one. If root runtime is unacceptable, replace it with a tested startup ownership strategy before removing `RAILWAY_RUN_UID=0`.
 
-In the Railway **app service UI**, set `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME`, and a long random `TASK_API_TOKEN` as secret variables. Do not paste values into GitHub workflow, Dockerfile, logs, docs, or chat. `ALLOWED_HOSTS` is required for `POST /run-task`. Model must support tool calls. `/health` and `/ready` intentionally require no API token, while task POST/GET require the bearer token. Public deployment without a task token fails at startup.
+In the Railway **app service UI**, set `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME`, and a long random `TASK_API_TOKEN` as secret variables. Do not paste values into GitHub workflow, Dockerfile, logs, docs, or chat. No domain allowlist is required: browser tools permit public HTTP(S) websites and reject local/non-public literal or DNS-resolved addresses. These application checks do not cover browser subresources, pre-validation redirects or DNS rebinding; enforce Selenium network-level egress restrictions against internal, loopback, private, link-local and metadata destinations before exposing arbitrary browsing. A private Selenium service alone does not restrict its outbound traffic. Model must support tool calls. `/health` and `/ready` intentionally require no API token, while task POST/GET require the bearer token. Public deployment without a task token fails at startup.
 
 ## 4. Enable automated deployment
 
