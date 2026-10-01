@@ -93,7 +93,7 @@ class TaskWorker:
                         self.store.finish(task_id, TaskStatus.FAILED, error="Task execution failed")
                 finally:
                     if context is not None:
-                        context.credentials.clear()
+                        context.clear_sensitive_state()
                     with self.active_lock:
                         self.active_context = None
                         self.active_task_id = None

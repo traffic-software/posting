@@ -1,4 +1,4 @@
-"""Submit a prompt-only browser task and poll the deployed API."""
+"""Submit a browser task in prompt-only or secure account mode and poll the API."""
 
 import argparse
 import getpass
@@ -25,9 +25,43 @@ ERROR_MESSAGES = {
 }
 
 
+def account_payload(prompt: str, secrets: set[str]) -> dict:
+    root = str(Path(__file__).resolve().parents[1])
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    from app.schemas import LoginCredential, TaskRequest
+
+    credential_id = input("Credential ID [account]: ").strip() or "account"
+    origins = [value.strip() for value in input("Authorized HTTPS origins (comma-separated): ").split(",")]
+    if input("I am authorized to use this account and permit login writes [yes/no]: ").strip().lower() != "yes":
+        raise ValueError("Account consent required")
+    username = getpass.getpass("Account username (hidden): ")
+    password = getpass.getpass("Account password (hidden): ")
+    seed = getpass.getpass("Authenticator Base32 secret (hidden; blank if unused): ")
+    secrets.update(value for value in (username, password, seed) if value)
+    credential = LoginCredential(id=credential_id, origins=origins, username=username, password=password, totp_secret=seed or None)
+    normalized_seed = credential.totp_secret.get_secret_value() if credential.totp_secret else None
+    if normalized_seed:
+        secrets.add(normalized_seed)
+    if any(value in prompt or value in credential_id for value in secrets):
+        raise ValueError("Keep credentials out of the prompt and ID")
+    request = TaskRequest(prompt=prompt, allow_write_actions=True, credentials=[credential])
+    return {
+        "prompt": request.prompt,
+        "allow_write_actions": True,
+        "credentials": [{
+            "id": credential.id, "origins": credential.origins,
+            "username": credential.username.get_secret_value(),
+            "password": credential.password.get_secret_value(), "totp_secret": normalized_seed,
+        }],
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--task-id", type=UUID, help="Poll without submitting a new task")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--task-id", type=UUID, help="Poll without submitting a new task")
+    mode.add_argument("--account", action="store_true", help="Collect encrypted structured account credentials separately from the task prompt")
     parser.add_argument("--timeout", type=int, default=240)
     args = parser.parse_args()
     if args.timeout <= 0:
@@ -47,22 +81,33 @@ def main() -> int:
         print("API token is required", file=sys.stderr)
         return 1
 
+    secrets = {token}
+
     def display(data) -> str:
-        return json.dumps(data, indent=2, ensure_ascii=False).replace(token, "[REDACTED]")
+        text = json.dumps(data, indent=2, ensure_ascii=False)
+        for secret in sorted(secrets, key=len, reverse=True):
+            escaped = json.dumps(secret, ensure_ascii=False)[1:-1]
+            text = text.replace(escaped, "[REDACTED]").replace(secret, "[REDACTED]")
+        return text
 
     task_id = str(args.task_id) if args.task_id else None
     with httpx.Client(base_url=base_url, headers={"Authorization": f"Bearer {token}"}, timeout=30) as client:
         try:
             if task_id is None:
                 print("Describe the task for your own/authorized account in the prompt.")
-                print("Prompt contents, including any credentials, go to the model and task database.")
+                print("Keep credentials out of the prompt; prompt contents go to the model and task database.")
+                if args.account:
+                    print("Account mode collects secrets separately; the server encrypts them before queueing.")
                 print("Typing/clicking requires ENABLE_WRITE_ACTIONS=true on the server.")
                 prompt = getpass.getpass("Task prompt (hidden): ").strip()
                 if not prompt or len(prompt) > 4000:
                     print("Prompt must contain 1 to 4000 characters", file=sys.stderr)
                     return 1
-                response = client.post("/run-task", json={"prompt": prompt})
-                del prompt
+                payload = account_payload(prompt, secrets) if args.account else {"prompt": prompt}
+                try:
+                    response = client.post("/run-task", json=payload)
+                finally:
+                    del payload, prompt
                 if response.status_code != 202:
                     print(f"Submission failed: HTTP {response.status_code}", file=sys.stderr)
                     try:

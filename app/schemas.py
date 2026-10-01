@@ -35,6 +35,29 @@ class LoginCredential(BaseModel):
     origins: list[str] = Field(min_length=1, max_length=5)
     username: SecretStr
     password: SecretStr
+    totp_secret: SecretStr | None = None
+
+    @field_validator("totp_secret")
+    @classmethod
+    def valid_totp_secret(cls, value: SecretStr | None) -> SecretStr | None:
+        if value is None:
+            return None
+        import base64
+        import binascii
+
+        raw = value.get_secret_value()
+        if len(raw) > 256 or any(char not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz234567 \t\r\n\v\f" for char in raw):
+            raise ValueError("Invalid Base32 TOTP secret")
+        raw = "".join(char for char in raw if char not in " \t\r\n\v\f").upper()
+        if not 16 <= len(raw) <= 128 or any(char not in "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567" for char in raw):
+            raise ValueError("Invalid Base32 TOTP secret")
+        try:
+            decoded = base64.b32decode(raw + "=" * (-len(raw) % 8))
+        except (ValueError, binascii.Error):
+            raise ValueError("Invalid Base32 TOTP secret") from None
+        if len(decoded) < 10 or base64.b32encode(decoded).decode().rstrip("=") != raw:
+            raise ValueError("Invalid Base32 TOTP secret")
+        return SecretStr(raw)
 
     @field_validator("origins")
     @classmethod

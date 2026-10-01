@@ -19,6 +19,9 @@ class TaskContext:
     cancelled: threading.Event = field(default_factory=threading.Event)
     _browser_lock: threading.Lock = field(default_factory=threading.Lock)
     _browser_close: Callable | None = None
+    _totp_codes: set[str] = field(default_factory=set)
+    _totp_attempts: dict[str, set[int]] = field(default_factory=dict)
+    _secret_lock: threading.Lock = field(default_factory=threading.Lock)
 
     def bind_browser(self, close: Callable) -> None:
         with self._browser_lock:
@@ -39,14 +42,32 @@ class TaskContext:
         try:
             self.close_browser()
         finally:
+            self.clear_sensitive_state()
+
+    def clear_sensitive_state(self) -> None:
+        with self._secret_lock:
             self.credentials.clear()
+            self._totp_codes.clear()
+            self._totp_attempts.clear()
+
+    def reserve_totp(self, credential: LoginCredential, timestep: int, code: str) -> None:
+        with self._secret_lock:
+            if self.cancelled.is_set() or not any(item is credential for item in self.credentials):
+                raise RuntimeError("Task credentials unavailable")
+            attempts = self._totp_attempts.setdefault(credential.id, set())
+            if timestep in attempts or len(attempts) >= 2:
+                raise RuntimeError("Authenticator attempt limit reached")
+            attempts.add(timestep)
+            self._totp_codes.add(code)
 
     def redact(self, text: str) -> str:
-        secrets = {
-            secret.get_secret_value()
-            for credential in self.credentials
-            for secret in (credential.username, credential.password)
-        }
+        with self._secret_lock:
+            secrets = self._totp_codes | {
+                secret.get_secret_value()
+                for credential in self.credentials
+                for secret in (credential.username, credential.password, credential.totp_secret)
+                if secret is not None
+            }
         for secret in sorted(secrets, key=len, reverse=True):
             text = text.replace(secret, "[REDACTED]")
         return text
@@ -85,6 +106,7 @@ def encode_context(request: TaskRequest, settings: Settings) -> tuple[str | None
                 "origins": credential.origins,
                 "username": credential.username.get_secret_value(),
                 "password": credential.password.get_secret_value(),
+                "totp_secret": credential.totp_secret.get_secret_value() if credential.totp_secret else None,
             }
             for credential in request.credentials
         ]

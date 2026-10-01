@@ -26,6 +26,8 @@ curl -sS http://127.0.0.1:8000/task-status/YOUR_TASK_ID \
 
 Prompt-এ workflow দিন, password নয়। Structured `credentials` ও exact HTTPS login origins দিয়ে authorized account task পাঠানো যায়। Task-specific proxy support বন্ধ; non-null `proxy` request reject হয়। Server ও task—দুই জায়গায় write permission এবং server-side credential encryption key প্রয়োজন। Request format, secure client ও সীমাবদ্ধতা: [docs/account-tasks.md](docs/account-tasks.md)। Anti-detect/security bypass বা proxy-auth plugin যোগ করা হয়নি।
 
+Optional structured credential `totp_secret` দিলে PyOTP দিয়ে authenticator-app 2FA support পাওয়া যায়: `fill_totp(selector, submit_selector, credential_id)` OTP সরাসরি Selenium দিয়ে fill ও submit করে। `inspect_totp_form` supported field selectors খুঁজে দেয়; single numeric field ও ছয়টি digit box support আছে। Code `TOTP.now()` দিয়ে তৈরি হয়। Seed/code model-কে দেওয়া হয় না; secure CLI mode: `.venv/Scripts/python.exe scripts/submit_account_task.py --account`। Prompt-এ seed দেবেন না। Standard Remote Selenium-ই ব্যবহৃত হয়; undetected-chromedriver যোগ করা হয়নি। CAPTCHA, SMS/email/recovery ও suspicious-login challenge-এ থামে। বিস্তারিত [account task docs](docs/account-tasks.md#authenticator-app-totp)।
+
 ## Browser policy ও সীমা
 
 - Agent runtime `deepagents.create_deep_agent` ব্যবহার করে। Planning (`write_todos`), task-local virtual filesystem ও planning-only subagent আছে; filesystem backend `StateBackend`, তাই host filesystem বা shell access দেওয়া হয় না। Subagent-এর browser/credential tools নেই; browser actions শুধু main agent-এর policy-checked Selenium tools দিয়ে হয়। Virtual files task শেষ হলে persist করা হয় না।

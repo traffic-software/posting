@@ -41,7 +41,8 @@ Save it only in the server's secret configuration, protect `.env` permissions, a
       "id": "account",
       "origins": ["https://login.example"],
       "username": "YOUR_ACCOUNT_IDENTIFIER",
-      "password": "YOUR_ACCOUNT_PASSWORD"
+      "password": "YOUR_ACCOUNT_PASSWORD",
+      "totp_secret": null
     }
   ]
 }
@@ -51,14 +52,30 @@ POST to `/run-task` with the existing bearer token. Response remains a task ID a
 
 - `credentials` are optional. Up to five credential IDs are supported; each permits up to five exact HTTPS origins. Omit `proxy` or set it to `null`; any non-null proxy request is rejected with 422.
 - Origins contain no path/query/fragment. Port differences matter. Cross-origin SSO requires explicitly listing each trusted credential-entry origin; do not add origins merely because an untrusted page asks for them.
-- The agent receives credential IDs and allowed origins, **not username/password values**. `fill_credential(selector, credential_id, field)` enters them directly through Selenium. Entry is restricted to top-level input fields at an allowed origin; password values require password inputs.
+- The agent receives credential IDs, allowed origins and an authenticator-availability boolean, **not username/password/TOTP seed values**. `fill_credential(selector, credential_id, field)` enters them directly through Selenium. Entry is restricted to top-level input fields at an allowed origin; password values require password inputs.
 - Challenges/restrictions are prohibited by agent instructions, with conservative checks before credential-task writes. These checks are not a universal challenge detector. A restricted site may result in a failed task or a completed explanation rather than successful login. Inspect the output: `COMPLETED` alone does not prove authentication succeeded.
 - Page contents and requested operations can still reach the configured model provider. Do not request sensitive mailbox/account content unless you accept that disclosure. Known credential values are redacted from text tool results and final output as defense in depth, not a complete data-loss-prevention guarantee.
 - Never put secrets in the **prompt**, credential **ID**, URLs, selectors or proxy host. Prompts and final outputs persist; arbitrary secrets in natural-language instructions cannot be reliably detected or automatically protected.
 
+## Authenticator-app TOTP
+
+For an authorized account already enrolled in authenticator-based 2FA, replace the request's optional `totp_secret: null` with your **existing unpadded Base32 shared secret** (lowercase and ASCII grouping whitespace are normalized to uppercase) in the structured credential object. Never put it in a prompt, URL, selector, chat or log. Supported format is six digits, 30-second periods and SHA-1; HOTP, provisioning URIs, enrollment, SMS/email codes, recovery codes and security-setting changes are not supported. Seeds must decode to at least 10 bytes and be at most 128 Base32 characters. Unsupported formats fail validation rather than being guessed.
+
+`fill_totp(selector, submit_selector, credential_id)` generates the OTP server-side, types it through standard Selenium and clicks the specified submit control. Both write gates, API authentication and credential encryption remain required. It only operates on an explicitly identified authenticator-app page at the credential's exact permitted HTTPS origin and in the top frame. Supported targets are one visible editable input with `autocomplete="one-time-code"`, one six-character (`maxlength="6"`) input with numeric constraints, or exactly six one-character numeric-oriented input cells in DOM order. Every target and the enabled submit button/input must belong to the same non-null form, whose effective submission action must stay at the current HTTPS origin. JavaScript-only or ambiguous forms may be rejected. Generic click/fill/credential tools still stop on MFA pages; this is a narrow normal-authentication exception, not a general challenge bypass.
+
+CAPTCHA, access-denied, suspicious-login and insecure-browser warnings always stop the action even when authenticator text is present. Generic verification-code pages and SMS/email/recovery/device-approval forms are rejected. Page classification uses conservative text/element checks, not a universal challenge detector; some legitimate or multilingual forms will not be supported. Do not weaken checks to get around a site's restrictions.
+
+The tool waits for a fresh period if fewer than five seconds remain, subject to cancellation, credential expiry and task budget. Keep the app server's clock synchronized. At most two timestep attempts per credential are permitted in a task, and a timestep cannot be reused after an uncertain entry/submission failure. The agent is instructed not to retry a failed submission automatically. A successful tool response means only that submission was attempted without an observed hard restriction; authentication success must be observed separately.
+
+Seeds and generated codes are redacted from text observations and final results. Attempt markers and generated-code redaction values remain task-local memory only and are cleared with credentials after completion/failure/cancellation; they are not serialized into the database. Python memory and SQLite backups cannot be guaranteed forensically erased. The trusted login page necessarily receives the OTP, and redaction is not a complete defense against transformed/encoded page data or a compromised allowed origin.
+
+DeepAgent follows `inspect_totp_form(credential_id)` → `fill_totp(selector, submit_selector, credential_id)` → observe the resulting page. Discovery returns a bounded list of supported layouts and structural selectors only; it does not read field values, hidden tokens, arbitrary labels or HTML. The fill tool independently revalidates the live form. Codes are generated locally with `pyotp.TOTP(secret, digits=6, interval=30).now()` and reserved only when the sampled period remains stable and fresh.
+
+Use the interactive client's optional `--account` mode or the structured HTTPS API for this feature. Do not paste a seed into the task prompt. Broad cross-site support does not guarantee every form works: iframes, JavaScript-only/no-form submissions, ambiguous MFA methods and some multilingual pages remain unsupported. Page scripts can react to typing or auto-submit inputs; DOM validation cannot universally prevent those side effects, and uncertain attempts are not automatically retried.
+
 ## Credential lifecycle
 
-Structured username/password values are encrypted with Fernet before SQLite insertion. The worker decrypts them after claim; default TTL is 900 seconds and configurable from 60 to 3600 seconds. Values remain scoped to the running task; browser closure is attempted on exit and cookies/profiles are not persisted by this feature. Graceful app shutdown cancels the active task, clears its live encrypted credentials and attempts to delete its registered browser session. Tools honor cancellation, including sessions created after cancellation. Compose grants the app 60 seconds to stop; increase deployment grace if browser transport timeouts are raised. Hard kills, server crashes or an unreachable Selenium service can still leave a remote browser until Selenium cleans it up; configure a server-side idle session timeout. Outstanding model calls cannot be force-killed by this thread-based worker.
+Structured username/password values and optional TOTP seeds are encrypted with Fernet before SQLite insertion. The worker decrypts them after claim; default TTL is 900 seconds and configurable from 60 to 3600 seconds. Values remain scoped to the running task; browser closure is attempted on exit and cookies/profiles are not persisted by this feature. Graceful app shutdown cancels the active task, clears its live encrypted credentials and attempts to delete its registered browser session. Tools honor cancellation, including sessions created after cancellation. Compose grants the app 60 seconds to stop; increase deployment grace if browser transport timeouts are raised. Hard kills, server crashes or an unreachable Selenium service can still leave a remote browser until Selenium cleans it up; configure a server-side idle session timeout. Outstanding model calls cannot be force-killed by this thread-based worker.
 
 Unexpired pending tasks retain encrypted credentials across restarts. Completion, failure, expiry cleanup and interrupted-processing recovery clear the live credential columns. Interrupted processing is failed, not automatically retried. Pending expiry cleanup runs in the worker. TTL is also checked before credential entry.
 
@@ -79,9 +96,17 @@ cd /d/posting
 .venv/Scripts/python.exe scripts/submit_account_task.py
 ```
 
-The script now uses the **simple prompt-only flow**: it loads the API token from project `.env` (or prompts securely), asks for one hidden task prompt and sends only `{"prompt": "..."}`. No separate account, origins, proxy or credential-encryption setup is needed for this client. Typing/clicking still requires server `ENABLE_WRITE_ACTIONS=true`; the client cannot override that setting. Entering the prompt submits the task and can incur model API charges.
+By default the script uses the **simple prompt-only flow**: it loads the API token from project `.env` (or prompts securely), asks for one hidden task prompt and sends only `{"prompt": "..."}`. No separate account, origins, proxy or credential-encryption setup is needed for this client. Typing/clicking still requires server `ENABLE_WRITE_ACTIONS=true`; the client cannot override that setting. Entering the prompt submits the task and can incur model API charges.
 
 If username/password are included in the prompt, they are sent to the model provider and persisted in the task database **without the structured-credential encryption described above**. Hidden terminal entry prevents echo/history exposure, not model/database disclosure. Outputs may also contain sensitive account information; do not share them unredacted. The API still supports optional structured credentials for clients that need them; task-specific proxies are disabled. Only recognized, fixed server error messages are displayed; arbitrary response error bodies are omitted.
+
+For encrypted structured credentials, run:
+
+```bash
+.venv/Scripts/python.exe scripts/submit_account_task.py --account
+```
+
+Enter a goal such as `Open https://login.example/signin, use credential ID account, complete authenticator 2FA if requested, then report the observed outcome`—without secret values. The client asks separately for an account ID, comma-separated exact HTTPS origins, explicit authorization/write consent, hidden username/password and optional hidden Base32 authenticator secret. It sends those values in `credentials` with `allow_write_actions=true`, not in the model prompt. Server authentication, write permission and encryption configuration are still required. Input validation errors omit secret values; result display redacts the submitted credentials as defense in depth. Do not pass secrets as command-line arguments or paste them into task text. `--account` and `--task-id` are mutually exclusive; the default prompt-only path is unchanged.
 
 Optional `TASK_API_URL` defaults to `https://webagent.elgrowth.com`. It must use HTTPS. The client does not configure the server's write gate or encryption key.
 

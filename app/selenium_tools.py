@@ -1,9 +1,11 @@
 import ipaddress
+import json
 import socket
 import time
 from typing import Literal
 from urllib.parse import urlsplit
 
+import pyotp
 from langchain_core.tools import ToolException, tool
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
@@ -13,6 +15,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from app.config import Settings
 from app.schemas import https_origin
 from app.task_context import TaskContext
+from app.totp_forms import (
+    DISCOVER_CONTROLS, SUBMISSION_FORM, single_input, split_input, structural_selector,
+    submit_control, validate_inputs,
+)
 
 
 class BrowserPolicyStop(RuntimeError):
@@ -53,23 +59,35 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
     def redact(text: str) -> str:
         return context.redact(text) if context else text
 
+    hard_markers = (
+        "captcha", "verify you are human", "verify it's you", "access denied", "suspicious login",
+        "this browser or app may not be secure", "unusual traffic",
+    )
+    mfa_markers = (
+        "two-step verification", "two-factor", "verification code", "authenticator",
+        "authentication app", "totp", "one-time code",
+    )
+
+    def page_text() -> str:
+        check_session()
+        try:
+            visible = driver.find_element(By.TAG_NAME, "body").text[:20000].lower()
+            if any(marker in visible for marker in hard_markers):
+                raise BrowserPolicyStop("Authentication challenge or access restriction encountered")
+            return visible
+        except WebDriverException:
+            raise BrowserPolicyStop("Could not verify login page policy") from None
+
     def check_write_page() -> None:
         check_session()
         if context and context.credentials:
-            try:
-                visible = driver.find_element(By.TAG_NAME, "body").text[:20000].lower()
-                markers = (
-                    "captcha", "verify you are human", "verify it's you", "two-step verification",
-                    "two-factor", "verification code", "access denied", "suspicious login",
-                    "this browser or app may not be secure", "unusual traffic",
-                )
-                if any(marker in visible for marker in markers):
-                    raise BrowserPolicyStop("Authentication challenge or access restriction encountered")
-            except WebDriverException:
-                raise BrowserPolicyStop("Could not verify login page policy") from None
+            if any(marker in page_text() for marker in mfa_markers):
+                raise BrowserPolicyStop("Authentication challenge or access restriction encountered")
 
-    def credential_origin(credential) -> None:
-        check_write_page()
+    def check_credential_origin(credential) -> None:
+        check_session()
+        if not any(item is credential for item in context.credentials):
+            raise BrowserPolicyStop("Task credentials unavailable")
         if context.credential_expires_at is not None and time.time() >= context.credential_expires_at:
             raise BrowserPolicyStop("Task credentials expired")
         try:
@@ -82,6 +100,18 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                 raise BrowserPolicyStop("Credential entry is not authorized at this origin or frame")
         except (ValueError, WebDriverException):
             raise BrowserPolicyStop("Could not verify credential origin") from None
+
+    def credential_origin(credential) -> None:
+        check_write_page()
+        check_credential_origin(credential)
+
+    def check_totp_page(credential) -> None:
+        check_credential_origin(credential)
+        visible = page_text()
+        if not any(marker in visible for marker in ("authenticator app", "authentication app", "totp")) or any(
+            marker in visible for marker in ("sms", "text message", "email code", "recovery code", "backup code", "device approval")
+        ):
+            raise BrowserPolicyStop("Only an explicit authenticator-app form is supported")
 
     def check_session() -> None:
         if context and context.cancelled.is_set():
@@ -98,7 +128,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
         check_session()
         condition = (conditions.element_to_be_clickable if clickable else conditions.visibility_of_element_located)
         try:
-            return WebDriverWait(driver, settings.browser_timeout_seconds).until(
+            return WebDriverWait(driver, min(settings.browser_timeout_seconds, max(0, deadline - time.monotonic()))).until(
                 condition((By.CSS_SELECTOR, selector))
             )
         except WebDriverException as exc:
@@ -191,4 +221,130 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                     raise BrowserPolicyStop("Credential entry failed") from None
 
             tools.append(fill_credential)
+            if any(credential.totp_secret is not None for credential in context.credentials):
+                def totp_credential(credential_id):
+                    credential = next((item for item in context.credentials if item.id == credential_id), None)
+                    if credential is None or credential.totp_secret is None:
+                        raise BrowserPolicyStop("Authenticator credential unavailable")
+                    return credential
+
+                def check_submission(elements, submit, credential):
+                    check_totp_page(credential)
+                    validate_inputs(elements)
+                    if not submit_control(submit):
+                        raise BrowserPolicyStop("Authenticator submit control is not authorized")
+                    for element in elements:
+                        form = driver.execute_script(SUBMISSION_FORM, element, submit)
+                        if (
+                            not isinstance(form, dict) or form.get("sameForm") is not True
+                            or https_origin(form.get("action", "")) != https_origin(driver.current_url)
+                        ):
+                            raise BrowserPolicyStop("Authenticator form submission is not authorized")
+
+                @tool
+                def inspect_totp_form(credential_id: str) -> str:
+                    """Discover supported authenticator inputs and submit selectors without reading field values."""
+                    credential = totp_credential(credential_id)
+                    try:
+                        check_totp_page(credential)
+                        controls = driver.execute_script(DISCOVER_CONTROLS)
+                        check_totp_page(credential)
+                        if not isinstance(controls, list):
+                            raise BrowserPolicyStop("Could not inspect authenticator form")
+                        forms = {}
+                        for row in controls[:200]:
+                            if not isinstance(row, dict):
+                                continue
+                            selector, form_id, element = row.get("selector"), row.get("form"), row.get("element")
+                            if not structural_selector(selector) or type(form_id) is not int or form_id < 0:
+                                continue
+                            group = forms.setdefault(form_id, {"single": [], "split": [], "submit": []})
+                            if single_input(element):
+                                group["single"].append((selector, element))
+                            if split_input(element):
+                                group["split"].append((selector, element))
+                            if submit_control(element):
+                                group["submit"].append((selector, element))
+                        candidates = []
+                        for group in forms.values():
+                            layouts = [("single", [item]) for item in group["single"]]
+                            if len(group["split"]) == 6:
+                                layouts.append(("six-digit", group["split"]))
+                            for layout, inputs in layouts:
+                                for submit_selector, submit in group["submit"]:
+                                    try:
+                                        check_submission([item[1] for item in inputs], submit, credential)
+                                    except (BrowserPolicyStop, ValueError):
+                                        continue
+                                    candidates.append({"layout": layout, "selector": ", ".join(item[0] for item in inputs), "submit_selector": submit_selector})
+                                    if len(candidates) >= 8:
+                                        break
+                                if len(candidates) >= 8:
+                                    break
+                            if len(candidates) >= 8:
+                                break
+                        check_totp_page(credential)
+                        return redact(json.dumps({"forms": candidates, "note": "Revalidate with fill_totp; submission is not proof of login."}))
+                    except BrowserPolicyStop:
+                        raise
+                    except (WebDriverException, ToolException, ValueError, TypeError, AttributeError):
+                        raise BrowserPolicyStop("Authenticator inspection failed") from None
+
+                @tool
+                def fill_totp(selector: str, submit_selector: str, credential_id: str) -> str:
+                    """Generate the current OTP locally and submit one input or exactly six digit cells using a credential ID."""
+                    credential = totp_credential(credential_id)
+                    try:
+                        check_totp_page(credential)
+                        if not selector.strip() or len(selector) > 2000:
+                            raise BrowserPolicyStop("Invalid authenticator selector")
+                        remaining = min(settings.browser_timeout_seconds, deadline - time.monotonic())
+                        if remaining <= 0:
+                            raise BrowserPolicyStop("Task time limit reached")
+                        elements = WebDriverWait(driver, remaining).until(lambda browser: browser.find_elements(By.CSS_SELECTOR, selector))
+                        check_totp_page(credential)
+                        submit = find_element(submit_selector, clickable=True)
+
+                        def check_controls():
+                            check_submission(elements, submit, credential)
+                            if driver.find_elements(By.CSS_SELECTOR, selector) != elements or driver.find_element(By.CSS_SELECTOR, submit_selector) != submit:
+                                raise BrowserPolicyStop("Authenticator controls changed")
+
+                        totp = pyotp.TOTP(credential.totp_secret.get_secret_value(), digits=6, interval=30)
+                        while True:
+                            check_controls()
+                            if deadline - time.monotonic() <= 0.25:
+                                raise BrowserPolicyStop("Insufficient time for a fresh authenticator code")
+                            before = time.time()
+                            if 30 - before % 30 >= 5:
+                                code = totp.now()
+                                after = time.time()
+                                if int(before // 30) == int(after // 30) and 30 - after % 30 >= 5:
+                                    timestep = int(after // 30)
+                                    break
+                            if context.cancelled.wait(0.25):
+                                raise BrowserPolicyStop("Task cancelled")
+                        context.reserve_totp(credential, timestep, code)
+
+                        def check_current_code():
+                            check_controls()
+                            if int(time.time() // 30) != timestep:
+                                raise BrowserPolicyStop("Authenticator code expired before submission")
+
+                        for index, element in enumerate(elements):
+                            check_current_code()
+                            element.clear()
+                            check_current_code()
+                            element.send_keys(code if len(elements) == 1 else code[index])
+                            check_current_code()
+                        submit.click()
+                        check_session()
+                        page_text()
+                        return "Authenticator code submitted; login outcome must be observed separately"
+                    except BrowserPolicyStop:
+                        raise
+                    except (WebDriverException, ToolException, ValueError, RuntimeError):
+                        raise BrowserPolicyStop("Authenticator entry failed") from None
+
+                tools.extend([inspect_totp_form, fill_totp])
     return tools
