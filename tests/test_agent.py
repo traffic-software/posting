@@ -207,3 +207,40 @@ def test_report_respects_serialized_byte_limit(text):
     result = output_result(text)
     assert result["output"]
     assert len(json.dumps(result, ensure_ascii=False).encode("utf-8")) <= 8000
+
+
+@pytest.mark.parametrize("failure", [TimeoutError, RuntimeError], ids=["timeout", "unknown"])
+def test_startup_failure_is_reported_without_raw_exception(monkeypatch, failure):
+    from app.task_report import TaskExecutionFailure
+
+    def unavailable(**_):
+        raise failure("raw startup secret")
+
+    class Offline:
+        def invoke(self, *_):
+            raise RuntimeError("raw provider secret")
+
+    monkeypatch.setattr(agent.webdriver, "Remote", unavailable)
+    monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: Offline())
+    settings = Settings(_env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1", model_name="test")
+    with pytest.raises(TaskExecutionFailure) as error:
+        agent.run_task("Read title", settings)
+    assert "raw" not in str(error.value.result)
+    if failure is TimeoutError:
+        assert "time limit" in error.value.result["output"]
+
+
+def test_cleanup_error_does_not_discard_success(monkeypatch):
+    class Driver(FakeDriver):
+        def quit(self):
+            raise RuntimeError("cleanup secret")
+
+    class Graph:
+        def invoke(self, *_args, **_kwargs):
+            return {"messages": [SimpleNamespace(content="Observed page title")]}
+
+    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: Driver())
+    monkeypatch.setattr(agent, "create_deep_agent", lambda **_: Graph())
+    monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: object())
+    settings = Settings(_env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1", model_name="test")
+    assert agent.run_task("Read title", settings) == {"output": "Observed page title"}

@@ -5,6 +5,9 @@ from deepagents import create_deep_agent
 from deepagents.backends import StateBackend
 from langchain.agents.middleware import TodoListMiddleware
 from langchain_openai import ChatOpenAI
+from langgraph.errors import GraphRecursionError
+from openai import APIConnectionError, APITimeoutError, AuthenticationError, RateLimitError
+from selenium.common.exceptions import WebDriverException
 from selenium import webdriver
 from selenium.webdriver.remote.client_config import ClientConfig
 
@@ -36,22 +39,11 @@ State what remains unverified and a safe next step, if supported. Never invent a
 
 
 def _execute_task(prompt: str, settings: Settings, context: TaskContext) -> dict:
-    if not settings.openai_api_key or not settings.openai_base_url or not settings.model_name:
-        raise RuntimeError("Model configuration is missing")
-
-    if context and context.cancelled.is_set():
-        raise RuntimeError("Task cancelled")
-    if context and context.proxy is not None:
-        raise RuntimeError("Task proxies are disabled")
     deadline = time.monotonic() + settings.task_timeout_seconds
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--no-sandbox")
-    if context and context.credentials and (
-        not settings.enable_write_actions or context.allow_write_actions is not True
-    ):
-        raise RuntimeError("Credential writes are disabled")
     context.record_observation("execution", "stage", "Connecting to the browser service")
     driver = webdriver.Remote(
         command_executor=settings.selenium_remote_url, options=options,
@@ -137,14 +129,19 @@ def run_task(prompt: str, settings: Settings, context: TaskContext | None = None
     try:
         return _execute_task(prompt, settings, context)
     except Exception as exc:
-        from langgraph.errors import GraphRecursionError
-        from selenium.common.exceptions import WebDriverException
-
         reason = "Execution stopped before the requested outcome could be verified."
         if isinstance(exc, GraphRecursionError):
             reason = "The agent reached its execution step limit."
         elif isinstance(exc, TimeoutError):
             reason = "Execution exceeded its time limit."
+        elif isinstance(exc, APITimeoutError):
+            reason = "The model service did not respond within its timeout."
+        elif isinstance(exc, AuthenticationError):
+            reason = "The model service rejected the configured authentication."
+        elif isinstance(exc, RateLimitError):
+            reason = "The model service rejected the request due to a rate or quota limit."
+        elif isinstance(exc, APIConnectionError):
+            reason = "A connection to the model service could not be established."
         elif isinstance(exc, WebDriverException):
             reason = "The browser service could not complete an operation."
         if context.cancelled.is_set():

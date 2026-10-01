@@ -41,3 +41,22 @@ def test_failed_result_does_not_disappear(tmp_path):
     store.claim_next()
     store.finish(task_id, TaskStatus.FAILED, error="Task execution failed")
     assert TaskStore(store.path).get(task_id)["error"] == "Task execution failed"
+
+
+def test_lifecycle_failures_include_persisted_explanations(tmp_path):
+    store = TaskStore(tmp_path / "tasks.db")
+    store.initialize()
+    cancelled = store.create("cancel", 3)
+    store.claim_next()
+    store.cancel_processing(cancelled)
+    interrupted = store.create("restart", 3)
+    store.claim_next()
+    store.recover_interrupted()
+    expired = store.create("expire", 3, credential_blob="unused", credential_expires_at="2000-01-01T00:00:00Z")
+    assert store.claim_next() is None
+    reopened = TaskStore(store.path)
+    for task_id, reason in [(cancelled, "shut down"), (interrupted, "restart"), (expired, "expired")]:
+        record = reopened.get(task_id)
+        assert record["status"] == TaskStatus.FAILED
+        assert reason in record["result"]["output"]
+        assert "not confirmed" in record["result"]["output"]

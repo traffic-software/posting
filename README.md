@@ -22,6 +22,24 @@ curl -sS http://127.0.0.1:8000/task-status/YOUR_TASK_ID \
 
 `TASK_API_TOKEN` ফাঁকা থাকলে উদাহরণের Authorization header বাদ দিতে পারেন, তবে তখন শুধু trusted local environment ব্যবহার করুন। Railway deployment-এ `REQUIRE_TASK_API_TOKEN=true` বাধ্যতামূলক। `GET /health` API ও task DB/worker পরীক্ষা করে; `GET /ready` অতিরিক্তভাবে Selenium Grid readiness পরীক্ষা করে। ভুল UUID-তে 422, অজানা UUID-তে 404, capacity পূর্ণ হলে 429। API-তে কোনো ফল সফলভাবে সেভ হলে app restart-এর পরেও একই ID-তে পাওয়া যায়।
 
+## অসম্পূর্ণ কাজের রিপোর্ট
+
+নতুন execution failure-এ `result: null`-এর বদলে `result.output`-এ ব্যাখ্যা থাকে। Browser বন্ধ করার পরে একই configured model-কে সীমিত, redacted tool observations দিয়ে একবার বিশ্লেষণ করতে বলা হয়—কী চেষ্টা হয়েছে, কোথায় থেমেছে, কোন কারণ evidence দিয়ে জানা যাচ্ছে এবং কী যাচাই হয়নি। এই reporting call-এর timeout সর্বোচ্চ ১০ সেকেন্ড; এটি browser action বা task retry করে না। Model unavailable হলে বা shutdown/restart/credential expiry হলে factual fallback থাকে; agent analysis পাওয়া যায়নি বলা হয়। Raw exception, credentials বা OTP প্রকাশ করা হয় না।
+
+উদাহরণ (শুধু illustration, কোনো নির্দিষ্ট task-এর diagnosis নয়):
+
+```json
+{
+  "status": "FAILED",
+  "result": {
+    "output": "পেজ খোলার চেষ্টা করেছি, কিন্তু browser service operation শেষ করতে পারেনি। পেজের তথ্য বা login outcome যাচাই করা যায়নি। Website কেন ব্যর্থ হয়েছে তা পাওয়া evidence থেকে নিশ্চিত নয়।"
+  },
+  "error": "Task execution failed"
+}
+```
+
+`COMPLETED` মানে agent execution শেষ হয়েছে, requested login/action নিশ্চিত সফল হয়েছে নয়। স্বাভাবিক final response-এও অসম্পূর্ণ কাজের কারণ এবং observed outcome বলতে agent-কে নির্দেশ দেওয়া হয়। পুরোনো FAILED record-এর observations সংরক্ষিত না থাকলে পুরোনো task-এর কারণ পুনর্গঠন করা হয় না।
+
 ## Account login
 
 Prompt-এ workflow দিন, password নয়। Structured `credentials` ও exact HTTPS login origins দিয়ে authorized account task পাঠানো যায়। Task-specific proxy support বন্ধ; non-null `proxy` request reject হয়। Server ও task—দুই জায়গায় write permission প্রয়োজন। Test-এ encryption key না দিলে app temporary key তৈরি করে; production/restart recovery-র জন্য persistent key configure করুন। Request format, secure client ও সীমাবদ্ধতা: [docs/account-tasks.md](docs/account-tasks.md)। Anti-detect/security bypass বা proxy-auth plugin যোগ করা হয়নি।
