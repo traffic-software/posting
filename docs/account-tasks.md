@@ -28,7 +28,7 @@ Generate a key on a trusted server with the installed environment:
 python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'
 ```
 
-Save it only in the server's secret configuration, protect `.env` permissions, and do not send it to the client, model, repository, chat or logs. This command prints the new secret: use a private terminal. Missing/invalid keys reject credential submissions with 503. Changing the key invalidates pending encrypted tasks; plan rotation rather than silently replacing it.
+Save it only in the server's secret configuration, protect `.env` permissions, and do not send it to the client, model, repository, chat or logs. This command prints the new secret: use a private terminal. A missing/blank key now uses a private, automatically generated process-local Fernet key, so tests can submit credentials without manual key setup. Ciphertext is still stored, not plaintext passwords or seeds. Pending credential tasks in this mode cannot decrypt after restart/redeployment and fail safely; configure a persistent key for production/restart recovery. An invalid nonempty configured key still rejects credential submissions with 503. Changing the key invalidates pending encrypted tasks; plan rotation rather than silently replacing it.
 
 ## Request shape
 
@@ -77,7 +77,7 @@ Use the interactive client's optional `--account` mode or the structured HTTPS A
 
 Structured username/password values and optional TOTP seeds are encrypted with Fernet before SQLite insertion. The worker decrypts them after claim; default TTL is 900 seconds and configurable from 60 to 3600 seconds. Values remain scoped to the running task; browser closure is attempted on exit and cookies/profiles are not persisted by this feature. Graceful app shutdown cancels the active task, clears its live encrypted credentials and attempts to delete its registered browser session. Tools honor cancellation, including sessions created after cancellation. Compose grants the app 60 seconds to stop; increase deployment grace if browser transport timeouts are raised. Hard kills, server crashes or an unreachable Selenium service can still leave a remote browser until Selenium cleans it up; configure a server-side idle session timeout. Outstanding model calls cannot be force-killed by this thread-based worker.
 
-Unexpired pending tasks retain encrypted credentials across restarts. Completion, failure, expiry cleanup and interrupted-processing recovery clear the live credential columns. Interrupted processing is failed, not automatically retried. Pending expiry cleanup runs in the worker. TTL is also checked before credential entry.
+With a configured persistent key, unexpired pending tasks retain encrypted credentials across restarts. With the automatic ephemeral key, a new process cannot decrypt previous pending credentials; those tasks fail safely and their blobs are cleared. Completion, failure, expiry cleanup and interrupted-processing recovery clear the live credential columns. Interrupted processing is failed, not automatically retried. Pending expiry cleanup runs in the worker. TTL is also checked before credential entry.
 
 Clearing a SQLite column is **logical deletion**, not forensic erasure: WAL files, backups or memory copies may retain ciphertext/data. Protect the database, encryption key, server, Selenium control channel and backup policy accordingly. No browser automation can keep a password secret from the trusted login page receiving it; compromised pages/scripts at an allowed origin remain a risk.
 
@@ -96,17 +96,11 @@ cd /d/posting
 .venv/Scripts/python.exe scripts/submit_account_task.py
 ```
 
-By default the script uses the **simple prompt-only flow**: it loads the API token from project `.env` (or prompts securely), asks for one hidden task prompt and sends only `{"prompt": "..."}`. No separate account, origins, proxy or credential-encryption setup is needed for this client. Typing/clicking still requires server `ENABLE_WRITE_ACTIONS=true`; the client cannot override that setting. Entering the prompt submits the task and can incur model API charges.
+The current script is a **fixed-account Gmail test client**: it loads the API token from project `.env` (or prompts securely), keeps the locally configured account and instructions unchanged, and sends structured `credentials` with `allow_write_actions=true`. It no longer asks for account values or task directions. Running it submits a task and can incur model API charges. Server `ENABLE_WRITE_ACTIONS=true` and API authentication are still required; the client cannot override those gates. Keep the local test fixture private and do not commit real credentials.
 
 If username/password are included in the prompt, they are sent to the model provider and persisted in the task database **without the structured-credential encryption described above**. Hidden terminal entry prevents echo/history exposure, not model/database disclosure. Outputs may also contain sensitive account information; do not share them unredacted. The API still supports optional structured credentials for clients that need them; task-specific proxies are disabled. Only recognized, fixed server error messages are displayed; arbitrary response error bodies are omitted.
 
-For encrypted structured credentials, run:
-
-```bash
-.venv/Scripts/python.exe scripts/submit_account_task.py --account
-```
-
-Enter a goal such as `Open https://login.example/signin, use credential ID account, complete authenticator 2FA if requested, then report the observed outcome`—without secret values. The client asks separately for an account ID, comma-separated exact HTTPS origins, explicit authorization/write consent, hidden username/password and optional hidden Base32 authenticator secret. It sends those values in `credentials` with `allow_write_actions=true`, not in the model prompt. Server authentication, write permission and encryption configuration are still required. Input validation errors omit secret values; result display redacts the submitted credentials as defense in depth. Do not pass secrets as command-line arguments or paste them into task text. `--account` and `--task-id` are mutually exclusive; the default prompt-only path is unchanged.
+The old `--account` flag remains accepted for compatibility, but is no longer necessary: a normal run submits the fixed structured account test. Duplicate client-side schema/prompt checks have been removed; the server still validates requests. Client output masks the configured credentials and token. Keep secrets out of the prompt. Missing server encryption-key configuration now uses temporary process-local encryption; a malformed nonempty configured key still needs correction.
 
 Optional `TASK_API_URL` defaults to `https://webagent.elgrowth.com`. It must use HTTPS. The client does not configure the server's write gate or encryption key.
 

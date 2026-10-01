@@ -2,81 +2,25 @@ import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 
+import httpx
 import pytest
 
 
-@pytest.mark.parametrize("status,detail", [
-    (202, None),
-    (503, "Task service is not configured"),
-    (422, "unknown-sensitive-error"),
-])
-def test_prompt_only_submission_without_live_calls(monkeypatch, capsys, status, detail):
+@pytest.fixture
+def client_script(monkeypatch):
     path = Path(__file__).resolve().parents[1] / "scripts" / "submit_account_task.py"
     spec = importlib.util.spec_from_file_location("submit_client", path)
-    client_script = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(client_script)
-    monkeypatch.setattr(client_script, "load_dotenv", lambda *_: None)
-    monkeypatch.setenv("TASK_API_TOKEN", "fake-token")
-    monkeypatch.setenv("TASK_API_URL", "https://api.example")
-    monkeypatch.setattr(client_script.sys, "argv", ["submit_account_task.py"])
-    monkeypatch.setattr(client_script.getpass, "getpass", lambda *_: "Authorized demo task")
-    submitted = []
-
-    class FakeClient:
-        def __init__(self, **kwargs):
-            pass
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *_):
-            pass
-
-        def post(self, path, json):
-            submitted.append(json)
-            return SimpleNamespace(
-                status_code=status,
-                json=lambda: {"task_id": "fake-task"} if status == 202 else {"detail": detail},
-            )
-
-        def get(self, path):
-            return SimpleNamespace(
-                raise_for_status=lambda: None,
-                json=lambda: {"status": "COMPLETED", "result": {"output": "Demo done"}},
-            )
-
-    monkeypatch.setattr(client_script.httpx, "Client", FakeClient)
-    assert client_script.main() == (0 if status == 202 else 1)
-    assert submitted == [{"prompt": "Authorized demo task"}]
-    captured = capsys.readouterr()
-    assert "fake-token" not in captured.out + captured.err
-    assert "unknown-sensitive-error" not in captured.err
-    if status == 503:
-        assert "model configuration is incomplete" in captured.err
-
-
-@pytest.mark.parametrize("consent,seed,origins,expected", [
-    ("yes", "gezd gnbv gy3t qojq gezd gnbv gy3t qojq", "https://login.example", 0),
-    ("no", "", "https://login.example", 1),
-    ("yes", "invalid-private-seed", "https://login.example", 1),
-    ("yes", "", "http://login.example", 1),
-    ("yes", "", "https://login.example", 0),
-])
-def test_account_mode_keeps_secrets_out_of_prompt(monkeypatch, capsys, consent, seed, origins, expected):
-    path = Path(__file__).resolve().parents[1] / "scripts" / "submit_account_task.py"
-    spec = importlib.util.spec_from_file_location("account_client", path)
     script = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(script)
     monkeypatch.setattr(script, "load_dotenv", lambda *_: None)
-    monkeypatch.setenv("TASK_API_TOKEN", "private-token")
+    monkeypatch.setenv("TASK_API_TOKEN", "fake-token")
     monkeypatch.setenv("TASK_API_URL", "https://api.example")
-    monkeypatch.setattr(script.sys, "argv", ["submit_account_task.py", "--account"])
-    hidden = iter(["Sign in using account", "private-user", 'private-"password', seed])
-    visible = iter(["account", origins, consent])
-    monkeypatch.setattr(script.getpass, "getpass", lambda *_: next(hidden))
-    monkeypatch.setattr("builtins.input", lambda *_: next(visible))
-    submitted = []
+    monkeypatch.setattr(script.sys, "argv", ["submit_account_task.py"])
+    monkeypatch.setattr(script.getpass, "getpass", lambda *_: pytest.fail("Unexpected credential prompt"))
+    return script
 
+
+def fake_client(monkeypatch, script, submitted, status=202, detail=None, result=None):
     class FakeClient:
         def __init__(self, **kwargs):
             pass
@@ -89,59 +33,93 @@ def test_account_mode_keeps_secrets_out_of_prompt(monkeypatch, capsys, consent, 
 
         def post(self, path, json):
             submitted.append(json)
-            return SimpleNamespace(status_code=202, json=lambda: {"task_id": "fake-task"})
+            return SimpleNamespace(status_code=status, json=lambda: {"task_id": "fake-task"} if status == 202 else {"detail": detail})
 
         def get(self, path):
-            return SimpleNamespace(raise_for_status=lambda: None, json=lambda: {
-                "status": "COMPLETED", "result": {"output": 'private-user private-"password ' + seed + " GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"},
-            })
+            return SimpleNamespace(raise_for_status=lambda: None, json=lambda: result or {"status": "COMPLETED", "result": {"output": "Demo done"}})
 
     monkeypatch.setattr(script.httpx, "Client", FakeClient)
-    assert script.main() == expected
+
+
+@pytest.mark.parametrize("status,detail", [
+    (202, None), (503, "Task service is not configured"),
+    (503, "Credential encryption is unavailable"), (422, "unknown-sensitive-error"),
+])
+def test_fixed_account_submission_without_live_calls(client_script, monkeypatch, capsys, status, detail):
+    submitted = []
+    fake_client(monkeypatch, client_script, submitted, status, detail)
+    assert client_script.main() == (0 if status == 202 else 1)
+    assert len(submitted) == 1
+    payload = submitted[0]
+    assert payload["allow_write_actions"] is True
+    assert "inspect_totp_form" in payload["prompt"] and "fill_totp" in payload["prompt"]
+    expected = client_script.account_payload(payload["prompt"], set())["credentials"][0]
+    assert all(payload["credentials"][0][key] == value for key, value in expected.items())
+    captured = capsys.readouterr()
+    output = captured.out + captured.err
+    assert "fake-token" not in output and "unknown-sensitive-error" not in output
+    assert all(expected[key] not in output for key in ("username", "password", "totp_secret"))
+    if detail == "Credential encryption is unavailable":
+        assert detail in captured.err
+
+
+def test_known_credential_output_is_redacted(client_script, monkeypatch, capsys):
+    secrets = {"fake-token"}
+    credential = client_script.account_payload("test", secrets)["credentials"][0]
+    fake_client(monkeypatch, client_script, [], result={
+        "status": "COMPLETED", "result": {"output": " ".join(secrets)},
+    })
+    assert client_script.main() == 0
+    output = capsys.readouterr().out
+    assert "[REDACTED]" in output
+    assert all(secret not in output for secret in secrets)
+    assert all(credential[key] not in output for key in ("username", "password", "totp_secret"))
+
+
+def test_resume_does_not_resubmit(client_script, monkeypatch):
+    submitted = []
+    monkeypatch.setattr(client_script.sys, "argv", ["client", "--task-id", "existing-task"])
+    fake_client(monkeypatch, client_script, submitted)
+    assert client_script.main() == 0
+    assert not submitted
+
+
+def test_old_account_flag_still_runs_fixed_test(client_script, monkeypatch):
+    submitted = []
+    monkeypatch.setattr(client_script.sys, "argv", ["client", "--account"])
+    fake_client(monkeypatch, client_script, submitted)
+    assert client_script.main() == 0
+    assert len(submitted) == 1 and "credentials" in submitted[0]
+
+
+def test_https_is_required_before_submission(client_script, monkeypatch):
+    monkeypatch.setenv("TASK_API_URL", "http://api.example")
+    submitted = []
+    fake_client(monkeypatch, client_script, submitted)
+    assert client_script.main() == 1
+    assert not submitted
+
+
+def test_network_failure_never_retries(client_script, monkeypatch, capsys):
+    calls = []
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            pass
+
+        def post(self, *args, **kwargs):
+            calls.append(True)
+            raise httpx.ConnectError("private-error-details")
+
+    monkeypatch.setattr(client_script.httpx, "Client", FakeClient)
+    assert client_script.main() == 1
+    assert len(calls) == 1
     output = capsys.readouterr()
-    assert "private-token" not in output.out + output.err
-    assert "private-user" not in output.out + output.err and 'private-\\"password' not in output.out + output.err
-    if seed:
-        assert seed not in output.out + output.err
-    if expected:
-        assert not submitted
-    else:
-        assert submitted[0]["prompt"] == "Sign in using account"
-        assert submitted[0]["allow_write_actions"] is True
-        credential = submitted[0]["credentials"][0]
-        assert credential["password"] == 'private-"password'
-        assert credential["totp_secret"] == ("GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ" if seed else None)
-        if seed:
-            assert credential["totp_secret"] not in output.out
-
-
-def test_account_mode_and_polling_are_mutually_exclusive(monkeypatch):
-    path = Path(__file__).resolve().parents[1] / "scripts" / "submit_account_task.py"
-    spec = importlib.util.spec_from_file_location("account_conflict", path)
-    script = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(script)
-    monkeypatch.setattr(script.sys, "argv", ["client", "--account", "--task-id", "00000000-0000-0000-0000-000000000001"])
-    with pytest.raises(SystemExit) as error:
-        script.main()
-    assert error.value.code == 2
-
-
-def test_account_payload_imports_schema_outside_repository(tmp_path):
-    import subprocess
-    import sys
-
-    path = Path(__file__).resolve().parents[1] / "scripts" / "submit_account_task.py"
-    code = """
-import runpy, builtins, getpass, sys
-module = runpy.run_path(sys.argv[1])
-visible = iter(['account', 'https://login.example', 'yes'])
-hidden = iter(['private-user', 'private-password', ''])
-builtins.input = lambda *_: next(visible)
-getpass.getpass = lambda *_: next(hidden)
-payload = module['account_payload']('Authorized account task', set())
-assert payload['credentials'][0]['password'] == 'private-password'
-print('ok')
-"""
-    result = subprocess.run([sys.executable, "-I", "-c", code, str(path)], cwd=tmp_path, capture_output=True, text=True, timeout=30)
-    assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == "ok"
+    assert "private-error-details" not in output.err
+    assert "outcome may be unknown" in output.err

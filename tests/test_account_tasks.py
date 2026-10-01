@@ -16,7 +16,7 @@ from app.main import create_app
 from app.schemas import FixedProxy, LoginCredential, TaskRequest, TaskStatus
 from app.selenium_tools import BrowserPolicyStop, browser_tools
 from app.storage import TaskStore
-from app.task_context import TaskContext, decode_context, encode_context
+from app.task_context import TaskContext, credential_cipher, decode_context, encode_context
 
 
 USERNAME = "fake-account@example.com"
@@ -54,8 +54,11 @@ def public_dns(monkeypatch):
     ])
 
 
-def test_encrypt_decrypt_and_redact(tmp_path):
+@pytest.mark.parametrize("persistent", [False, True])
+def test_encrypt_decrypt_and_redact(tmp_path, persistent):
     settings = configured(tmp_path)
+    if not persistent:
+        settings.credential_fernet_key = ""
     options, blob = encode_context(TaskRequest.model_validate(request_body()), settings)
     assert USERNAME not in options + blob
     assert PASSWORD not in options + blob
@@ -67,9 +70,54 @@ def test_encrypt_decrypt_and_redact(tmp_path):
     assert decode_context(None, None, settings) is None
     with pytest.raises(InvalidToken):
         decode_context(options, "corrupt", settings)
-    old = Fernet(settings.credential_fernet_key).encrypt_at_time(b"[]", int(time.time()) - 1000).decode()
+    old = credential_cipher(settings).encrypt_at_time(b"[]", int(time.time()) - 1000).decode()
     with pytest.raises(InvalidToken):
         decode_context(options, old, settings)
+
+
+def test_ephemeral_cipher_is_private_and_instance_scoped(tmp_path):
+    settings = configured(tmp_path)
+    settings.credential_fernet_key = ""
+    cipher = credential_cipher(settings)
+    assert credential_cipher(settings) is cipher
+    assert "_ephemeral_credential_cipher" not in settings.model_dump()
+    assert "_ephemeral_credential_cipher" not in repr(settings)
+    request = TaskRequest.model_validate(request_body())
+    options, blob = encode_context(request, settings)
+    fresh = configured(tmp_path)
+    fresh.credential_fernet_key = ""
+    assert credential_cipher(fresh) is not cipher
+    with pytest.raises(InvalidToken):
+        decode_context(options, blob, fresh)
+
+
+def test_pending_ephemeral_credentials_fail_safely_after_restart(tmp_path):
+    from app.worker import TaskWorker
+
+    settings = configured(tmp_path)
+    settings.credential_fernet_key = ""
+    options, blob = encode_context(TaskRequest.model_validate(request_body()), settings)
+    store = TaskStore(settings.database_path)
+    store.initialize()
+    task_id = store.create("Authorized synthetic account test", 1, context_json=options, credential_blob=blob)
+    fresh = configured(tmp_path)
+    fresh.credential_fernet_key = ""
+    calls = []
+    worker = TaskWorker(store, fresh, runner=lambda *_: calls.append(True))
+    worker.start()
+    try:
+        for _ in range(100):
+            if store.get(task_id)["status"] == "FAILED":
+                break
+            time.sleep(0.01)
+        result = store.get(task_id)
+        assert result["status"] == "FAILED"
+        assert result["error"] == "Task execution failed"
+        assert not calls
+        with store.connection() as connection:
+            assert connection.execute("SELECT credential_blob FROM tasks WHERE task_id = ?", (task_id,)).fetchone()[0] is None
+    finally:
+        worker.stop()
 
 
 @pytest.mark.parametrize("changes", [
@@ -95,7 +143,6 @@ def test_validation_never_reflects_credentials(tmp_path, changes):
 @pytest.mark.parametrize("setting,value,expected", [
     ("enable_write_actions", False, 403),
     ("task_api_token", "", 403),
-    ("credential_fernet_key", "", 503),
     ("credential_fernet_key", "invalid", 503),
 ])
 def test_credential_admission_fails_closed(tmp_path, setting, value, expected):
@@ -108,8 +155,11 @@ def test_credential_admission_fails_closed(tmp_path, setting, value, expected):
         assert client.app.state.store.claim_execution() is None
 
 
-def test_authenticated_execution_redacts_and_clears(tmp_path):
+@pytest.mark.parametrize("persistent", [False, True])
+def test_authenticated_execution_redacts_and_clears(tmp_path, persistent):
     settings = configured(tmp_path)
+    if not persistent:
+        settings.credential_fernet_key = ""
     seen = []
 
     def runner(prompt, _, context):

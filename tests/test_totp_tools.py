@@ -264,8 +264,11 @@ def test_attempts_bounded_and_runtime_cleanup(setup):
     assert not context.credentials and not context._totp_codes and not context._totp_attempts
 
 
-def test_totp_encrypted_round_trip_and_legacy(tmp_path):
+@pytest.mark.parametrize("persistent", [False, True])
+def test_totp_encrypted_round_trip_and_legacy(tmp_path, persistent):
     settings = configured(tmp_path)
+    if not persistent:
+        settings.credential_fernet_key = ""
     request = TaskRequest(prompt="Authorized login", allow_write_actions=True, credentials=[credential()])
     options, blob = encode_context(request, settings)
     assert SEED not in options + blob

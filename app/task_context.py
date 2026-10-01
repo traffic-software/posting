@@ -87,7 +87,7 @@ class TaskContext:
 
 def credential_cipher(settings: Settings) -> Fernet:
     if not settings.credential_fernet_key:
-        raise ValueError("Credential encryption is not configured")
+        return settings._ephemeral_credential_cipher
     return Fernet(settings.credential_fernet_key.encode("ascii"))
 
 

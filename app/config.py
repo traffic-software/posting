@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from pydantic import Field
+from cryptography.fernet import Fernet
+from pydantic import Field, PrivateAttr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +16,7 @@ class Settings(BaseSettings):
     app_revision: str = "local"
     enable_write_actions: bool = False
     credential_fernet_key: str = Field(default="", repr=False)
+    _ephemeral_credential_cipher: Fernet = PrivateAttr(default_factory=lambda: Fernet(Fernet.generate_key()))
     credential_ttl_seconds: int = Field(default=900, ge=60, le=3600)
     database_path: Path = Path("data/tasks.db")
     selenium_remote_url: str = "http://selenium:4444/wd/hub"

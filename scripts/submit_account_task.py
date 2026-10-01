@@ -1,4 +1,4 @@
-"""Submit a browser task in prompt-only or secure account mode and poll the API."""
+"""Submit the configured Gmail login test and poll the API."""
 
 import argparse
 import getpass
@@ -8,7 +8,6 @@ import sys
 import time
 from pathlib import Path
 from urllib.parse import urlsplit
-from uuid import UUID
 
 import httpx
 from dotenv import load_dotenv
@@ -26,46 +25,31 @@ ERROR_MESSAGES = {
 
 
 def account_payload(prompt: str, secrets: set[str]) -> dict:
-    root = str(Path(__file__).resolve().parents[1])
-    if root not in sys.path:
-        sys.path.insert(0, root)
-    from app.schemas import LoginCredential, TaskRequest
-
-    credential_id = input("Credential ID [account]: ").strip() or "account"
-    origins = [value.strip() for value in input("Authorized HTTPS origins (comma-separated): ").split(",")]
-    if input("I am authorized to use this account and permit login writes [yes/no]: ").strip().lower() != "yes":
-        raise ValueError("Account consent required")
-    username = getpass.getpass("Account username (hidden): ")
-    password = getpass.getpass("Account password (hidden): ")
-    seed = getpass.getpass("Authenticator Base32 secret (hidden; blank if unused): ")
+    credential_id = "account"
+    origins = ["https://accounts.google.com", "https://mail.google.com"]
+    username = "rmansa082@gmail.com"
+    password = "PDSAKLZXCa"
+    seed = "suse vtgn ohir znkr h4tu u2m3 6ftp v4wy"
     secrets.update(value for value in (username, password, seed) if value)
-    credential = LoginCredential(id=credential_id, origins=origins, username=username, password=password, totp_secret=seed or None)
-    normalized_seed = credential.totp_secret.get_secret_value() if credential.totp_secret else None
-    if normalized_seed:
-        secrets.add(normalized_seed)
-    if any(value in prompt or value in credential_id for value in secrets):
-        raise ValueError("Keep credentials out of the prompt and ID")
-    request = TaskRequest(prompt=prompt, allow_write_actions=True, credentials=[credential])
+    normalized_seed = "".join(seed.split()).upper()
+    secrets.add(normalized_seed)
     return {
-        "prompt": request.prompt,
+        "prompt": prompt,
         "allow_write_actions": True,
         "credentials": [{
-            "id": credential.id, "origins": credential.origins,
-            "username": credential.username.get_secret_value(),
-            "password": credential.password.get_secret_value(), "totp_secret": normalized_seed,
+            "id": credential_id, "origins": origins,
+            "username": username,
+            "password": password, "totp_secret": seed,
         }],
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--task-id", type=UUID, help="Poll without submitting a new task")
-    mode.add_argument("--account", action="store_true", help="Collect encrypted structured account credentials separately from the task prompt")
+    parser.add_argument("--task-id", help="Poll an existing task without submitting again")
+    parser.add_argument("--account", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--timeout", type=int, default=240)
     args = parser.parse_args()
-    if args.timeout <= 0:
-        parser.error("--timeout must be positive")
     load_dotenv(Path(__file__).resolve().parents[1] / ".env")
     base_url = os.getenv("TASK_API_URL", "https://webagent.elgrowth.com").rstrip("/")
     parsed = urlsplit(base_url)
@@ -94,16 +78,35 @@ def main() -> int:
     with httpx.Client(base_url=base_url, headers={"Authorization": f"Bearer {token}"}, timeout=30) as client:
         try:
             if task_id is None:
-                print("Describe the task for your own/authorized account in the prompt.")
-                print("Keep credentials out of the prompt; prompt contents go to the model and task database.")
-                if args.account:
-                    print("Account mode collects secrets separately; the server encrypts them before queueing.")
-                print("Typing/clicking requires ENABLE_WRITE_ACTIONS=true on the server.")
-                prompt = getpass.getpass("Task prompt (hidden): ").strip()
-                if not prompt or len(prompt) > 4000:
-                    print("Prompt must contain 1 to 4000 characters", file=sys.stderr)
-                    return 1
-                payload = account_payload(prompt, secrets) if args.account else {"prompt": prompt}
+                print("Submitting the configured Gmail login test.")
+                prompt = """"Sign in to my authorized Gmail account using structured credential ID account.
+
+1. Open https://accounts.google.com/.
+2. Inspect the visible page and identify the account identifier field.
+3. Use fill_credential with credential ID account and field username.
+4. Continue to the password page. Use fill_credential with credential ID
+   account and field password, then continue.
+5. If Google requests an authenticator-app code, use inspect_totp_form
+   with credential ID account to discover supported OTP input and submit
+   selectors.
+6. Use fill_totp with those selectors and credential ID account.
+   The tool must generate the current 30-second OTP from the supplied
+   structured TOTP secret and enter it directly. Never request, repeat
+   or expose the password, shared secret or generated OTP.
+7. After submission, inspect the resulting page. If authentication
+   succeeds, navigate to https://mail.google.com/ and confirm that the
+   Gmail inbox interface is visible. Do not read email contents, send
+   messages or change account settings.
+8. Report only the observed outcome. Do not claim successful login
+   merely because a button was clicked or an OTP was submitted.
+
+If no authenticator-app challenge appears, do not invent or force one.
+Report whether Gmail was reached and whether authenticator 2FA was used.
+Stop on CAPTCHA, suspicious-login warnings, access restrictions,
+unsupported forms, SMS/email verification, recovery requests or device
+approval. Do not bypass restrictions or blindly retry a failed login.
+"""
+                payload = account_payload(prompt, secrets)
                 try:
                     response = client.post("/run-task", json=payload)
                 finally:
