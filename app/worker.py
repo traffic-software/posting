@@ -6,6 +6,7 @@ from app.agent import run_task
 from app.config import Settings
 from app.schemas import TaskStatus
 from app.storage import TaskStore
+from app.task_context import TaskContext, decode_context
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,9 @@ class TaskWorker:
         self.runner = runner
         self.wakeup = threading.Event()
         self.stopping = threading.Event()
+        self.active_lock = threading.Lock()
+        self.active_task_id = None
+        self.active_context = None
         self.thread = threading.Thread(target=self._loop, name="task-worker", daemon=True)
 
     def start(self) -> None:
@@ -30,6 +34,18 @@ class TaskWorker:
     def stop(self) -> None:
         self.stopping.set()
         self.notify()
+        with self.active_lock:
+            task_id, context = self.active_task_id, self.active_context
+        if task_id is not None:
+            try:
+                self.store.cancel_processing(task_id)
+            except Exception as exc:
+                logger.error("Task shutdown cleanup failed (%s)", type(exc).__name__)
+        if context is not None:
+            try:
+                context.cancel()
+            except Exception as exc:
+                logger.error("Browser shutdown failed (%s)", type(exc).__name__)
         self.thread.join(timeout=5)
 
     @property
@@ -39,18 +55,49 @@ class TaskWorker:
     def _loop(self) -> None:
         while not self.stopping.is_set():
             try:
-                task = self.store.claim_next()
+                with self.active_lock:
+                    if self.stopping.is_set():
+                        break
+                    task = self.store.claim_execution()
+                    self.active_task_id = task["task_id"] if task else None
                 if task is None:
                     self.wakeup.wait(timeout=2)
                     self.wakeup.clear()
                     continue
-                task_id, prompt = task
+                task_id, prompt = task["task_id"], task["prompt"]
+                context = None
                 try:
-                    result = self.runner(prompt, self.settings)
-                    self.store.finish(task_id, TaskStatus.COMPLETED, result=result)
+                    context = decode_context(task["context_json"], task["credential_blob"], self.settings)
+                    if context is None and self.runner is run_task:
+                        context = TaskContext()
+                    with self.active_lock:
+                        self.active_context = context
+                        stopped = self.stopping.is_set()
+                    if stopped:
+                        if context is not None:
+                            context.cancel()
+                        raise RuntimeError("Task cancelled")
+                    if context is not None:
+                        result = context.redacted_result(self.runner(prompt, self.settings, context))
+                    else:
+                        result = self.runner(prompt, self.settings)
+                    if self.stopping.is_set():
+                        self.store.cancel_processing(task_id)
+                    else:
+                        self.store.finish(task_id, TaskStatus.COMPLETED, result=result)
                 except Exception as exc:
-                    logger.error("Task %s failed (%s)", task_id, type(exc).__name__)
-                    self.store.finish(task_id, TaskStatus.FAILED, error="Task execution failed")
+                    if self.stopping.is_set():
+                        self.store.cancel_processing(task_id)
+                    else:
+                        logger.error("Task %s failed (%s)", task_id, type(exc).__name__)
+                        self.store.finish(task_id, TaskStatus.FAILED, error="Task execution failed")
+                finally:
+                    if context is not None:
+                        context.credentials.clear()
+                    with self.active_lock:
+                        self.active_context = None
+                        self.active_task_id = None
+                    task = None
             except Exception as exc:
                 logger.error("Task worker could not access task storage (%s)", type(exc).__name__)
                 self.wakeup.wait(timeout=2)

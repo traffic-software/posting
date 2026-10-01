@@ -49,9 +49,16 @@ class TaskStore:
                     updated_at TEXT NOT NULL
                 )"""
             )
+            columns = {row["name"] for row in conn.execute("PRAGMA table_info(tasks)")}
+            for name in ("context_json", "credential_blob", "credential_expires_at"):
+                if name not in columns:
+                    conn.execute(f"ALTER TABLE tasks ADD COLUMN {name} TEXT")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_tasks_status_created ON tasks(status, created_at)")
 
-    def create(self, prompt: str, max_active: int) -> str:
+    def create(
+        self, prompt: str, max_active: int, *, context_json: str | None = None,
+        credential_blob: str | None = None, credential_expires_at: str | None = None,
+    ) -> str:
         task_id = str(uuid4())
         now = utc_now()
         with self.connection() as conn:
@@ -63,8 +70,10 @@ class TaskStore:
             if active >= max_active:
                 raise QueueFullError()
             conn.execute(
-                "INSERT INTO tasks (task_id, prompt, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
-                (task_id, prompt, TaskStatus.PENDING, now, now),
+                """INSERT INTO tasks (task_id, prompt, status, created_at, updated_at,
+                   context_json, credential_blob, credential_expires_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (task_id, prompt, TaskStatus.PENDING, now, now, context_json, credential_blob, credential_expires_at),
             )
         return task_id
 
@@ -82,10 +91,21 @@ class TaskStore:
         return result
 
     def claim_next(self) -> tuple[str, str] | None:
+        record = self.claim_execution()
+        return (record["task_id"], record["prompt"]) if record else None
+
+    def claim_execution(self) -> dict | None:
         with self.connection() as conn:
             conn.execute("BEGIN IMMEDIATE")
+            conn.execute(
+                """UPDATE tasks SET status = ?, error = ?, credential_blob = NULL,
+                   credential_expires_at = NULL, updated_at = ?
+                   WHERE status = ? AND credential_expires_at <= ?""",
+                (TaskStatus.FAILED, "Task credentials expired", utc_now(), TaskStatus.PENDING, utc_now()),
+            )
             row = conn.execute(
-                "SELECT task_id, prompt FROM tasks WHERE status = ? ORDER BY created_at, rowid LIMIT 1",
+                """SELECT task_id, prompt, context_json, credential_blob FROM tasks
+                   WHERE status = ? ORDER BY created_at, rowid LIMIT 1""",
                 (TaskStatus.PENDING,),
             ).fetchone()
             if row is None:
@@ -94,7 +114,7 @@ class TaskStore:
                 "UPDATE tasks SET status = ?, updated_at = ? WHERE task_id = ? AND status = ?",
                 (TaskStatus.PROCESSING, utc_now(), row["task_id"], TaskStatus.PENDING),
             )
-            return row["task_id"], row["prompt"]
+            return dict(row)
 
     def finish(self, task_id: str, status: TaskStatus, *, result: dict | None = None, error: str | None = None) -> None:
         if status not in (TaskStatus.COMPLETED, TaskStatus.FAILED):
@@ -104,17 +124,28 @@ class TaskStore:
             raise ValueError("Task result exceeds storage limit")
         with self.connection() as conn:
             updated = conn.execute(
-                """UPDATE tasks SET status = ?, result_json = ?, error = ?, updated_at = ?
+                """UPDATE tasks SET status = ?, result_json = ?, error = ?, updated_at = ?,
+                   credential_blob = NULL, credential_expires_at = NULL
                    WHERE task_id = ? AND status = ?""",
                 (status, data, error, utc_now(), task_id, TaskStatus.PROCESSING),
             )
             if updated.rowcount != 1:
                 raise ValueError("Task is not processing")
 
+    def cancel_processing(self, task_id: str) -> None:
+        with self.connection() as conn:
+            conn.execute(
+                """UPDATE tasks SET status = ?, error = ?, updated_at = ?,
+                   credential_blob = NULL, credential_expires_at = NULL
+                   WHERE task_id = ? AND status = ?""",
+                (TaskStatus.FAILED, "Task cancelled by application shutdown", utc_now(), task_id, TaskStatus.PROCESSING),
+            )
+
     def recover_interrupted(self) -> int:
         with self.connection() as conn:
             updated = conn.execute(
-                """UPDATE tasks SET status = ?, error = ?, updated_at = ?
+                """UPDATE tasks SET status = ?, error = ?, updated_at = ?,
+                   credential_blob = NULL, credential_expires_at = NULL
                    WHERE status = ?""",
                 (TaskStatus.FAILED, "Task interrupted by application restart", utc_now(), TaskStatus.PROCESSING),
             )

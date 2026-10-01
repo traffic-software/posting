@@ -1,6 +1,6 @@
 # Browser Task API
 
-এই repository-র পুরোনো `GCW.py` / `ps_lib/` worker অপরিবর্তিত রেখে নতুন FastAPI + Deep Agents + Selenium Standalone Chrome task API যোগ করা হয়েছে। আর্কিটেকচার ও DFD: [plan/implementation-plan.md](plan/implementation-plan.md), [plan/dfd.md](plan/dfd.md)। GHCR ও Railway deployment: [docs/railway-deployment.md](docs/railway-deployment.md)। VPS deployment: [docs/vps-deployment.md](docs/vps-deployment.md)।
+এই repository-র পুরোনো `GCW.py` / `ps_lib/` worker অপরিবর্তিত রেখে নতুন FastAPI + LangChain browser agent + Selenium Standalone Chrome task API যোগ করা হয়েছে। আর্কিটেকচার ও DFD: [plan/implementation-plan.md](plan/implementation-plan.md), [plan/dfd.md](plan/dfd.md)। GHCR ও Railway deployment: [docs/railway-deployment.md](docs/railway-deployment.md)। VPS deployment: [docs/vps-deployment.md](docs/vps-deployment.md)।
 
 ## চালু করা
 
@@ -21,6 +21,10 @@ curl -sS http://127.0.0.1:8000/task-status/YOUR_TASK_ID \
 ```
 
 `TASK_API_TOKEN` ফাঁকা থাকলে উদাহরণের Authorization header বাদ দিতে পারেন, তবে তখন শুধু trusted local environment ব্যবহার করুন। Railway deployment-এ `REQUIRE_TASK_API_TOKEN=true` বাধ্যতামূলক। `GET /health` API ও task DB/worker পরীক্ষা করে; `GET /ready` অতিরিক্তভাবে Selenium Grid readiness পরীক্ষা করে। ভুল UUID-তে 422, অজানা UUID-তে 404, capacity পূর্ণ হলে 429। API-তে কোনো ফল সফলভাবে সেভ হলে app restart-এর পরেও একই ID-তে পাওয়া যায়।
+
+## Account login ও fixed proxy
+
+Prompt-এ workflow দিন, password নয়। Structured `credentials`, exact HTTPS login origins ও optional fixed IP-allowlisted proxy দিয়ে authorized account task পাঠানো যায়। Server ও task—দুই জায়গায় write permission এবং server-side credential encryption key প্রয়োজন। Request format, secure client ও সীমাবদ্ধতা: [docs/account-tasks.md](docs/account-tasks.md)। Anti-detect/security bypass বা proxy-auth plugin যোগ করা হয়নি।
 
 ## Browser policy ও সীমা
 

@@ -39,7 +39,9 @@ click==8.5.0
 colorama==0.4.6 ; sys_platform == 'win32'
     # via pytest
 cryptography==50.0.2
-    # via google-auth
+    # via
+    #   -r requirements.txt
+    #   google-auth
 deepagents==0.7.20
     # via -r requirements.txt
 distro==1.9.0
@@ -97,7 +99,9 @@ jsonpatch==1.33
 jsonpointer==3.1.1
     # via jsonpatch
 langchain==1.4.3
-    # via deepagents
+    # via
+    #   -r requirements.txt
+    #   deepagents
 langchain-anthropic==1.7.5
     # via deepagents
 langchain-core==1.6.6

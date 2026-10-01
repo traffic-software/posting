@@ -1,16 +1,22 @@
 import hmac
 from collections.abc import Callable
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlsplit
 from uuid import UUID
 
 import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from langchain_core.tools import ToolException
 
 from app.agent import run_task
 from app.config import Settings
 from app.schemas import TaskAccepted, TaskRequest, TaskResponse, TaskStatus
 from app.storage import QueueFullError, TaskStore
+from app.selenium_tools import check_url
+from app.task_context import encode_context
 from app.worker import TaskWorker
 
 
@@ -34,6 +40,10 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
     app.state.store = store
     app.state.worker = worker
 
+    @app.exception_handler(RequestValidationError)
+    async def invalid_request(_request, _exc):
+        return JSONResponse(status_code=422, content={"detail": "Invalid task request"})
+
     def authorize(authorization: str | None = Header(default=None)) -> None:
         if not settings.task_api_token:
             return
@@ -47,8 +57,31 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
             raise HTTPException(status_code=503, detail="Task service is not configured")
         if not worker.alive:
             raise HTTPException(status_code=503, detail="Task worker is unavailable")
+        if request.credentials and not settings.task_api_token:
+            raise HTTPException(status_code=403, detail="Credential tasks require API authentication")
+        if request.allow_write_actions is True and not settings.enable_write_actions:
+            raise HTTPException(status_code=403, detail="Write actions are disabled")
         try:
-            task_id = store.create(request.prompt, settings.max_active_tasks)
+            for credential in request.credentials:
+                for origin in credential.origins:
+                    check_url(origin)
+            if request.proxy:
+                check_url(f"http://{request.proxy.endpoint}")
+        except ToolException as exc:
+            raise HTTPException(status_code=422, detail="Invalid task destination") from exc
+        try:
+            options, blob = encode_context(request, settings)
+        except (ValueError, UnicodeError) as exc:
+            raise HTTPException(status_code=503, detail="Credential encryption is unavailable") from exc
+        expires_at = (
+            (datetime.now(timezone.utc) + timedelta(seconds=settings.credential_ttl_seconds)).isoformat()
+            if blob else None
+        )
+        try:
+            task_id = store.create(
+                request.prompt, settings.max_active_tasks, context_json=options,
+                credential_blob=blob, credential_expires_at=expires_at,
+            )
         except QueueFullError as exc:
             raise HTTPException(status_code=429, detail="Task capacity reached") from exc
         worker.notify()

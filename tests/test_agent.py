@@ -32,7 +32,7 @@ def test_agent_closes_its_browser_after_result(monkeypatch):
             seen["config"] = config
             return {"messages": [SimpleNamespace(content="Page title: Example")]}
 
-    monkeypatch.setattr(agent, "create_deep_agent", lambda **_: FakeAgent())
+    monkeypatch.setattr(agent, "create_agent", lambda **_: FakeAgent())
     settings = Settings(
         _env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1",
         model_name="test-model"
@@ -51,7 +51,7 @@ def test_agent_closes_its_browser_after_error(monkeypatch):
         def invoke(self, *_args, **_kwargs):
             raise RuntimeError("provider failure")
 
-    monkeypatch.setattr(agent, "create_deep_agent", lambda **_: FakeAgent())
+    monkeypatch.setattr(agent, "create_agent", lambda **_: FakeAgent())
     settings = Settings(
         _env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1",
         model_name="test-model"
