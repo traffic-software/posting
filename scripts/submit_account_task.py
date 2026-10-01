@@ -1,4 +1,4 @@
-"""Submit an authorized account task using secure interactive credential entry."""
+"""Submit a prompt-only browser task and poll the deployed API."""
 
 import argparse
 import getpass
@@ -12,6 +12,17 @@ from uuid import UUID
 
 import httpx
 from dotenv import load_dotenv
+
+
+ERROR_MESSAGES = {
+    "Credential encryption is unavailable": "Credential encryption is unavailable",
+    "Task service is not configured": "Server model configuration is incomplete",
+    "Task worker is unavailable": "Server task worker is unavailable",
+    "Write actions are disabled": "Enable ENABLE_WRITE_ACTIONS on the server to allow writes",
+    "Unauthorized": "Check TASK_API_TOKEN",
+    "Invalid task request": "Invalid task request",
+    "Task capacity reached": "Server task capacity reached",
+}
 
 
 def main() -> int:
@@ -35,49 +46,34 @@ def main() -> int:
     if not token:
         print("API token is required", file=sys.stderr)
         return 1
-    secrets = [token]
 
     def display(data) -> str:
-        text = json.dumps(data, indent=2, ensure_ascii=False)
-        for secret in sorted(secrets, key=len, reverse=True):
-            if secret:
-                text = text.replace(secret, "[REDACTED]")
-        return text
+        return json.dumps(data, indent=2, ensure_ascii=False).replace(token, "[REDACTED]")
 
     task_id = str(args.task_id) if args.task_id else None
     with httpx.Client(base_url=base_url, headers={"Authorization": f"Bearer {token}"}, timeout=30) as client:
         try:
             if task_id is None:
-                print("Only use your own/authorized account. Do not put credentials in the prompt.")
-                prompt = input("Task prompt (refer to credential ID 'account'): ").strip()
-                origins = input("Exact allowed HTTPS login origins (comma-separated): ").split(",")
-                username = getpass.getpass("Account username (hidden): ")
-                password = getpass.getpass("Account password (hidden): ")
-                secrets.extend([username, password])
-                proxy_host = input("Fixed IP-allowlisted proxy host (blank for none): ").strip()
-                proxy = None
-                if proxy_host:
-                    scheme = input("Proxy scheme [http/socks5]: ").strip() or "http"
-                    proxy = {"scheme": scheme, "host": proxy_host, "port": int(input("Proxy port: "))}
-                print("This task permits browser writes and may incur model API charges.")
-                if input("Authorize this task? Type yes: ").strip().lower() != "yes":
-                    print("Cancelled; no task submitted.")
-                    return 0
-                payload = {
-                    "prompt": prompt, "allow_write_actions": True,
-                    "credentials": [{
-                        "id": "account", "origins": [origin.strip() for origin in origins],
-                        "username": username, "password": password,
-                    }],
-                    "proxy": proxy,
-                }
-                response = client.post("/run-task", json=payload)
+                print("Describe the task for your own/authorized account in the prompt.")
+                print("Prompt contents, including any credentials, go to the model and task database.")
+                print("Typing/clicking requires ENABLE_WRITE_ACTIONS=true on the server.")
+                prompt = getpass.getpass("Task prompt (hidden): ").strip()
+                if not prompt or len(prompt) > 4000:
+                    print("Prompt must contain 1 to 4000 characters", file=sys.stderr)
+                    return 1
+                response = client.post("/run-task", json={"prompt": prompt})
+                del prompt
                 if response.status_code != 202:
-                    print(f"Submission failed: HTTP {response.status_code}; response body omitted.", file=sys.stderr)
+                    print(f"Submission failed: HTTP {response.status_code}", file=sys.stderr)
+                    try:
+                        detail = response.json().get("detail")
+                        if isinstance(detail, str) and detail in ERROR_MESSAGES:
+                            print(ERROR_MESSAGES[detail], file=sys.stderr)
+                    except (ValueError, AttributeError):
+                        pass
                     return 1
                 task_id = response.json()["task_id"]
                 print(f"Accepted task: {task_id}", flush=True)
-                del payload, username, password
 
             deadline = time.monotonic() + args.timeout
             while time.monotonic() < deadline:
@@ -94,7 +90,7 @@ def main() -> int:
             print(f"Polling failed: HTTP {exc.response.status_code}", file=sys.stderr)
             return 1
         except httpx.RequestError:
-            print("Connection failed. No request or credential details were logged.", file=sys.stderr)
+            print("Connection failed. No request details were logged.", file=sys.stderr)
             if task_id is None:
                 print("Submission outcome may be unknown; do not retry side-effecting work blindly.", file=sys.stderr)
             return 1

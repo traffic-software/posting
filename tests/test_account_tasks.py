@@ -79,6 +79,8 @@ def test_encrypt_decrypt_and_redact(tmp_path):
     {"proxy": {"host": "proxy.example", "port": 8080, "password": PASSWORD}},
     {"proxy": {"host": "user:secret@proxy.example", "port": 8080}},
     {"proxy": {"host": "proxy.example", "port": 0}},
+    {"proxy": {"scheme": "http", "host": "proxy.example", "port": 8080}},
+    {"proxy": {"scheme": "socks5", "host": "proxy.example", "port": 8080}},
 ])
 def test_validation_never_reflects_credentials(tmp_path, changes):
     body = request_body() | changes
@@ -263,8 +265,7 @@ def test_account_write_gates(tmp_path, global_gate, task_gate):
     assert {item.name for item in tools} == {"navigate_to_page", "extract_text"}
 
 
-@pytest.mark.parametrize("scheme", ["http", "socks5"])
-def test_standard_proxy_and_secret_free_model_context(tmp_path, monkeypatch, scheme):
+def test_direct_browser_and_secret_free_model_context(tmp_path, monkeypatch):
     driver = FakeDriver()
     captured = {}
 
@@ -283,44 +284,35 @@ def test_standard_proxy_and_secret_free_model_context(tmp_path, monkeypatch, sch
         return FakeAgent()
 
     monkeypatch.setattr(agent.webdriver, "Remote", remote)
-    monkeypatch.setattr(agent, "create_agent", factory)
-    context = TaskContext(allow_write_actions=True, credentials=[credential()], proxy=FixedProxy(scheme=scheme, host="proxy.example", port=8080))
+    monkeypatch.setattr(agent, "create_deep_agent", factory)
+    context = TaskContext(allow_write_actions=True, credentials=[credential()])
     result = agent.run_task("Authorized login using account", configured(tmp_path), context)
     assert driver.closed
     assert result == {"output": "Done [REDACTED]"}
-    proxy = captured["options"]["proxy"]
-    assert proxy["proxyType"] == "manual"
-    if scheme == "http":
-        assert proxy["httpProxy"] == proxy["sslProxy"] == "proxy.example:8080"
-    else:
-        assert proxy["socksProxy"] == "proxy.example:8080" and proxy["socksVersion"] == 5
+    assert not captured["options"].get("proxy")
     assert PASSWORD not in json.dumps(captured["state"]) + captured["system_prompt"]
     assert USERNAME not in captured["system_prompt"]
     assert "account" in captured["system_prompt"]
-    assert "middleware" not in captured and "backend" not in captured
+    from deepagents.backends import StateBackend
+
+    assert isinstance(captured["backend"], StateBackend)
+    assert captured["subagents"][0]["tools"] == []
+    assert PASSWORD not in captured["subagents"][0]["system_prompt"]
+    assert USERNAME not in captured["subagents"][0]["system_prompt"]
     assert all(item.name not in ("read_file", "execute", "task") for item in captured["tools"])
 
 
-def test_unaccepted_proxy_closes_browser(tmp_path, monkeypatch):
-    driver = FakeDriver()
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: driver)
-    context = TaskContext(proxy=FixedProxy(host="proxy.example", port=8080))
-    with pytest.raises(RuntimeError, match="proxy configuration"):
-        agent.run_task("Read title", configured(tmp_path), context)
-    assert driver.closed
-
-
-def test_private_proxy_rejected_before_browser(tmp_path, monkeypatch):
+@pytest.mark.parametrize("host,scheme", [("proxy.example", "http"), ("proxy.example", "socks5"), ("127.0.0.1", "http")])
+def test_legacy_proxy_context_rejected_before_browser(tmp_path, monkeypatch, host, scheme):
     calls = []
     monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: calls.append(True))
-    context = TaskContext(proxy=FixedProxy(host="127.0.0.1", port=8080))
-    with pytest.raises(Exception, match="non-public"):
+    context = TaskContext(proxy=FixedProxy(host=host, scheme=scheme, port=8080))
+    with pytest.raises(RuntimeError, match="Task proxies are disabled"):
         agent.run_task("Read title", configured(tmp_path), context)
     assert calls == []
 
 
-def test_real_agent_graph_exposes_only_browser_tools(tmp_path):
-    from langchain.agents import create_agent
+def test_real_deep_agent_graph_uses_virtual_files_and_browser_tools(tmp_path, monkeypatch):
     from langchain_core.language_models.fake_chat_models import FakeMessagesListChatModel
     from langchain_core.messages import AIMessage
 
@@ -331,12 +323,17 @@ def test_real_agent_graph_exposes_only_browser_tools(tmp_path):
             seen.extend(item.name for item in tools)
             return self
 
-    tools = browser_tools(FakeDriver(), configured(tmp_path), time.monotonic() + 60)
-    graph = create_agent(model=TestModel(responses=[AIMessage(content="Read-only test")]), tools=tools)
-    result = graph.invoke({"messages": [{"role": "user", "content": "Report no action"}]})
-    assert result["messages"][-1].content == "Read-only test"
-    assert set(seen) == {item.name for item in tools}
-    assert not {"read_file", "write_file", "execute", "task"}.intersection(seen)
+    driver = FakeDriver()
+    settings = configured(tmp_path)
+    tools = browser_tools(driver, settings, time.monotonic() + 60)
+    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: driver)
+    monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: TestModel(responses=[AIMessage(content="Read-only test")]))
+    result = agent.run_task("Report no action", settings)
+    assert result == {"output": "Read-only test"}
+    assert driver.closed
+    assert {item.name for item in tools}.issubset(seen)
+    assert {"read_file", "write_file", "write_todos", "task"}.issubset(seen)
+    assert "execute" not in seen
 
 
 def test_worker_decryption_failure_is_sanitized_and_cleared(tmp_path, caplog):

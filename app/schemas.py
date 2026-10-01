@@ -88,6 +88,13 @@ class TaskRequest(BaseModel):
     credentials: list[LoginCredential] = Field(default_factory=list, max_length=5)
     proxy: FixedProxy | None = None
 
+    @field_validator("proxy", mode="before")
+    @classmethod
+    def proxy_disabled(cls, value):
+        if value is not None:
+            raise ValueError("Task proxies are disabled")
+        return value
+
     @model_validator(mode="after")
     def valid_credentials(self):
         if self.credentials and self.allow_write_actions is not True:

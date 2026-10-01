@@ -1,13 +1,14 @@
 import time
 
-from langchain.agents import create_agent
+from deepagents import create_deep_agent
+from deepagents.backends import StateBackend
+from langchain.agents.middleware import TodoListMiddleware
 from langchain_openai import ChatOpenAI
 from selenium import webdriver
-from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium.webdriver.remote.client_config import ClientConfig
 
 from app.config import Settings
-from app.selenium_tools import browser_tools, check_url
+from app.selenium_tools import browser_tools
 from app.task_context import TaskContext
 
 
@@ -29,6 +30,8 @@ def run_task(prompt: str, settings: Settings, context: TaskContext | None = None
 
     if context and context.cancelled.is_set():
         raise RuntimeError("Task cancelled")
+    if context and context.proxy is not None:
+        raise RuntimeError("Task proxies are disabled")
     deadline = time.monotonic() + settings.task_timeout_seconds
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
@@ -38,17 +41,6 @@ def run_task(prompt: str, settings: Settings, context: TaskContext | None = None
         not settings.enable_write_actions or context.allow_write_actions is not True
     ):
         raise RuntimeError("Credential writes are disabled")
-    if context and context.proxy:
-        check_url(f"http://{context.proxy.endpoint}")
-        proxy = Proxy()
-        proxy.proxy_type = ProxyType.MANUAL
-        if context.proxy.scheme == "http":
-            proxy.http_proxy = context.proxy.endpoint
-            proxy.ssl_proxy = context.proxy.endpoint
-        else:
-            proxy.socks_proxy = context.proxy.endpoint
-            proxy.socks_version = 5
-        options.proxy = proxy
     driver = webdriver.Remote(
         command_executor=settings.selenium_remote_url, options=options,
         client_config=ClientConfig(
@@ -59,11 +51,6 @@ def run_task(prompt: str, settings: Settings, context: TaskContext | None = None
     try:
         if context is not None:
             context.bind_browser(driver.quit)
-        if context and context.proxy:
-            actual = driver.capabilities.get("proxy", {})
-            expected = options.proxy.to_capabilities()
-            if any(actual.get(key) != value for key, value in expected.items()):
-                raise RuntimeError("Browser did not accept the requested proxy configuration")
         driver.set_page_load_timeout(settings.browser_timeout_seconds)
         driver.set_script_timeout(settings.browser_timeout_seconds)
         model = ChatOpenAI(
@@ -78,10 +65,20 @@ def run_task(prompt: str, settings: Settings, context: TaskContext | None = None
             policy += "\nAvailable credential IDs and permitted HTTPS origins:\n" + "\n".join(
                 f"{credential.id}: {', '.join(credential.origins)}" for credential in context.credentials
             )
-        agent = create_agent(
+        agent = create_deep_agent(
             model=model,
             tools=browser_tools(driver, settings, deadline, context),
             system_prompt=policy,
+            backend=StateBackend(),
+            middleware=[TodoListMiddleware()],
+            subagents=[{
+                "name": "general-purpose",
+                "description": "Plan an authorized browser task without performing actions.",
+                "system_prompt": SYSTEM_PROMPT + "\nYou are a planning-only subagent. "
+                "Do not browse or perform actions; return a plan to the main agent. "
+                "Never claim to have observed a page or completed an action.",
+                "tools": [],
+            }],
         )
         state = agent.invoke(
             {"messages": [{"role": "user", "content": prompt}]},

@@ -1,6 +1,6 @@
 # Browser Task API
 
-এই repository-র পুরোনো `GCW.py` / `ps_lib/` worker অপরিবর্তিত রেখে নতুন FastAPI + LangChain browser agent + Selenium Standalone Chrome task API যোগ করা হয়েছে। আর্কিটেকচার ও DFD: [plan/implementation-plan.md](plan/implementation-plan.md), [plan/dfd.md](plan/dfd.md)। GHCR ও Railway deployment: [docs/railway-deployment.md](docs/railway-deployment.md)। VPS deployment: [docs/vps-deployment.md](docs/vps-deployment.md)।
+এই repository-র পুরোনো `GCW.py` / `ps_lib/` worker অপরিবর্তিত রেখে নতুন FastAPI + DeepAgents browser agent + Selenium Standalone Chrome task API যোগ করা হয়েছে। আর্কিটেকচার ও DFD: [plan/implementation-plan.md](plan/implementation-plan.md), [plan/dfd.md](plan/dfd.md)। GHCR ও Railway deployment: [docs/railway-deployment.md](docs/railway-deployment.md)। VPS deployment: [docs/vps-deployment.md](docs/vps-deployment.md)।
 
 ## চালু করা
 
@@ -22,12 +22,13 @@ curl -sS http://127.0.0.1:8000/task-status/YOUR_TASK_ID \
 
 `TASK_API_TOKEN` ফাঁকা থাকলে উদাহরণের Authorization header বাদ দিতে পারেন, তবে তখন শুধু trusted local environment ব্যবহার করুন। Railway deployment-এ `REQUIRE_TASK_API_TOKEN=true` বাধ্যতামূলক। `GET /health` API ও task DB/worker পরীক্ষা করে; `GET /ready` অতিরিক্তভাবে Selenium Grid readiness পরীক্ষা করে। ভুল UUID-তে 422, অজানা UUID-তে 404, capacity পূর্ণ হলে 429। API-তে কোনো ফল সফলভাবে সেভ হলে app restart-এর পরেও একই ID-তে পাওয়া যায়।
 
-## Account login ও fixed proxy
+## Account login
 
-Prompt-এ workflow দিন, password নয়। Structured `credentials`, exact HTTPS login origins ও optional fixed IP-allowlisted proxy দিয়ে authorized account task পাঠানো যায়। Server ও task—দুই জায়গায় write permission এবং server-side credential encryption key প্রয়োজন। Request format, secure client ও সীমাবদ্ধতা: [docs/account-tasks.md](docs/account-tasks.md)। Anti-detect/security bypass বা proxy-auth plugin যোগ করা হয়নি।
+Prompt-এ workflow দিন, password নয়। Structured `credentials` ও exact HTTPS login origins দিয়ে authorized account task পাঠানো যায়। Task-specific proxy support বন্ধ; non-null `proxy` request reject হয়। Server ও task—দুই জায়গায় write permission এবং server-side credential encryption key প্রয়োজন। Request format, secure client ও সীমাবদ্ধতা: [docs/account-tasks.md](docs/account-tasks.md)। Anti-detect/security bypass বা proxy-auth plugin যোগ করা হয়নি।
 
 ## Browser policy ও সীমা
 
+- Agent runtime `deepagents.create_deep_agent` ব্যবহার করে। Planning (`write_todos`), task-local virtual filesystem ও planning-only subagent আছে; filesystem backend `StateBackend`, তাই host filesystem বা shell access দেওয়া হয় না। Subagent-এর browser/credential tools নেই; browser actions শুধু main agent-এর policy-checked Selenium tools দিয়ে হয়। Virtual files task শেষ হলে persist করা হয় না।
 - যেকোনো public HTTP(S) website browse করা যায়; domain allowlist লাগে না। Embedded credentials, localhost/local নাম ও non-public IP নিষিদ্ধ। DNS-এর কোনো address private/non-public হলে URL reject হয়। Website-এর login, access control বা anti-bot restriction bypass করা হয় না।
 - URL validation সম্পূর্ণ SSRF isolation নয়: **redirect request আগেই পাঠানো হতে পারে**, browser subresource request আলাদাভাবে যাচাই হয় না এবং DNS rebinding সম্ভব। Public deployment-এ Selenium container-এর জন্য network-level egress firewall/proxy দিয়ে private/internal, loopback, link-local, metadata ও non-public network access আটকাতে হবে। App-side DNS check Chrome-এর connection-এর বিকল্প নয়।
 - ডিফল্টে শুধু `navigate_to_page` ও `extract_text` আছে। `ENABLE_WRITE_ACTIONS=true` দিলে `click_element` ও `fill_element` tool পাওয়া যাবে; এরা form submit/বাহ্যিক side effect ঘটাতে পারে। অনুমোদিত test site ছাড়া enable করবেন না। CAPTCHA bypass বা legacy worker tool দেওয়া হয়নি।

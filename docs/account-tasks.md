@@ -1,6 +1,6 @@
-# Authorized account tasks and fixed proxies
+# Authorized account tasks
 
-This feature uses **standard Remote Selenium**, not undetected ChromeDriver or anti-detect tooling. It does not spoof fingerprints, rotate proxies, bypass CAPTCHA/MFA/2FA, or work around blocked-login warnings. A proxy cannot guarantee Gmail or any other site's login will succeed. Use only accounts and workflows you are authorized to automate.
+This feature uses **standard Remote Selenium**, not undetected ChromeDriver or anti-detect tooling. It does not spoof fingerprints, rotate proxies, bypass CAPTCHA/MFA/2FA, or work around blocked-login warnings. Task-specific proxies are disabled; browser sessions use the Selenium host's existing network configuration. Use only accounts and workflows you are authorized to automate.
 
 The repository exposes an API and an interactive Python client; it does not include a frontend. A frontend can send the structured JSON below over HTTPS. The current shared bearer token is for one trusted operator: it is not per-user identity or task ownership. Add those protections before building a public multi-user credential-submission service.
 
@@ -43,18 +43,13 @@ Save it only in the server's secret configuration, protect `.env` permissions, a
       "username": "YOUR_ACCOUNT_IDENTIFIER",
       "password": "YOUR_ACCOUNT_PASSWORD"
     }
-  ],
-  "proxy": {
-    "scheme": "http",
-    "host": "proxy.provider.example",
-    "port": 8080
-  }
+  ]
 }
 ```
 
 POST to `/run-task` with the existing bearer token. Response remains a task ID and `PENDING`; poll `/task-status/{task_id}`. Status responses never include the submitted context or encrypted blob. Validation errors return generic 422 messages rather than reflecting request fields.
 
-- `credentials` and `proxy` are optional. Up to five credential IDs are supported; each permits up to five exact HTTPS origins.
+- `credentials` are optional. Up to five credential IDs are supported; each permits up to five exact HTTPS origins. Omit `proxy` or set it to `null`; any non-null proxy request is rejected with 422.
 - Origins contain no path/query/fragment. Port differences matter. Cross-origin SSO requires explicitly listing each trusted credential-entry origin; do not add origins merely because an untrusted page asks for them.
 - The agent receives credential IDs and allowed origins, **not username/password values**. `fill_credential(selector, credential_id, field)` enters them directly through Selenium. Entry is restricted to top-level input fields at an allowed origin; password values require password inputs.
 - Challenges/restrictions are prohibited by agent instructions, with conservative checks before credential-task writes. These checks are not a universal challenge detector. A restricted site may result in a failed task or a completed explanation rather than successful login. Inspect the output: `COMPLETED` alone does not prove authentication succeeded.
@@ -69,13 +64,11 @@ Unexpired pending tasks retain encrypted credentials across restarts. Completion
 
 Clearing a SQLite column is **logical deletion**, not forensic erasure: WAL files, backups or memory copies may retain ciphertext/data. Protect the database, encryption key, server, Selenium control channel and backup policy accordingly. No browser automation can keep a password secret from the trusted login page receiving it; compromised pages/scripts at an allowed origin remain a risk.
 
-## Fixed source-IP-allowlisted proxy
+## Proxy support disabled
 
-Optional proxy schemes are `http` and `socks5`. Supply a public hostname/IP and integer port. Username/password proxy authentication and browser extensions are **not supported** by this feature. Configure the provider to allow the VPS's actual public egress IP, not a Docker container's private address. The endpoint stays fixed for the task.
+The app does not configure Selenium proxy capabilities. Non-null `proxy` submissions are rejected at request validation; previously queued proxy tasks fail before a browser session is created rather than silently running without their requested proxy. Legacy proxy context decoding is retained only to reject those pending tasks safely.
 
-The app validates public proxy addresses and configures normal Selenium proxy capabilities. Rejected/missing negotiated proxy capabilities fail the task; browser connection failures are reported rather than retried without the proxy. This is not proof that all browser traffic used the proxy: browser bypass rules, non-web traffic and upstream behavior require independent egress enforcement and verification.
-
-Restrict Selenium egress at the host/network layer to the approved proxy endpoint and necessary control/DNS traffic. Require the proxy provider to block internal, loopback, private, link-local, metadata and other non-public destinations, including destinations resolved in the proxy's network. Application DNS validation, a private Compose network and source-IP allowlisting alone do not prevent SSRF, DNS rebinding, redirects or browser subresource access. Test the effective route using an approved controlled endpoint before trusting it with account tasks.
+This does not change the Selenium host's network configuration or any infrastructure-level proxy. Continue to enforce network-level egress restrictions against internal, loopback, private, link-local, metadata and other non-public destinations. Application DNS validation and a private Compose network alone do not prevent SSRF, DNS rebinding, redirects or browser subresource access.
 
 ## Interactive client
 
@@ -86,7 +79,9 @@ cd /d/posting
 .venv/Scripts/python.exe scripts/submit_account_task.py
 ```
 
-The script loads the API token from project `.env` (or prompts securely), asks for the workflow, trusted login origins, hidden username/password and an optional fixed proxy. It requires explicit confirmation before submission. It never submits credentials as command-line arguments or prints the request/error body.
+The script now uses the **simple prompt-only flow**: it loads the API token from project `.env` (or prompts securely), asks for one hidden task prompt and sends only `{"prompt": "..."}`. No separate account, origins, proxy or credential-encryption setup is needed for this client. Typing/clicking still requires server `ENABLE_WRITE_ACTIONS=true`; the client cannot override that setting. Entering the prompt submits the task and can incur model API charges.
+
+If username/password are included in the prompt, they are sent to the model provider and persisted in the task database **without the structured-credential encryption described above**. Hidden terminal entry prevents echo/history exposure, not model/database disclosure. Outputs may also contain sensitive account information; do not share them unredacted. The API still supports optional structured credentials for clients that need them; task-specific proxies are disabled. Only recognized, fixed server error messages are displayed; arbitrary response error bodies are omitted.
 
 Optional `TASK_API_URL` defaults to `https://webagent.elgrowth.com`. It must use HTTPS. The client does not configure the server's write gate or encryption key.
 
@@ -100,4 +95,4 @@ If submission times out before an ID is received, its outcome may be unknown; do
 
 ## Verification
 
-Unit tests use synthetic credentials, fake drivers/model responses and mocked DNS. They do not log in to real platforms or contact real proxies. Before production, perform an explicitly authorized controlled login/proxy integration test, check negotiated capabilities and effective egress, and verify failure with an unreachable proxy never falls back to direct traffic. Test CAPTCHA/2FA/restriction stops without attempting bypass. Real Chrome/site compatibility has not been established by unit tests.
+Unit tests use synthetic credentials, fake drivers/model responses and mocked DNS. They do not log in to real platforms or contact real proxies. Before production, perform an explicitly authorized controlled login integration test, verify effective egress restrictions, and check that non-null proxy requests are rejected. Test CAPTCHA/2FA/restriction stops without attempting bypass. Real Chrome/site compatibility has not been established by unit tests.
