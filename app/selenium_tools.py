@@ -2,6 +2,7 @@ import ipaddress
 import json
 import socket
 import time
+from functools import wraps
 from typing import Literal
 from urllib.parse import urlsplit
 
@@ -58,6 +59,26 @@ def check_url(url: str) -> None:
 def browser_tools(driver, settings: Settings, deadline: float, context: TaskContext | None = None):
     def redact(text: str) -> str:
         return context.redact(text) if context else text
+
+    def observe(function):
+        @wraps(function)
+        def wrapped(*args, **kwargs):
+            if context:
+                context.record_observation(function.__name__, "started", "Browser action attempted")
+            try:
+                result = function(*args, **kwargs)
+            except (BrowserPolicyStop, ToolException) as exc:
+                if context:
+                    context.record_observation(function.__name__, "stopped", str(exc))
+                raise
+            except Exception:
+                if context:
+                    context.record_observation(function.__name__, "failed", "Browser action failed; cause not verified")
+                raise
+            if context:
+                context.record_observation(function.__name__, "returned", str(result))
+            return result
+        return wrapped
 
     hard_markers = (
         "captcha", "verify you are human", "verify it's you", "access denied", "suspicious login",
@@ -135,6 +156,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             raise ToolException("Element not available") from exc
 
     @tool
+    @observe
     def navigate_to_page(url: str) -> str:
         """Navigate to a public HTTP(S) URL and report the resulting page title."""
         check_url(url)
@@ -147,6 +169,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             raise ToolException("Browser navigation failed") from exc
 
     @tool
+    @observe
     def extract_text(selector: str) -> str:
         """Read visible text from the first element matching a CSS selector (up to 2000 characters)."""
         element = find_element(selector)
@@ -165,6 +188,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
         writes_allowed = settings.enable_write_actions and context.allow_write_actions is True
     if writes_allowed:
         @tool
+        @observe
         def click_element(selector: str) -> str:
             """Click the first clickable element matching a CSS selector on the public website."""
             check_write_page()
@@ -178,6 +202,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                 raise ToolException("Could not click element") from exc
 
         @tool
+        @observe
         def fill_element(selector: str, value: str) -> str:
             """Replace an input field's text with a provided value on the public website."""
             if len(value) > 2000:
@@ -196,6 +221,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
         tools.extend([click_element, fill_element])
         if context and context.credentials:
             @tool
+            @observe
             def fill_credential(selector: str, credential_id: str, field: Literal["username", "password"]) -> str:
                 """Fill a username or password using a supplied credential ID at its authorized login origin."""
                 credential = next((item for item in context.credentials if item.id == credential_id), None)
@@ -242,6 +268,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                             raise BrowserPolicyStop("Authenticator form submission is not authorized")
 
                 @tool
+                @observe
                 def inspect_totp_form(credential_id: str) -> str:
                     """Discover supported authenticator inputs and submit selectors without reading field values."""
                     credential = totp_credential(credential_id)
@@ -291,6 +318,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                         raise BrowserPolicyStop("Authenticator inspection failed") from None
 
                 @tool
+                @observe
                 def fill_totp(selector: str, submit_selector: str, credential_id: str) -> str:
                     """Generate the current OTP locally and submit one input or exactly six digit cells using a credential ID."""
                     credential = totp_credential(credential_id)

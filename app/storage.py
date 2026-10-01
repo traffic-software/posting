@@ -6,6 +6,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from app.schemas import TaskStatus
+from app.task_report import failure_result
 
 
 class QueueFullError(Exception):
@@ -98,10 +99,10 @@ class TaskStore:
         with self.connection() as conn:
             conn.execute("BEGIN IMMEDIATE")
             conn.execute(
-                """UPDATE tasks SET status = ?, error = ?, credential_blob = NULL,
+                """UPDATE tasks SET status = ?, error = ?, result_json = ?, credential_blob = NULL,
                    credential_expires_at = NULL, updated_at = ?
                    WHERE status = ? AND credential_expires_at <= ?""",
-                (TaskStatus.FAILED, "Task credentials expired", utc_now(), TaskStatus.PENDING, utc_now()),
+                (TaskStatus.FAILED, "Task credentials expired", json.dumps(failure_result("Queued task credentials expired before execution.")), utc_now(), TaskStatus.PENDING, utc_now()),
             )
             row = conn.execute(
                 """SELECT task_id, prompt, context_json, credential_blob FROM tasks
@@ -135,19 +136,19 @@ class TaskStore:
     def cancel_processing(self, task_id: str) -> None:
         with self.connection() as conn:
             conn.execute(
-                """UPDATE tasks SET status = ?, error = ?, updated_at = ?,
+                """UPDATE tasks SET status = ?, error = ?, result_json = ?, updated_at = ?,
                    credential_blob = NULL, credential_expires_at = NULL
                    WHERE task_id = ? AND status = ?""",
-                (TaskStatus.FAILED, "Task cancelled by application shutdown", utc_now(), task_id, TaskStatus.PROCESSING),
+                (TaskStatus.FAILED, "Task cancelled by application shutdown", json.dumps(failure_result("The application shut down and cancelled execution.")), utc_now(), task_id, TaskStatus.PROCESSING),
             )
 
     def recover_interrupted(self) -> int:
         with self.connection() as conn:
             updated = conn.execute(
-                """UPDATE tasks SET status = ?, error = ?, updated_at = ?,
+                """UPDATE tasks SET status = ?, error = ?, result_json = ?, updated_at = ?,
                    credential_blob = NULL, credential_expires_at = NULL
                    WHERE status = ?""",
-                (TaskStatus.FAILED, "Task interrupted by application restart", utc_now(), TaskStatus.PROCESSING),
+                (TaskStatus.FAILED, "Task interrupted by application restart", json.dumps(failure_result("An application restart interrupted execution.")), utc_now(), TaskStatus.PROCESSING),
             )
             return updated.rowcount
 

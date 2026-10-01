@@ -65,6 +65,8 @@ def test_runner_failure_is_sanitized(tmp_path):
         result = await_final(client, task_id).json()
         assert result["status"] == TaskStatus.FAILED
         assert result["error"] == "Task execution failed"
+        assert result["result"]["output"]
+        assert "not confirmed" in result["result"]["output"]
         assert "secret" not in str(result)
 
 

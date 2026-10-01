@@ -7,6 +7,7 @@ from app.config import Settings
 from app.schemas import TaskStatus
 from app.storage import TaskStore
 from app.task_context import TaskContext, decode_context
+from app.task_report import TaskExecutionFailure, failure_result, output_result
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +91,11 @@ class TaskWorker:
                         self.store.cancel_processing(task_id)
                     else:
                         logger.error("Task %s failed (%s)", task_id, type(exc).__name__)
-                        self.store.finish(task_id, TaskStatus.FAILED, error="Task execution failed")
+                        report = exc.result if isinstance(exc, TaskExecutionFailure) else failure_result()
+                        if context is not None:
+                            report = context.redacted_result(report)
+                        report = output_result(report["output"])
+                        self.store.finish(task_id, TaskStatus.FAILED, result=report, error="Task execution failed")
                 finally:
                     if context is not None:
                         context.clear_sensitive_state()

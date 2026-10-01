@@ -121,3 +121,89 @@ def test_agent_closes_its_browser_after_error(monkeypatch):
     with pytest.raises(RuntimeError):
         agent.run_task("Get title", settings)
     assert browser.closed
+
+
+def test_failure_diagnosis_uses_redacted_evidence_without_tools(monkeypatch):
+    import json
+    from app.schemas import LoginCredential
+    from app.task_context import TaskContext
+    from app.task_report import TaskExecutionFailure
+
+    browser = FakeDriver()
+    context = TaskContext(allow_write_actions=True, credentials=[LoginCredential(
+        id="account", origins=["https://example.com"], username="private-user",
+        password="private-password",
+    )])
+    context.record_observation("extract_text", "returned", "private-user: account form visible")
+    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: browser)
+
+    class BrokenAgent:
+        def invoke(self, *_args, **_kwargs):
+            raise RuntimeError("private-password provider internal data")
+
+    monkeypatch.setattr(agent, "create_deep_agent", lambda **_: BrokenAgent())
+    calls = []
+
+    class Model:
+        def invoke(self, messages):
+            assert browser.closed
+            calls.append(messages)
+            return SimpleNamespace(content="Could not finish after viewing the form. private-password")
+
+    configurations = []
+    def model(**kwargs):
+        configurations.append(kwargs)
+        return Model()
+
+    monkeypatch.setattr(agent, "ChatOpenAI", model)
+    settings = Settings(_env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1",
+                        model_name="test", enable_write_actions=True)
+    with pytest.raises(TaskExecutionFailure) as error:
+        agent.run_task("Sign in private-user", settings, context)
+    assert len(calls) == 1
+    evidence = json.loads(calls[0][1]["content"])
+    assert "account form visible" in str(evidence)
+    assert "private-user" not in str(calls)
+    assert "private-password" not in str(calls) + str(error.value.result)
+    assert "provider internal" not in str(calls)
+    assert configurations[-1]["max_retries"] == 0
+    assert configurations[-1]["timeout"] <= 10
+
+
+def test_failure_analysis_outage_has_safe_fallback(monkeypatch):
+    from app.task_report import TaskExecutionFailure
+    browser = FakeDriver()
+    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: browser)
+
+    class Broken:
+        def invoke(self, *_args, **_kwargs):
+            raise RuntimeError("secret internal detail")
+
+    monkeypatch.setattr(agent, "create_deep_agent", lambda **_: Broken())
+    monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: Broken())
+    settings = Settings(_env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1", model_name="test")
+    with pytest.raises(TaskExecutionFailure) as error:
+        agent.run_task("Read title", settings)
+    assert browser.closed
+    assert "No additional agent analysis" in error.value.result["output"]
+    assert "secret" not in str(error.value.result)
+
+
+def test_cancelled_task_does_not_call_diagnostic_model(monkeypatch):
+    from app.task_context import TaskContext
+    from app.task_report import TaskExecutionFailure
+    context = TaskContext()
+    context.cancel()
+    monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: pytest.fail("Unexpected model call"))
+    settings = Settings(_env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1", model_name="test")
+    with pytest.raises(TaskExecutionFailure):
+        agent.run_task("Read title", settings, context)
+
+
+@pytest.mark.parametrize("text", ["বাংলা" * 6000, '"\\n' * 6000], ids=["unicode", "escaping"])
+def test_report_respects_serialized_byte_limit(text):
+    import json
+    from app.task_report import output_result
+    result = output_result(text)
+    assert result["output"]
+    assert len(json.dumps(result, ensure_ascii=False).encode("utf-8")) <= 8000

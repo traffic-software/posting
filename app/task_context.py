@@ -22,6 +22,8 @@ class TaskContext:
     _totp_codes: set[str] = field(default_factory=set)
     _totp_attempts: dict[str, set[int]] = field(default_factory=dict)
     _secret_lock: threading.Lock = field(default_factory=threading.Lock)
+    _observations: list[dict] = field(default_factory=list)
+    _observation_lock: threading.Lock = field(default_factory=threading.Lock)
 
     def bind_browser(self, close: Callable) -> None:
         with self._browser_lock:
@@ -44,7 +46,21 @@ class TaskContext:
         finally:
             self.clear_sensitive_state()
 
+    def record_observation(self, tool: str, outcome: str, detail: str) -> None:
+        entry = {"tool": tool, "outcome": outcome, "detail": self.redact(detail)[:500]}
+        with self._observation_lock:
+            if not self.cancelled.is_set():
+                self._observations.append(entry)
+                del self._observations[:-12]
+
+    def observations(self) -> list[dict]:
+        with self._observation_lock:
+            entries = [dict(entry) for entry in self._observations]
+        return self.redacted_result({"events": entries})["events"]
+
     def clear_sensitive_state(self) -> None:
+        with self._observation_lock:
+            self._observations.clear()
         with self._secret_lock:
             self.credentials.clear()
             self._totp_codes.clear()
