@@ -165,3 +165,21 @@ def test_write_tools_require_explicit_opt_in():
     assert {item.name for item in tools} == {
         "navigate_to_page", "extract_text", "click_element", "fill_element"
     }
+
+
+def test_tool_stop_observation_is_bounded_and_preserves_policy():
+    from types import SimpleNamespace
+    from app.task_context import TaskContext
+    context = TaskContext()
+    tools = browser_tools(SimpleNamespace(current_url="about:blank"), Settings(_env_file=None), time.monotonic() + 30, context)
+    navigate = next(item for item in tools if item.name == "navigate_to_page")
+    with pytest.raises(ToolException):
+        navigate.invoke({"url": "http://localhost/"})
+    assert context.observations()[-1]["outcome"] == "stopped"
+    assert "Local destinations" in context.observations()[-1]["detail"]
+    for _ in range(20):
+        context.record_observation("extract_text", "returned", "x" * 2000)
+    assert len(context.observations()) == 12
+    assert all(len(item["detail"]) <= 500 for item in context.observations())
+    context.clear_sensitive_state()
+    assert context.observations() == []

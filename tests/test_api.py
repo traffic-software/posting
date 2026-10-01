@@ -134,3 +134,20 @@ def test_processing_task_limits_admission(tmp_path):
             assert await_final(client, task_id).json()["status"] == TaskStatus.COMPLETED
     finally:
         release.set()
+
+
+def test_agent_failure_explanation_is_persisted(tmp_path):
+    from app.task_report import TaskExecutionFailure, output_result
+
+    explanation = "The page opened, but an observed authentication restriction stopped the task. Login is not confirmed."
+    def fail(*_):
+        raise TaskExecutionFailure(output_result(explanation))
+
+    settings = settings_for(tmp_path)
+    with TestClient(create_app(settings, runner=fail)) as client:
+        task_id = client.post("/run-task", json={"prompt": "Authorized test"}, headers=headers()).json()["task_id"]
+        report = await_final(client, task_id).json()
+        assert report["status"] == TaskStatus.FAILED
+        assert report["result"] == {"output": explanation}
+    with TestClient(create_app(settings, runner=lambda *_: {})) as client:
+        assert client.get(f"/task-status/{task_id}", headers=headers()).json()["result"]["output"] == explanation
