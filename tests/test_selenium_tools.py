@@ -129,7 +129,7 @@ def test_read_only_tools_and_navigation():
     browser = FakeBrowser()
     settings = Settings(_env_file=None)
     tools = browser_tools(browser, settings, time.monotonic() + 60)
-    assert {item.name for item in tools} == {"navigate_to_page", "extract_text"}
+    assert {item.name for item in tools} == {"navigate_to_page", "extract_text", "inspect_page"}
     assert "Example" in tools[0].invoke({"url": "https://another.example"})
 
 
@@ -163,7 +163,7 @@ def test_write_tools_require_explicit_opt_in():
     settings = Settings(_env_file=None, enable_write_actions=True)
     tools = browser_tools(FakeBrowser(), settings, time.monotonic() + 60)
     assert {item.name for item in tools} == {
-        "navigate_to_page", "extract_text", "click_element", "fill_element"
+        "navigate_to_page", "extract_text", "inspect_page", "click_element", "fill_element"
     }
 
 

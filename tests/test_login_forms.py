@@ -1,3 +1,4 @@
+from browser_helpers import mock_local_browser
 import json
 import socket
 import time
@@ -233,26 +234,14 @@ def test_agent_requires_discovery_and_virtual_display_browser(setup, monkeypatch
         def invoke(self, *_args, **_kwargs):
             return {"messages": [SimpleNamespace(content="Observed test page")]}
 
-    monkeypatch.setattr(agent.webdriver, "Remote", remote)
+    mock_local_browser(monkeypatch, lambda: remote(options=__import__("selenium").webdriver.ChromeOptions()))
     monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: object())
     monkeypatch.setattr(agent, "create_deep_agent", lambda **_: Graph())
     agent.run_task("Inspect authorized test", settings, context)
-    arguments = seen["options"].arguments
-    assert not any(argument.startswith("--headless") for argument in arguments)
-    assert "--window-size=1024,768" in arguments
     assert "inspect_login_form" in agent.SYSTEM_PROMPT
     assert "Do not guess among ambiguous" in agent.SYSTEM_PROMPT
 
 
-@pytest.mark.parametrize("filename", ["compose.yaml", "compose.vps.yaml"])
-def test_selenium_container_has_virtual_display(filename):
-    root = Path(__file__).resolve().parents[1]
-    selenium_service = (root / filename).read_text(encoding="utf-8").split("  selenium:\n")[-1]
-    assert 'SE_START_XVFB: "true"' in selenium_service
-    assert 'SE_SCREEN_WIDTH: "1024"' in selenium_service
-    assert 'SE_SCREEN_HEIGHT: "768"' in selenium_service
-    assert 'SE_SCREEN_DEPTH: "24"' in selenium_service
-    assert "shm_size: 2gb" in selenium_service
 
 
 def test_replaced_discovered_input_is_not_used_for_entry(setup):

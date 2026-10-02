@@ -9,3 +9,7 @@ selenium>=4.30,<5
 pyotp>=2.9,<3
 httpx>=0.28,<1
 pytest>=8,<10
+
+pyvirtualdisplay>=3,<4
+PyAutoGUI>=0.9.54,<1
+python3-Xlib>=0.15,<1

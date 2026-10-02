@@ -7,15 +7,14 @@ services:
       - .env
     environment:
       DATABASE_PATH: /data/tasks.db
-      SELENIUM_REMOTE_URL: http://selenium:4444/wd/hub
+      CHROMIUM_BINARY: /usr/bin/chromium
+      CHROMEDRIVER_BINARY: /usr/bin/chromedriver
       REQUIRE_TASK_API_TOKEN: "true"
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
       - tasks_data:/data
-    depends_on:
-      selenium:
-        condition: service_healthy
+    shm_size: 2gb
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
       interval: 15s
@@ -23,21 +22,6 @@ services:
       retries: 3
     restart: unless-stopped
     stop_grace_period: 60s
-
-  selenium:
-    image: selenium/standalone-chrome:4.31.0
-    environment:
-      SE_START_XVFB: "true"
-      SE_SCREEN_WIDTH: "1024"
-      SE_SCREEN_HEIGHT: "768"
-      SE_SCREEN_DEPTH: "24"
-    shm_size: 2gb
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:4444/status | grep -Eq '\"ready\"[[:space:]]*:[[:space:]]*true'"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-    restart: unless-stopped
 
 volumes:
   tasks_data:

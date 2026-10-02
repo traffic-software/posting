@@ -2,16 +2,15 @@ import hmac
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlsplit
 from uuid import UUID
 
-import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from langchain_core.tools import ToolException
 
 from app.agent import run_task
+from app.browser_runtime import browser_ready
 from app.config import Settings
 from app.schemas import TaskAccepted, TaskRequest, TaskResponse, TaskStatus
 from app.storage import QueueFullError, TaskStore
@@ -103,16 +102,8 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
     @app.get("/ready")
     def ready():
         health()
-        remote = urlsplit(settings.selenium_remote_url)
-        if remote.scheme not in ("http", "https") or not remote.netloc:
+        if not browser_ready(settings):
             raise HTTPException(status_code=503, detail="Browser service unavailable")
-        try:
-            response = httpx.get(f"{remote.scheme}://{remote.netloc}/status", timeout=3)
-            response.raise_for_status()
-            if response.json().get("value", {}).get("ready") is not True:
-                raise ValueError("Selenium is not ready")
-        except (httpx.HTTPError, ValueError):
-            raise HTTPException(status_code=503, detail="Browser service unavailable") from None
         return {"status": "ok", "revision": settings.app_revision}
 
     return app

@@ -137,6 +137,8 @@ langsmith==0.14.2
     # via
     #   deepagents
     #   langchain-core
+mouseinfo==0.1.3
+    # via pyautogui
 openai==3.22.1
     # via langchain-openai
 opentelemetry-api==1.45.0
@@ -163,6 +165,8 @@ pyasn1==0.6.4
     # via pyasn1-modules
 pyasn1-modules==0.4.2
     # via google-auth
+pyautogui==0.9.54
+    # via -r requirements.txt
 pycparser==3.0 ; (implementation_name != 'PyPy' and implementation_name != 'pypy' and os_name == 'nt') or (implementation_name != 'PyPy' and platform_python_implementation != 'PyPy')
     # via cffi
 pydantic==2.13.5
@@ -182,16 +186,44 @@ pydantic-core==2.46.5
     # via pydantic
 pydantic-settings==2.15.0
     # via -r requirements.txt
+pygetwindow==0.0.9
+    # via pyautogui
 pygments==2.21.0
     # via pytest
+pymsgbox==2.0.1
+    # via pyautogui
+pyobjc-core==12.2.2 ; sys_platform == 'darwin'
+    # via
+    #   pyautogui
+    #   pyobjc-framework-cocoa
+    #   pyobjc-framework-quartz
+pyobjc-framework-cocoa==12.2.2 ; sys_platform == 'darwin'
+    # via pyobjc-framework-quartz
+pyobjc-framework-quartz==12.2.2 ; sys_platform == 'darwin'
+    # via pyautogui
 pyotp==2.10.0
     # via -r requirements.txt
+pyperclip==1.11.0
+    # via mouseinfo
+pyrect==0.2.0
+    # via pygetwindow
+pyscreeze==1.0.1
+    # via pyautogui
 pysocks==1.7.1
     # via urllib3
 pytest==9.1.1
     # via -r requirements.txt
 python-dotenv==1.2.3
     # via pydantic-settings
+python3-xlib==0.15
+    # via
+    #   -r requirements.txt
+    #   mouseinfo
+    #   pyautogui
+pytweening==1.2.0
+    # via pyautogui
+pyvirtualdisplay==3.0
+    # via -r requirements.txt
 pyyaml==6.0.3
     # via langchain-core
 regex==2026.9.29
@@ -205,6 +237,8 @@ requests==2.34.2
     #   tiktoken
 requests-toolbelt==1.0.0
     # via langsmith
+rubicon-objc==0.5.7 ; sys_platform == 'darwin'
+    # via mouseinfo
 selenium==4.49.0
     # via -r requirements.txt
 sniffio==1.3.1

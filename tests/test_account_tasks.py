@@ -1,3 +1,4 @@
+from browser_helpers import mock_local_browser
 import json
 import socket
 import sqlite3
@@ -312,7 +313,7 @@ def test_account_write_gates(tmp_path, global_gate, task_gate):
     settings.enable_write_actions = global_gate
     context = TaskContext(allow_write_actions=task_gate, credentials=[credential()])
     tools = browser_tools(FakeDriver(), settings, time.monotonic() + 60, context)
-    assert {item.name for item in tools} == {"navigate_to_page", "extract_text"}
+    assert {item.name for item in tools} == {"navigate_to_page", "extract_text", "inspect_page"}
 
 
 def test_direct_browser_and_secret_free_model_context(tmp_path, monkeypatch):
@@ -333,7 +334,7 @@ def test_direct_browser_and_secret_free_model_context(tmp_path, monkeypatch):
         captured.update(kwargs)
         return FakeAgent()
 
-    monkeypatch.setattr(agent.webdriver, "Remote", remote)
+    mock_local_browser(monkeypatch, lambda: remote(options=__import__("selenium").webdriver.ChromeOptions()))
     monkeypatch.setattr(agent, "create_deep_agent", factory)
     context = TaskContext(allow_write_actions=True, credentials=[credential()])
     result = agent.run_task("Authorized login using account", configured(tmp_path), context)
@@ -355,7 +356,7 @@ def test_direct_browser_and_secret_free_model_context(tmp_path, monkeypatch):
 @pytest.mark.parametrize("host,scheme", [("proxy.example", "http"), ("proxy.example", "socks5"), ("127.0.0.1", "http")])
 def test_legacy_proxy_context_rejected_before_browser(tmp_path, monkeypatch, host, scheme):
     calls = []
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: calls.append(True))
+    mock_local_browser(monkeypatch, lambda: calls.append(True))
     context = TaskContext(proxy=FixedProxy(host=host, scheme=scheme, port=8080))
     with pytest.raises(RuntimeError, match="Task proxies are disabled"):
         agent.run_task("Read title", configured(tmp_path), context)
@@ -376,7 +377,7 @@ def test_real_deep_agent_graph_uses_virtual_files_and_browser_tools(tmp_path, mo
     driver = FakeDriver()
     settings = configured(tmp_path)
     tools = browser_tools(driver, settings, time.monotonic() + 60)
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: driver)
+    mock_local_browser(monkeypatch, lambda: driver)
     monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: TestModel(responses=[AIMessage(content="Read-only test")]))
     result = agent.run_task("Report no action", settings)
     assert result == {"output": "Read-only test"}
@@ -429,7 +430,7 @@ def test_credential_context_survives_pending_restart(tmp_path):
 def test_explicit_read_only_task_ceiling(tmp_path):
     context = TaskContext(allow_write_actions=False)
     tools = browser_tools(FakeDriver(), configured(tmp_path), time.monotonic() + 60, context)
-    assert {item.name for item in tools} == {"navigate_to_page", "extract_text"}
+    assert {item.name for item in tools} == {"navigate_to_page", "extract_text", "inspect_page"}
 
 
 def test_shutdown_cancels_active_credentials_and_browser(tmp_path):

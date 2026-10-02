@@ -12,11 +12,9 @@ The deploy job is disabled until the GitHub repository variable `RAILWAY_ENABLED
 
 The project **`posting-browser-agent`** already exists in your Railway workspace (project ID `2b92fd9e-4c9c-4d49-8587-95fa1a9d7db2`, production environment ID `be1ff1ff-a1c2-45db-ab5e-f800f2ebb766`). Its empty **`app`** service exists (ID `6d744e5a-30b8-4634-84d1-8b7ebfe61982`). Do **not** create another project or app service. No Selenium service, app image source, volume, public domain, or variables have been configured yet.
 
-In the Railway project UI, add a Docker Image service named **`selenium`** using `selenium/standalone-chrome:4.31.0`. Add a volume to the existing **`app`** service mounted at `/data`; a volume created on a different service will not persist `tasks.db`. After the first GHCR package is Public, set the existing app service's Docker image source to `ghcr.io/traffic-software/posting-app:deep-worker`. The local Railway CLI 5.28.1 panicked during volume creation on Windows, and service creation from the Selenium image was blocked by the command permission policy; use the Railway UI rather than assuming either action succeeded.
+Use the existing app service with its `/data` volume. The updated image includes local Chromium, matching ChromeDriver, Xvfb and PyAutoGUI. No separate Selenium service is required. Keep one replica and one Uvicorn worker; allocate sufficient app memory for Chrome.
 
-Keep the Selenium service **private** (no generated/public domain, TCP proxy, or VNC exposure). Place `app` and `selenium` in the same project **and environment** so `selenium.railway.internal` resolves. Set Selenium resources high enough for headless Chrome and verify its `/status` shows `value.ready=true`; Compose `shm_size` is not inherited by Railway. Set one app replica only: SQLite and the in-process task worker are not safe for multi-replica deployment.
-
-In the **app** service, configure a Railway HTTP health check path `/ready` (wait for both DB/worker and Selenium). Generate a public Railway domain for app only, targeting app port 8000. The image honors Railway's `PORT` with default 8000; set `PORT=8000` if the domain/health routing needs an explicit port. Do not configure image auto-updates if GitHub Actions is responsible for redeploys.
+Configure `/ready` as the HTTP healthcheck on port 8000. It checks local prerequisites without spawning a competing desktop; a real browser smoke test is separate.
 
 ## 3. Configure Railway service variables
 
@@ -24,22 +22,22 @@ Set non-secret values in the app service:
 
 ```text
 DATABASE_PATH=/data/tasks.db
-SELENIUM_REMOTE_URL=http://selenium.railway.internal:4444/wd/hub
+CHROMIUM_BINARY=/usr/bin/chromium
+CHROMEDRIVER_BINARY=/usr/bin/chromedriver
 PORT=8000
-RAILWAY_RUN_UID=0
 REQUIRE_TASK_API_TOKEN=true
 ENABLE_WRITE_ACTIONS=false
 ```
 
-Railway volumes mount as root; `RAILWAY_RUN_UID=0` lets this image write `/data/tasks.db` despite its default non-root `USER app`. Treat the mounted SQLite volume (which contains prompts/results) as sensitive; Railway volume data persists across redeploys, but a volume service has downtime during redeploy. Do not use an app replica count above one. If root runtime is unacceptable, replace it with a tested startup ownership strategy before removing `RAILWAY_RUN_UID=0`.
+The image runs as a non-root app user. Ensure the volume is writable with a tested ownership setup; do not switch Chromium to root as a workaround. Keep one replica for SQLite and the exclusive desktop runtime.
 
-In the Railway **app service UI**, set `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME`, and a long random `TASK_API_TOKEN` as secret variables. Do not paste values into GitHub workflow, Dockerfile, logs, docs, or chat. No domain allowlist is required: browser tools permit public HTTP(S) websites and reject local/non-public literal or DNS-resolved addresses. These application checks do not cover browser subresources, pre-validation redirects or DNS rebinding; enforce Selenium network-level egress restrictions against internal, loopback, private, link-local and metadata destinations before exposing arbitrary browsing. A private Selenium service alone does not restrict its outbound traffic. Model must support tool calls. `/health` and `/ready` intentionally require no API token, while task POST/GET require the bearer token. Public deployment without a task token fails at startup.
+In the Railway **app service UI**, set `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME`, and a long random `TASK_API_TOKEN` as secret variables. Do not paste values into GitHub workflow, Dockerfile, logs, docs, or chat. No domain allowlist is required: browser tools permit public HTTP(S) websites and reject local/non-public literal or DNS-resolved addresses. These application checks do not cover browser subresources, pre-validation redirects or DNS rebinding; enforce app-container network-level egress restrictions against internal, loopback, private, link-local and metadata destinations before exposing arbitrary browsing. A private Selenium service alone does not restrict its outbound traffic. Model must support tool calls. `/health` and `/ready` intentionally require no API token, while task POST/GET require the bearer token. Public deployment without a task token fails at startup.
 
 For optional authorized account tasks, set `CREDENTIAL_FERNET_KEY` as a secret service variable, keep it stable while encrypted tasks are pending, and use `CREDENTIAL_TTL_SECONDS` (default 900). Server writes and task-level consent must both be enabled for credential entry. Fixed proxies use source-IP allowlisting; a provider must support Railway's actual stable egress arrangement before use—do not assume the public app domain or VPS IP is the Railway egress IP. See [account-tasks.md](account-tasks.md) for the API contract and limitations. No anti-detection/security bypass is implemented.
 
 ## 4. Enable automated deployment
 
-Once the image is Public and the Railway app/Selenium/volume/variables/domain are healthy, create a **Railway project token** for its production environment. In GitHub repository settings add:
+Once the image is Public and the Railway app/volume/variables/domain are healthy, create a **Railway project token** for its production environment. In GitHub repository settings add:
 
 | Type | Name | Value |
 | --- | --- | --- |

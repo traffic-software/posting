@@ -1,3 +1,4 @@
+from browser_helpers import mock_local_browser
 import socket
 import time
 from types import SimpleNamespace
@@ -356,7 +357,7 @@ def test_real_deep_agent_invokes_totp_without_secret_observations(setup, monkeyp
         AIMessage(content="", tool_calls=[{"name": "extract_text", "id": "observe", "args": {"selector": "body"}}]),
         AIMessage(content="Authenticator submitted; outcome not yet observed"),
     ])
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: driver)
+    mock_local_browser(monkeypatch, lambda: driver)
     monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: model)
     result = agent.run_task("Authorized authenticator login", settings, context)
     assert driver.submit.clicked and driver.closed
@@ -501,7 +502,7 @@ def test_seed_canonicalization():
 def test_agent_prompt_contains_only_totp_capability(setup, monkeypatch):
     driver, settings, context = setup
     captured = {}
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: driver)
+    mock_local_browser(monkeypatch, lambda: driver)
 
     def factory(**kwargs):
         captured.update(kwargs)

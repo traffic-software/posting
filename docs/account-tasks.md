@@ -1,6 +1,6 @@
 # Authorized account tasks
 
-This feature uses **standard Remote Selenium**, not undetected ChromeDriver or anti-detect tooling. It does not spoof fingerprints, rotate proxies, bypass CAPTCHA/MFA/2FA, or work around blocked-login warnings. Task-specific proxies are disabled; browser sessions use the Selenium host's existing network configuration. Use only accounts and workflows you are authorized to automate.
+This feature uses **standard local Selenium with a task-scoped PyAutoGUI desktop**, not undetected ChromeDriver or anti-detect tooling. It does not spoof fingerprints, rotate proxies, bypass CAPTCHA/MFA/2FA, or work around blocked-login warnings. Task-specific proxies are disabled; browser sessions use the app container's existing network configuration. Use only accounts and workflows you are authorized to automate.
 
 The repository exposes an API and an interactive Python client; it does not include a frontend. A frontend can send the structured JSON below over HTTPS. The current shared bearer token is for one trusted operator: it is not per-user identity or task ownership. Add those protections before building a public multi-user credential-submission service.
 
@@ -63,7 +63,9 @@ Before each username/password entry, the agent uses `inspect_login_form(credenti
 
 The agent is instructed to inspect again after navigation or a username-to-password transition and not to guess among ambiguous controls. Initial discovery waits for usable fields within the browser timeout and remaining task budget. Missing credential targets request fresh inspection rather than an automatic write or submit retry. `fill_credential` independently checks live input type, visibility, enabled/readonly state, origin, frame, policy and expiry immediately before entry. Discovery does not authorize a different origin or relax MFA restrictions; existing explicit tool callers can still supply a selector without prior discovery.
 
-Chrome runs without `--headless` in the Selenium container's Xvfb virtual display. Both Compose configurations explicitly enable `SE_START_XVFB` and a `1024×768×24` screen; Chrome uses a `1024×768` window. The official Selenium image owns display startup, so do not add `pyvirtualdisplay` to the API container: its Remote browser runs elsewhere. Deploy the updated app and recreate the Selenium service to apply these environment settings. Physical display hardware is not required. Display-backed mode is not an anti-detection mechanism or a guarantee that a site's login will work.
+Chrome runs with an Xvfb display in the same Linux app container as the agent. Display startup precedes local Chromium/ChromeDriver creation, and PyAutoGUI is bound to that display only. A desktop lock serializes tasks; one app process/replica is required. Generic mouse/keyboard actions target inspected browser elements, not arbitrary coordinates or OS shortcuts. ASCII nonsecret typing uses PyAutoGUI; Unicode has an explicit Selenium fallback. Credentials and OTPs always use the dedicated guarded Selenium tools, never desktop typing or clipboard. No raw desktop screenshots are sent to the model or persisted.
+
+The app image must be rebuilt for the local-browser migration. There is no remote Selenium fallback or host-desktop fallback; local runtime requires Linux and the configured Chromium/ChromeDriver/Xvfb executables. `/ready` checks prerequisites without spawning a competing desktop. Display-backed mode does not bypass security restrictions or guarantee login success.
 
 ## Authenticator-app TOTP
 
@@ -83,7 +85,7 @@ Use the interactive client's optional `--account` mode or the structured HTTPS A
 
 ## Credential lifecycle
 
-Structured username/password values and optional TOTP seeds are encrypted with Fernet before SQLite insertion. The worker decrypts them after claim; default TTL is 900 seconds and configurable from 60 to 3600 seconds. Values remain scoped to the running task; browser closure is attempted on exit and cookies/profiles are not persisted by this feature. Graceful app shutdown cancels the active task, clears its live encrypted credentials and attempts to delete its registered browser session. Tools honor cancellation, including sessions created after cancellation. Compose grants the app 60 seconds to stop; increase deployment grace if browser transport timeouts are raised. Hard kills, server crashes or an unreachable Selenium service can still leave a remote browser until Selenium cleans it up; configure a server-side idle session timeout. Outstanding model calls cannot be force-killed by this thread-based worker.
+Structured username/password values and optional TOTP seeds are encrypted with Fernet before SQLite insertion. The worker decrypts them after claim; default TTL is 900 seconds and configurable from 60 to 3600 seconds. Values remain scoped to the running task; browser closure is attempted on exit and cookies/profiles are not persisted by this feature. Graceful app shutdown cancels the active task, clears its live encrypted credentials and attempts to delete its registered local browser session. Tools honor cancellation, including sessions created after cancellation. Compose grants the app 60 seconds to stop; increase deployment grace if browser transport timeouts are raised. Hard kills, server crashes or an unreachable Selenium service can still leave a browser process until its container is stopped; monitor container resource limits. Outstanding model calls cannot be force-killed by this thread-based worker.
 
 With a configured persistent key, unexpired pending tasks retain encrypted credentials across restarts. With the automatic ephemeral key, a new process cannot decrypt previous pending credentials; those tasks fail safely and their blobs are cleared. Completion, failure, expiry cleanup and interrupted-processing recovery clear the live credential columns. Interrupted processing is failed, not automatically retried. Pending expiry cleanup runs in the worker. TTL is also checked before credential entry.
 
@@ -93,7 +95,7 @@ Clearing a SQLite column is **logical deletion**, not forensic erasure: WAL file
 
 The app does not configure Selenium proxy capabilities. Non-null `proxy` submissions are rejected at request validation; previously queued proxy tasks fail before a browser session is created rather than silently running without their requested proxy. Legacy proxy context decoding is retained only to reject those pending tasks safely.
 
-This does not change the Selenium host's network configuration or any infrastructure-level proxy. Continue to enforce network-level egress restrictions against internal, loopback, private, link-local, metadata and other non-public destinations. Application DNS validation and a private Compose network alone do not prevent SSRF, DNS rebinding, redirects or browser subresource access.
+This does not change the app container's network configuration or any infrastructure-level proxy. Continue to enforce network-level egress restrictions against internal, loopback, private, link-local, metadata and other non-public destinations. Application DNS validation and a private Compose network alone do not prevent SSRF, DNS rebinding, redirects or browser subresource access.
 
 ## Interactive client
 

@@ -19,7 +19,10 @@ class Settings(BaseSettings):
     _ephemeral_credential_cipher: Fernet = PrivateAttr(default_factory=lambda: Fernet(Fernet.generate_key()))
     credential_ttl_seconds: int = Field(default=900, ge=60, le=3600)
     database_path: Path = Path("data/tasks.db")
-    selenium_remote_url: str = "http://selenium:4444/wd/hub"
+    chromium_binary: Path = Path("/usr/bin/chromium")
+    chromedriver_binary: Path = Path("/usr/bin/chromedriver")
+    browser_window_width: int = Field(default=1024, ge=640, le=3840)
+    browser_window_height: int = Field(default=768, ge=480, le=2160)
     max_active_tasks: int = 20
     model_timeout_seconds: int = 45
     browser_timeout_seconds: int = 20

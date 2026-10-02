@@ -1,3 +1,4 @@
+from browser_helpers import mock_local_browser
 from types import SimpleNamespace
 
 import pytest
@@ -33,7 +34,7 @@ def test_deep_agent_builtin_tools_are_task_scoped(monkeypatch, operation):
             return self
 
     model = TestModel(responses=replies)
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: browser)
+    mock_local_browser(monkeypatch, lambda: browser)
     monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: model)
     states = []
     factory = agent.create_deep_agent
@@ -85,7 +86,7 @@ class FakeDriver:
 
 def test_agent_closes_its_browser_after_result(monkeypatch):
     browser = FakeDriver()
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: browser)
+    mock_local_browser(monkeypatch, lambda: browser)
     seen = {}
 
     class FakeAgent:
@@ -107,7 +108,7 @@ def test_agent_closes_its_browser_after_result(monkeypatch):
 
 def test_agent_closes_its_browser_after_error(monkeypatch):
     browser = FakeDriver()
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: browser)
+    mock_local_browser(monkeypatch, lambda: browser)
 
     class FakeAgent:
         def invoke(self, *_args, **_kwargs):
@@ -135,7 +136,7 @@ def test_failure_diagnosis_uses_redacted_evidence_without_tools(monkeypatch):
         password="private-password",
     )])
     context.record_observation("extract_text", "returned", "private-user: account form visible")
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: browser)
+    mock_local_browser(monkeypatch, lambda: browser)
 
     class BrokenAgent:
         def invoke(self, *_args, **_kwargs):
@@ -173,7 +174,7 @@ def test_failure_diagnosis_uses_redacted_evidence_without_tools(monkeypatch):
 def test_failure_analysis_outage_has_safe_fallback(monkeypatch):
     from app.task_report import TaskExecutionFailure
     browser = FakeDriver()
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: browser)
+    mock_local_browser(monkeypatch, lambda: browser)
 
     class Broken:
         def invoke(self, *_args, **_kwargs):
@@ -220,7 +221,7 @@ def test_startup_failure_is_reported_without_raw_exception(monkeypatch, failure)
         def invoke(self, *_):
             raise RuntimeError("raw provider secret")
 
-    monkeypatch.setattr(agent.webdriver, "Remote", unavailable)
+    mock_local_browser(monkeypatch, unavailable)
     monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: Offline())
     settings = Settings(_env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1", model_name="test")
     with pytest.raises(TaskExecutionFailure) as error:
@@ -239,7 +240,7 @@ def test_cleanup_error_does_not_discard_success(monkeypatch):
         def invoke(self, *_args, **_kwargs):
             return {"messages": [SimpleNamespace(content="Observed page title")]}
 
-    monkeypatch.setattr(agent.webdriver, "Remote", lambda **_: Driver())
+    mock_local_browser(monkeypatch, lambda: Driver())
     monkeypatch.setattr(agent, "create_deep_agent", lambda **_: Graph())
     monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: object())
     settings = Settings(_env_file=None, openai_api_key="test", openai_base_url="https://model.example/v1", model_name="test")

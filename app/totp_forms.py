@@ -2,24 +2,17 @@
 
 import re
 
+from app.browser_dom import STRUCTURAL_SELECTOR_JS
+
 
 def structural_selector(value) -> bool:
     return isinstance(value, str) and len(value) <= 300 and re.fullmatch(
-        r"\*:nth-child\([1-9][0-9]{0,5}\)(?: > \*:nth-child\([1-9][0-9]{0,5}\)){0,11}", value,
+        r"(?:\*|[a-z][a-z0-9-]{0,31}):nth-child\([1-9][0-9]{0,5}\)"
+        r"(?: > (?:\*|[a-z][a-z0-9-]{0,31}):nth-child\([1-9][0-9]{0,5}\)){0,11}", value,
     ) is not None
 
 
-DISCOVER_CONTROLS = """
-const structuralSelector = (element) => {
-    const parts = [];
-    while (element && parts.length < 12) {
-        let index = 1;
-        for (let sibling = element.previousElementSibling; sibling; sibling = sibling.previousElementSibling) index++;
-        parts.unshift(`*:nth-child(${index})`);
-        element = element.parentElement;
-    }
-    return element ? '' : parts.join(' > ');
-};
+DISCOVER_CONTROLS = STRUCTURAL_SELECTOR_JS + """
 return Array.from(document.querySelectorAll('input, button')).slice(0, 200).map(element => ({
     element, selector: structuralSelector(element), form: Array.from(document.forms).indexOf(element.form)
 }));

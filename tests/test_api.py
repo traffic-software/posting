@@ -78,26 +78,13 @@ def test_unconfigured_service_rejects_submission(tmp_path):
 
 
 def test_readiness_checks_browser_without_exposing_tasks(tmp_path, monkeypatch):
-    import httpx
-
     settings = settings_for(tmp_path)
     settings.app_revision = "abc123"
     with TestClient(create_app(settings, runner=lambda *_: {})) as client:
-        def unavailable(*_args, **_kwargs):
-            raise httpx.ConnectError("Grid unavailable")
-
-        monkeypatch.setattr(httpx, "get", unavailable)
+        monkeypatch.setattr("app.main.browser_ready", lambda _: False)
         assert client.get("/ready").status_code == 503
         assert client.get("/health").json()["revision"] == "abc123"
-
-        class ReadyResponse:
-            def raise_for_status(self):
-                pass
-
-            def json(self):
-                return {"value": {"ready": True}}
-
-        monkeypatch.setattr(httpx, "get", lambda *_args, **_kwargs: ReadyResponse())
+        monkeypatch.setattr("app.main.browser_ready", lambda _: True)
         assert client.get("/ready").json() == {"status": "ok", "revision": "abc123"}
 
 
