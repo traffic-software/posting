@@ -14,6 +14,7 @@ from selenium.webdriver.support import expected_conditions as conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
 from app.config import Settings
+from app.login_forms import continuation_control, login_input
 from app.schemas import https_origin
 from app.task_context import TaskContext
 from app.totp_forms import (
@@ -220,33 +221,96 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
 
         tools.extend([click_element, fill_element])
         if context and context.credentials:
+            discovered_login_inputs = {}
+
+            def login_credential(credential_id):
+                credential = next((item for item in context.credentials if item.id == credential_id), None)
+                if credential is None:
+                    raise BrowserPolicyStop("Unknown credential ID")
+                return credential
+
+            @tool
+            @observe
+            def inspect_login_form(credential_id: str) -> str:
+                """Discover live username/password inputs and continuation buttons without reading field values."""
+                credential = login_credential(credential_id)
+
+                def discover(browser):
+                    credential_origin(credential)
+                    controls = browser.execute_script(DISCOVER_CONTROLS)
+                    credential_origin(credential)
+                    if not isinstance(controls, list):
+                        raise ToolException("Could not inspect login controls")
+                    candidates = {"username": [], "password": [], "buttons": []}
+                    live_inputs = {}
+                    for row in controls[:200]:
+                        if not isinstance(row, dict):
+                            continue
+                        selector, form_id, element = row.get("selector"), row.get("form"), row.get("element")
+                        if not structural_selector(selector) or type(form_id) is not int or form_id < -1 or element is None:
+                            continue
+                        candidate = {"selector": selector, "form": form_id}
+                        for field in ("username", "password"):
+                            if login_input(element, field):
+                                candidates[field].append(candidate)
+                                live_inputs[(credential_id, selector, field)] = element
+                        if continuation_control(element):
+                            candidates["buttons"].append(candidate)
+                    credential_origin(credential)
+                    return (candidates, live_inputs) if candidates["username"] or candidates["password"] else False
+
+                try:
+                    credential_origin(credential)
+                    remaining = min(settings.browser_timeout_seconds, deadline - time.monotonic())
+                    if remaining <= 0:
+                        raise ToolException("Task time limit reached")
+                    candidates, live_inputs = WebDriverWait(driver, remaining).until(discover)
+                    credential_origin(credential)
+                    discovered_login_inputs.clear()
+                    discovered_login_inputs.update(live_inputs)
+                    return json.dumps({
+                        "controls": {kind: items[:8] for kind, items in candidates.items()},
+                        "ambiguous": {kind: len(items) > 1 for kind, items in candidates.items()},
+                        "truncated": any(len(items) > 8 for items in candidates.values()),
+                        "note": "Use live selectors; inspect again after navigation. Do not guess among ambiguous controls. Entry or continuation is not proof of login.",
+                    })
+                except BrowserPolicyStop:
+                    raise
+                except WebDriverException:
+                    raise ToolException("No usable login controls became available; inspect the current page before continuing") from None
+                except (ValueError, TypeError, AttributeError):
+                    raise ToolException("Could not inspect login controls") from None
+
             @tool
             @observe
             def fill_credential(selector: str, credential_id: str, field: Literal["username", "password"]) -> str:
                 """Fill a username or password using a supplied credential ID at its authorized login origin."""
-                credential = next((item for item in context.credentials if item.id == credential_id), None)
-                if credential is None:
-                    raise BrowserPolicyStop("Unknown credential ID")
+                credential = login_credential(credential_id)
                 credential_origin(credential)
-                element = find_element(selector)
+                try:
+                    element = find_element(selector)
+                except ToolException as exc:
+                    if isinstance(exc.__cause__, WebDriverException):
+                        raise ToolException("Credential element unavailable; use inspect_login_form again for a current selector") from None
+                    raise
                 try:
                     credential_origin(credential)
-                    if element.tag_name.lower() != "input":
-                        raise BrowserPolicyStop("Credentials may only be entered into input fields")
-                    input_type = (element.get_attribute("type") or "text").lower()
-                    if (field == "password" and input_type != "password") or (
-                        field == "username" and input_type not in ("text", "email", "tel")
-                    ):
-                        raise BrowserPolicyStop("Credential field type is not authorized")
+                    if not login_input(element, field):
+                        raise BrowserPolicyStop("Credential field is not an authorized editable input")
+                    discovered = discovered_login_inputs.get((credential_id, selector, field))
+                    if discovered is not None and discovered != element:
+                        raise BrowserPolicyStop("Credential field changed since inspection; inspect_login_form again")
                     element.clear()
                     credential_origin(credential)
+                    if not login_input(element, field) or driver.find_element(By.CSS_SELECTOR, selector) != element:
+                        raise BrowserPolicyStop("Credential field changed before entry")
                     element.send_keys(getattr(credential, field).get_secret_value())
                     check_session()
                     return "Credential entered"
                 except WebDriverException:
                     raise BrowserPolicyStop("Credential entry failed") from None
 
-            tools.append(fill_credential)
+            tools.extend([inspect_login_form, fill_credential])
             if any(credential.totp_secret is not None for credential in context.credentials):
                 def totp_credential(credential_id):
                     credential = next((item for item in context.credentials if item.id == credential_id), None)

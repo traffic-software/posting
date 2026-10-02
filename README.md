@@ -46,6 +46,14 @@ Prompt-এ workflow দিন, password নয়। Structured `credentials` ও e
 
 Optional structured credential `totp_secret` দিলে PyOTP দিয়ে authenticator-app 2FA support পাওয়া যায়: `fill_totp(selector, submit_selector, credential_id)` OTP সরাসরি Selenium দিয়ে fill ও submit করে। `inspect_totp_form` supported field selectors খুঁজে দেয়; single numeric field ও ছয়টি digit box support আছে। Code `TOTP.now()` দিয়ে তৈরি হয়। Seed/code model-কে দেওয়া হয় না; secure CLI mode: `.venv/Scripts/python.exe scripts/submit_account_task.py --account`। Prompt-এ seed দেবেন না। Standard Remote Selenium-ই ব্যবহৃত হয়; undetected-chromedriver যোগ করা হয়নি। CAPTCHA, SMS/email/recovery ও suspicious-login challenge-এ থামে। বিস্তারিত [account task docs](docs/account-tasks.md#authenticator-app-totp)।
 
+Username/password দেওয়ার আগে agent `inspect_login_form(credential_id)` দিয়ে actual DOM-এর visible/editable input ও continuation button-এর structural selector নেয়; page text দেখে selector অনুমান করতে বলা হয় না। Username → Next → password transition-এর পরে আবার inspect করে। Discovery values/labels/HTML ফেরত দেয় না, এবং ambiguous controls হলে অনুমান করে action নেওয়া নয়।
+
+## Container virtual display
+
+দুই Compose setup-এ Selenium container-এর নিজস্ব Xvfb explicit চালু করা আছে (`SE_START_XVFB=true`, screen `1024×768×24`)। Chrome `--headless` ছাড়া সেই virtual display-তে চলে, window size `1024×768`; physical monitor লাগে না। Official Selenium image display lifecycle পরিচালনা করে। API container-এ `pyvirtualdisplay` চালানো হয় না, কারণ Remote Chrome আলাদা container-এ আছে।
+
+পরিবর্তন deploy করার সময় app update-এর সঙ্গে Selenium service-ও recreate করুন। Local build-এর জন্য `docker compose up --build -d`; VPS image update-এর পরে `docker compose -f compose.vps.yaml up -d`। শুধু app restart করলে পুরোনো Selenium container নতুন display environment পাবে না। Virtual display missing-element/security restriction-এর সার্বজনীন সমাধান নয়; login outcome আলাদাভাবে যাচাই করতে হবে।
+
 ## Browser policy ও সীমা
 
 - Agent runtime `deepagents.create_deep_agent` ব্যবহার করে। Planning (`write_todos`), task-local virtual filesystem ও planning-only subagent আছে; filesystem backend `StateBackend`, তাই host filesystem বা shell access দেওয়া হয় না। Subagent-এর browser/credential tools নেই; browser actions শুধু main agent-এর policy-checked Selenium tools দিয়ে হয়। Virtual files task শেষ হলে persist করা হয় না।

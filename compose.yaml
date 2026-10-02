@@ -25,6 +25,11 @@ services:
 
   selenium:
     image: selenium/standalone-chrome:4.31.0
+    environment:
+      SE_START_XVFB: "true"
+      SE_SCREEN_WIDTH: "1024"
+      SE_SCREEN_HEIGHT: "768"
+      SE_SCREEN_DEPTH: "24"
     shm_size: 2gb
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:4444/status | grep -Eq '\"ready\"[[:space:]]*:[[:space:]]*true'"]
