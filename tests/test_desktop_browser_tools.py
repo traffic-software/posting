@@ -1,3 +1,4 @@
+from browser_helpers import FakeIdleTracker
 import json
 import socket
 import time
@@ -68,7 +69,7 @@ def setup(tmp_path, monkeypatch):
 
 def bind(setup):
     driver, desktop, context, settings = setup
-    return {item.name: item for item in browser_tools(driver, settings, time.monotonic() + 30, context, desktop)}
+    return {item.name: item for item in browser_tools(driver, settings, time.monotonic() + 30, context, desktop, network_idle=FakeIdleTracker())}
 
 
 def test_mouse_and_keyboard_use_guarded_desktop(setup):

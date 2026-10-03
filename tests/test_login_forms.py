@@ -1,3 +1,4 @@
+from browser_helpers import FakeIdleTracker
 from browser_helpers import mock_local_browser
 import json
 import socket
@@ -76,7 +77,7 @@ def setup(tmp_path, monkeypatch):
 
 def tools(setup, deadline=None):
     driver, settings, context = setup
-    return {item.name: item for item in browser_tools(driver, settings, deadline or time.monotonic() + 30, context)}
+    return {item.name: item for item in browser_tools(driver, settings, deadline or time.monotonic() + 30, context, network_idle=FakeIdleTracker())}
 
 
 def inspect(tool):

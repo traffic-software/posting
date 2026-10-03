@@ -68,7 +68,7 @@ def _execute_task(prompt: str, settings: Settings, context: TaskContext) -> dict
             )
         agent = create_deep_agent(
             model=model,
-            tools=browser_tools(driver, settings, deadline, context, desktop=session.desktop),
+            tools=browser_tools(driver, settings, deadline, context, desktop=session.desktop, network_idle=session.network_idle),
             system_prompt=policy,
             backend=StateBackend(),
             middleware=[TodoListMiddleware()],

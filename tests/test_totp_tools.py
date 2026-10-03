@@ -1,3 +1,4 @@
+from browser_helpers import FakeIdleTracker
 from browser_helpers import mock_local_browser
 import socket
 import time
@@ -89,7 +90,7 @@ def setup(tmp_path, monkeypatch):
 
 def get_tool(setup, name="fill_totp", deadline=None):
     driver, settings, context = setup
-    return next(tool for tool in browser_tools(driver, settings, deadline or time.monotonic() + 60, context) if tool.name == name)
+    return next(tool for tool in browser_tools(driver, settings, deadline or time.monotonic() + 60, context, network_idle=FakeIdleTracker()) if tool.name == name)
 
 
 def invoke(tool, credential_id="account"):
@@ -175,7 +176,7 @@ def test_tool_visibility_requires_secret_and_both_gates(setup, server, consent, 
     settings.enable_write_actions = server
     context.allow_write_actions = consent
     context.credentials = [credential(seed)]
-    assert "fill_totp" not in {tool.name for tool in browser_tools(driver, settings, time.monotonic() + 60, context)}
+    assert "fill_totp" not in {tool.name for tool in browser_tools(driver, settings, time.monotonic() + 60, context, network_idle=FakeIdleTracker())}
 
 
 def test_unknown_and_seedless_credentials_fail(setup):

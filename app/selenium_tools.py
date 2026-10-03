@@ -15,6 +15,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from app.browser_dom import DISCOVER_PAGE
 from app.config import Settings
+from app.network_idle import NetworkIdleError
 from app.desktop_tools import DesktopInputError
 from app.login_forms import continuation_control, login_input
 from app.schemas import https_origin
@@ -59,7 +60,7 @@ def check_url(url: str) -> None:
         raise ToolException("Private and non-public IP addresses are not allowed")
 
 
-def browser_tools(driver, settings: Settings, deadline: float, context: TaskContext | None = None, desktop=None):
+def browser_tools(driver, settings: Settings, deadline: float, context: TaskContext | None = None, desktop=None, network_idle=None):
     def redact(text: str) -> str:
         return context.redact(text) if context else text
 
@@ -158,6 +159,19 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
         current = driver.current_url
         if current and current != "data:," and not current.startswith("about:blank"):
             check_url(current)
+
+    def pre_input(policy=None):
+        def guard():
+            check_session()
+            (policy or check_write_page)()
+        guard()
+        if network_idle is None:
+            raise BrowserPolicyStop("Network readiness could not be confirmed; this invocation entered no data")
+        try:
+            network_idle.wait(deadline, guard, context.cancelled if context else None)
+        except NetworkIdleError:
+            raise BrowserPolicyStop("Network readiness could not be confirmed; this invocation entered no data") from None
+        guard()
 
     def find_element(selector: str, clickable: bool = False):
         if len(selector) > 300 or not selector.strip():
@@ -265,8 +279,11 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             """Replace an input field's text with a provided value on the public website."""
             if len(value) > 2000:
                 raise ToolException("Input is too long")
-            check_write_page()
+            pre_input()
             element = find_element(selector)
+            previous = inspected_controls.get(selector)
+            if previous is not None and previous != element:
+                raise BrowserPolicyStop("Control changed; inspect_page again")
             try:
                 check_write_page()
                 tag = element.tag_name.lower()
@@ -322,6 +339,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             @observe
             def press_key(selector: str, key: Literal["enter", "tab", "esc", "space", "up", "down", "left", "right", "home", "end", "pageup", "pagedown", "backspace", "delete"]) -> str:
                 """Press one allowed page key on a live nonsecret browser control; no shortcuts."""
+                pre_input()
                 element = desktop_target(selector)
                 if (element.get_attribute("type") or "").lower() in ("password", "file") or element.get_attribute("autocomplete") == "one-time-code":
                     raise BrowserPolicyStop("Generic keyboard actions cannot target secret or file fields")
@@ -406,7 +424,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             def fill_credential(selector: str, credential_id: str, field: Literal["username", "password"]) -> str:
                 """Fill a username or password using a supplied credential ID at its authorized login origin."""
                 credential = login_credential(credential_id)
-                credential_origin(credential)
+                pre_input(lambda: credential_origin(credential))
                 try:
                     element = find_element(selector)
                 except ToolException as exc:
@@ -432,6 +450,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
 
             tools.extend([inspect_login_form, fill_credential])
             if any(credential.totp_secret is not None for credential in context.credentials):
+                discovered_totp_controls = {}
                 def totp_credential(credential_id):
                     credential = next((item for item in context.credentials if item.id == credential_id), None)
                     if credential is None or credential.totp_secret is None:
@@ -477,6 +496,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                             if submit_control(element):
                                 group["submit"].append((selector, element))
                         candidates = []
+                        discovered_totp_controls.clear()
                         for group in forms.values():
                             layouts = [("single", [item]) for item in group["single"]]
                             if len(group["split"]) == 6:
@@ -487,7 +507,9 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                                         check_submission([item[1] for item in inputs], submit, credential)
                                     except (BrowserPolicyStop, ValueError):
                                         continue
-                                    candidates.append({"layout": layout, "selector": ", ".join(item[0] for item in inputs), "submit_selector": submit_selector})
+                                    input_selector = ", ".join(item[0] for item in inputs)
+                                    discovered_totp_controls[(credential_id, input_selector, submit_selector)] = ([item[1] for item in inputs], submit)
+                                    candidates.append({"layout": layout, "selector": input_selector, "submit_selector": submit_selector})
                                     if len(candidates) >= 8:
                                         break
                                 if len(candidates) >= 8:
@@ -507,7 +529,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                     """Generate the current OTP locally and submit one input or exactly six digit cells using a credential ID."""
                     credential = totp_credential(credential_id)
                     try:
-                        check_totp_page(credential)
+                        pre_input(lambda: check_totp_page(credential))
                         if not selector.strip() or len(selector) > 2000:
                             raise BrowserPolicyStop("Invalid authenticator selector")
                         remaining = min(settings.browser_timeout_seconds, deadline - time.monotonic())
@@ -516,6 +538,9 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                         elements = WebDriverWait(driver, remaining).until(lambda browser: browser.find_elements(By.CSS_SELECTOR, selector))
                         check_totp_page(credential)
                         submit = find_element(submit_selector, clickable=True)
+                        previous = discovered_totp_controls.get((credential_id, selector, submit_selector))
+                        if previous is not None and previous != (elements, submit):
+                            raise BrowserPolicyStop("Authenticator controls changed; inspect_totp_form again")
 
                         def check_controls():
                             check_submission(elements, submit, credential)

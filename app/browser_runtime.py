@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from app.config import Settings
+from app.network_idle import NetworkIdleTracker, NetworkIdleError
 from app.desktop_tools import DesktopTools, close_pyautogui_xlib, rebind_pyautogui
 from app.task_context import TaskContext
 
@@ -29,6 +30,7 @@ class BrowserRuntimeError(RuntimeError):
 class LocalBrowserSession:
     driver: Any
     desktop: DesktopTools
+    network_idle: NetworkIdleTracker
 
 
 def _executable(path: Path) -> bool:
@@ -158,6 +160,7 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
         check()
         profile = tempfile.TemporaryDirectory(prefix="posting-chromium-")
         options = Options()
+        options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
         options.binary_location = str(settings.chromium_binary)
         options.add_argument(f"--user-data-dir={profile.name}")
         options.add_argument(f"--window-size={settings.browser_window_width},{settings.browser_window_height}")
@@ -171,6 +174,10 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
         )
         context.bind_browser(close_driver)
         check()
+        try:
+            network_idle = NetworkIdleTracker(driver, settings.network_idle_quiet_ms / 1000, settings.network_idle_max_wait_seconds)
+        except NetworkIdleError:
+            raise BrowserRuntimeError("Network readiness instrumentation unavailable") from None
         # Start on a neutral page, not Chromium's internal new-tab UI.
         driver.set_page_load_timeout(settings.browser_timeout_seconds)
         driver.get("about:blank")
@@ -184,7 +191,7 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
             except Exception:
                 context.record_observation("viewer", "unavailable", "Live viewer could not start; browser task continues")
         check()
-        yield LocalBrowserSession(driver=driver, desktop=DesktopTools(driver, pyautogui, check))
+        yield LocalBrowserSession(driver=driver, desktop=DesktopTools(driver, pyautogui, check), network_idle=network_idle)
     finally:
         stop_viewer()
         # Every layer has its own finally so a failed profile/context cleanup
