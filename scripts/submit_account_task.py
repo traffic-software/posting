@@ -51,7 +51,7 @@ def main() -> int:
     parser.add_argument("--timeout", type=int, default=240)
     args = parser.parse_args()
     load_dotenv(Path(__file__).resolve().parents[1] / ".env")
-    base_url = os.getenv("TASK_API_URL", "https://webagent.elgrowth.com").rstrip("/")
+    base_url = os.getenv("TASK_API_URL", "http://127.0.0.1:8000").rstrip("/")
     parsed = urlsplit(base_url)
     if (
         parsed.scheme != "https" or not parsed.hostname

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent live display</title>
+  <link rel="stylesheet" href="/desktop/static/viewer.css">
+  <script type="module" src="/desktop/static/viewer.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div><h1>Agent live display</h1><p>Read-only view of the active task's virtual desktop.</p></div>
+      <button id="logout" type="button" hidden>Sign out</button>
+    </header>
+    <p class="warning">This screen may show account identifiers or other sensitive information. Do not share or record it. Mouse, keyboard and clipboard control are disabled.</p>
+    <section id="login-panel" hidden>
+      <form id="login-form">
+        <label for="viewer-token">Display viewer token</label>
+        <input id="viewer-token" type="password" autocomplete="off" required maxlength="512">
+        <button type="submit" id="login-button">View display</button>
+      </form>
+      <p>Use the separate viewer token, not your task API token.</p>
+    </section>
+    <p id="status" role="status" aria-live="polite">Checking viewer session…</p>
+    <section id="screen" aria-label="Read-only live desktop" hidden></section>
+    <footer>No screenshots are stored by this viewer. When no task is active, the display is idle.</footer>
+  </main>
+</body>
+</html>

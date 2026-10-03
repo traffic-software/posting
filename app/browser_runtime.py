@@ -116,9 +116,18 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
         raise BrowserRuntimeError("Local Chromium runtime prerequisites are unavailable")
     _wait_for_runtime(context, deadline)
     display = profile = driver = pyautogui = window_manager = None
+    viewer = settings._display_viewer if settings.display_viewer_enabled else None
+    viewer_generation = None
     prior_display = os.environ.get("DISPLAY")
     closed = False
     close_lock = threading.Lock()
+
+    def stop_viewer() -> None:
+        if viewer is not None and viewer_generation is not None:
+            try:
+                viewer.stop_display(viewer_generation)
+            except Exception:
+                context.record_observation("cleanup", "failed", "Live viewer cleanup could not be confirmed")
 
     def close_driver() -> None:
         nonlocal closed
@@ -126,6 +135,7 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
             if closed:
                 return
             closed = True
+        stop_viewer()
         if driver is not None:
             try:
                 driver.quit()
@@ -168,8 +178,15 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
         driver.set_window_position(0, 0)
         driver.set_window_size(settings.browser_window_width, settings.browser_window_height)
         check()
+        if viewer is not None:
+            try:
+                viewer_generation = viewer.start_display(os.environ["DISPLAY"])
+            except Exception:
+                context.record_observation("viewer", "unavailable", "Live viewer could not start; browser task continues")
+        check()
         yield LocalBrowserSession(driver=driver, desktop=DesktopTools(driver, pyautogui, check))
     finally:
+        stop_viewer()
         # Every layer has its own finally so a failed profile/context cleanup
         # cannot leave Xvfb or the exclusive lock behind.
         try:

@@ -56,6 +56,25 @@ Agent `inspect_page` → discovered control → click/type/hover/scroll/key → 
 
 Image rebuild/redeploy প্রয়োজন; পুরোনো Selenium service আর প্রয়োজন নেই। Existing production container সরানো/deploy করা আলাদা operational action; migration আগে active task শেষ ও data backup নিশ্চিত করুন। `CHROMIUM_BINARY`, `CHROMEDRIVER_BINARY`, `BROWSER_WINDOW_WIDTH/HEIGHT` local config, default screen `1024×768`। `/ready` শুধু prerequisites যাচাই করে; real browser smoke test আলাদা।
 
+## Live display viewer — browser থেকে দেখা
+
+`/desktop`-এ authenticated **read-only** noVNC viewer আছে। Container চললে পেজ খোলা যায়; task চললে active virtual display দেখা যায়, idle-এ কোনো desktop stream থাকে না। পরের task শুরু হলে valid session reconnect করে। Viewer দিয়ে mouse/keyboard/clipboard control দেওয়া যায় না।
+
+নিজের `.env`-এ আলাদা viewer configuration দিন; token এখানে বা task prompt-এ পাঠাবেন না:
+
+```dotenv
+DISPLAY_VIEWER_ENABLED=true
+DISPLAY_VIEWER_TOKEN=replace-with-a-separate-long-random-token
+DISPLAY_VIEWER_ORIGIN=http://127.0.0.1:8001
+DISPLAY_VIEWER_SESSION_SECONDS=900
+```
+
+Image rebuild এবং container recreate প্রয়োজন। Existing local manual-test API port 8001 হলে browser-এ **http://127.0.0.1:8001/desktop** খুলে viewer token দিয়ে login করুন। `localhost` ও `127.0.0.1` ভিন্ন origin: configured origin-এর exact URL ব্যবহার করুন। Remote viewer-এর জন্য HTTPS origin প্রয়োজন; VPS উদাহরণ `https://webagent.elgrowth.com/desktop`। Nginx-এর updated `/desktop/ws` upgrade location apply না হলে live stream connect হবে না।
+
+Security: viewer token task API token থেকে আলাদা; cookie HttpOnly/SameSite=Strict, remote HTTPS-এ Secure, bounded lifetime। Raw VNC/noVNC ports publish হয় না—একই API port দিয়ে authenticated WebSocket proxy চলে, backend container loopback-only। Pixels model/task-result/database/logs-এ পাঠানো বা সেভ করা হয় না। তবে live screen-এ account identifiers বা অন্য sensitive তথ্য দেখা যেতে পারে; শুধু trusted operator-কে access দিন এবং screenshot/share করবেন না। এই single-operator viewer per-user/per-task authorization system নয়।
+
+Feature default-এ disabled। Viewer failure task execution বন্ধ করবে না। Task শেষে its VNC backend ও existing stream বন্ধ হয়; display/profile cleanup আগের মতো থাকে। Production deploy বা Docker security-policy change স্বয়ংক্রিয়ভাবে করা হয় না; test-only seccomp profile-এর অনুমোদন production-এ প্রযোজ্য নয়।
+
 ## Browser policy ও সীমা
 
 - Agent runtime `deepagents.create_deep_agent` ব্যবহার করে। Planning (`write_todos`), task-local virtual filesystem ও planning-only subagent আছে; filesystem backend `StateBackend`, তাই host filesystem বা shell access দেওয়া হয় না। Subagent-এর browser/credential tools নেই; browser actions শুধু main agent-এর policy-checked Selenium tools দিয়ে হয়। Virtual files task শেষ হলে persist করা হয় না।

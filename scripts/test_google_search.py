@@ -40,7 +40,7 @@ def main() -> int:
         return value.replace(token, "[REDACTED]")
 
     with httpx.Client(
-        base_url="https://webagent.elgrowth.com",
+        base_url="http://127.0.0.1:8000",
         headers={"Authorization": f"Bearer {token}"},
         timeout=30,
         follow_redirects=False,

@@ -138,11 +138,13 @@ def test_local_browser_wait_is_cancellable(monkeypatch):
             pass
 
 
-def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch):
+@pytest.mark.parametrize("viewer_fails", [False, True])
+def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch, viewer_fails):
     import pyvirtualdisplay
     import selenium.webdriver
 
     displays = []
+    viewer_events = []
 
     class FakeDisplay:
         def __init__(self, **_kwargs):
@@ -173,7 +175,20 @@ def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch):
             pass
 
         def quit(self):
+            viewer_events.append("browser-closed")
             self.quit_calls += 1
+
+    class Viewer:
+        def start_display(self, display_name):
+            assert display_name == ":99"
+            viewer_events.append("viewer-started")
+            if viewer_fails:
+                raise RuntimeError("synthetic viewer startup failure")
+            return "synthetic-generation"
+
+        def stop_display(self, generation):
+            assert generation == "synthetic-generation"
+            viewer_events.append("viewer-stopped")
 
     browser = Browser()
     monkeypatch.setattr("app.browser_runtime.sys.platform", "linux")
@@ -183,12 +198,19 @@ def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch):
     monkeypatch.setattr(pyvirtualdisplay, "Display", FakeDisplay)
     monkeypatch.setattr(selenium.webdriver, "Chrome", lambda **_kwargs: browser)
     context = TaskContext()
-    with local_browser(Settings(_env_file=None), context, time.monotonic() + 5) as session:
+    settings = Settings(_env_file=None, display_viewer_enabled=True)
+    settings._display_viewer = Viewer()
+    with local_browser(settings, context, time.monotonic() + 5) as session:
         assert session.driver is browser
         assert session.desktop._pyautogui.FAILSAFE is True
     assert browser.quit_calls == 1
     assert displays[0].stopped is True
     assert "DISPLAY" not in os.environ
+    assert "viewer-started" in viewer_events
+    if not viewer_fails:
+        assert viewer_events.index("viewer-stopped") < viewer_events.index("browser-closed")
+    else:
+        assert "viewer-stopped" not in viewer_events
 
 
 @pytest.mark.parametrize("needs_kill", [False, True])

@@ -12,6 +12,7 @@ from langchain_core.tools import ToolException
 from app.agent import run_task
 from app.browser_runtime import browser_ready
 from app.config import Settings
+from app.display_viewer import DisplayViewer, create_router
 from app.schemas import TaskAccepted, TaskRequest, TaskResponse, TaskStatus
 from app.storage import QueueFullError, TaskStore
 from app.selenium_tools import check_url
@@ -21,6 +22,8 @@ from app.worker import TaskWorker
 
 def create_app(settings: Settings | None = None, runner: Callable = run_task) -> FastAPI:
     settings = settings or Settings()
+    viewer = DisplayViewer(settings)
+    settings._display_viewer = viewer
     store = TaskStore(settings.database_path)
     worker = TaskWorker(store, settings, runner=runner)
 
@@ -33,11 +36,16 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
         try:
             yield
         finally:
-            worker.stop()
+            try:
+                worker.stop()
+            finally:
+                viewer.close()
 
     app = FastAPI(title="Browser Task API", lifespan=lifespan)
     app.state.store = store
     app.state.worker = worker
+    app.state.viewer = viewer
+    app.include_router(create_router(viewer))
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(_request, _exc):

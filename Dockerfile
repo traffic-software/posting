@@ -17,6 +17,10 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends libtk8.6 chromium-sandbox openbox \
     && rm -rf /var/lib/apt/lists/* \
     && python -c 'import tkinter'
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends x11vnc novnc \
+    && cp -aL /usr/share/novnc /opt/posting-novnc \
+    && rm -rf /var/lib/apt/lists/*
 COPY app ./app
 
 RUN groupadd --system app && useradd --system --gid app --create-home app \

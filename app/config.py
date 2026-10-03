@@ -15,6 +15,13 @@ class Settings(BaseSettings):
     require_task_api_token: bool = False
     app_revision: str = "local"
     enable_write_actions: bool = False
+    display_viewer_enabled: bool = False
+    display_viewer_token: str = Field(default="", repr=False)
+    display_viewer_origin: str = ""
+    display_viewer_session_seconds: int = Field(default=900, ge=60, le=3600)
+    display_viewer_assets: Path = Path("/opt/posting-novnc")
+    display_viewer_max_connections: int = Field(default=2, ge=1, le=2)
+    _display_viewer: object = PrivateAttr(default=None)
     credential_fernet_key: str = Field(default="", repr=False)
     _ephemeral_credential_cipher: Fernet = PrivateAttr(default_factory=lambda: Fernet(Fernet.generate_key()))
     credential_ttl_seconds: int = Field(default=900, ge=60, le=3600)
