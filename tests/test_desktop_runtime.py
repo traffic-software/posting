@@ -158,18 +158,9 @@ def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch, view
             self.stopped = True
 
     class Browser(FakeDriver):
-        log_types = ["performance"]
         def __init__(self):
             super().__init__()
             self.quit_calls = 0
-
-        def execute_cdp_cmd(self, command, arguments):
-            assert command == "Network.enable"
-            return {}
-
-        def get_log(self, name):
-            assert name == "performance"
-            return []
 
         def set_page_load_timeout(self, timeout):
             assert timeout > 0

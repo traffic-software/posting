@@ -1,4 +1,3 @@
-from browser_helpers import FakeIdleTracker
 import json
 import socket
 import time
@@ -69,7 +68,7 @@ def setup(tmp_path, monkeypatch):
 
 def bind(setup):
     driver, desktop, context, settings = setup
-    return {item.name: item for item in browser_tools(driver, settings, time.monotonic() + 30, context, desktop, network_idle=FakeIdleTracker())}
+    return {item.name: item for item in browser_tools(driver, settings, time.monotonic() + 30, context, desktop)}
 
 
 def test_mouse_and_keyboard_use_guarded_desktop(setup):
@@ -120,4 +119,13 @@ def test_inspected_replaced_target_is_not_clicked(setup):
     from langchain_core.tools import ToolException
     with pytest.raises(ToolException, match="changed"):
         tools["click_element"].invoke({"selector": "*:nth-child(1)"})
+    assert not setup[1].calls
+
+
+def test_inspected_replaced_text_target_requires_reinspection(setup):
+    tools = bind(setup)
+    tools["inspect_page"].invoke({})
+    setup[0].elements[0] = PageElement()
+    with pytest.raises(BrowserPolicyStop, match="inspect_page again"):
+        tools["fill_element"].invoke({"selector": "*:nth-child(1)", "value": "synthetic"})
     assert not setup[1].calls

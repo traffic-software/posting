@@ -108,20 +108,3 @@ docker run --rm --shm-size=2g --security-opt "seccomp=$PWD/tests/chromium-test-s
 Normal unit-test runs skip these three tests. The test-only seccomp profile preserves Moby's default deny policy and other restrictions while allowing `clone`, `setns` and `unshare` for Chromium's namespace sandbox. Baseline: https://raw.githubusercontent.com/moby/profiles/main/seccomp/default.json (SHA-256 `6416b47770785a41ac59073cdc77d9fe98517df2799dc83ef207e622de3053f6`). Chrome sandbox stays enabled; the container is not privileged. This is an explicitly approved isolated-test configuration, not a production Compose/daemon policy change. Do not apply it to production without a separate security review and authorization.
 
 `/ready` checks prerequisites only; it does not prove Chromium can launch or that PyAutoGUI coordinates work. Default Docker seccomp can still block Chromium startup. A failed image build or skipped integration test is not a verified browser deployment.
-
-### Input network readiness
-
-Text, credential, authenticator and key input require task-scoped Chrome
-performance/CDP instrumentation. Finite HTTP(S) requests must be absent for
-`NETWORK_IDLE_QUIET_MS` (default 500; range 100–5000), within
-`NETWORK_IDLE_MAX_WAIT_SECONDS` (default 20; range 0.1–60), capped by the task
-deadline. WebSocket and recognised EventSource/SSE streams do not block idle;
-slow fetch/XHR, hung requests and continuous polling can block it. Missing or
-invalid instrumentation fails closed, without entering data in that invocation;
-earlier actions are not undone. There is no disable/fallback setting.
-
-Readiness does not prove visibility, login success, completed animations or absence
-of future requests. Live-target, origin, credential expiry, frame and desktop focus
-checks still apply after waiting. Changed inspected controls require reinspection.
-Authenticator codes are generated only after readiness, without waiting between
-split digits or retrying input.

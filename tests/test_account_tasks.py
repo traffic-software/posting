@@ -1,4 +1,3 @@
-from browser_helpers import FakeIdleTracker
 from browser_helpers import mock_local_browser
 import json
 import socket
@@ -274,7 +273,7 @@ class FakeDriver:
 
 
 def tool_by_name(driver, settings, context, name):
-    tools = browser_tools(driver, settings, time.monotonic() + 60, context, network_idle=FakeIdleTracker())
+    tools = browser_tools(driver, settings, time.monotonic() + 60, context)
     return next(item for item in tools if item.name == name)
 
 
@@ -313,7 +312,7 @@ def test_account_write_gates(tmp_path, global_gate, task_gate):
     settings = configured(tmp_path)
     settings.enable_write_actions = global_gate
     context = TaskContext(allow_write_actions=task_gate, credentials=[credential()])
-    tools = browser_tools(FakeDriver(), settings, time.monotonic() + 60, context, network_idle=FakeIdleTracker())
+    tools = browser_tools(FakeDriver(), settings, time.monotonic() + 60, context)
     assert {item.name for item in tools} == {"navigate_to_page", "extract_text", "inspect_page"}
 
 
@@ -377,7 +376,7 @@ def test_real_deep_agent_graph_uses_virtual_files_and_browser_tools(tmp_path, mo
 
     driver = FakeDriver()
     settings = configured(tmp_path)
-    tools = browser_tools(driver, settings, time.monotonic() + 60, network_idle=FakeIdleTracker())
+    tools = browser_tools(driver, settings, time.monotonic() + 60)
     mock_local_browser(monkeypatch, lambda: driver)
     monkeypatch.setattr(agent, "ChatOpenAI", lambda **_: TestModel(responses=[AIMessage(content="Read-only test")]))
     result = agent.run_task("Report no action", settings)
@@ -430,7 +429,7 @@ def test_credential_context_survives_pending_restart(tmp_path):
 
 def test_explicit_read_only_task_ceiling(tmp_path):
     context = TaskContext(allow_write_actions=False)
-    tools = browser_tools(FakeDriver(), configured(tmp_path), time.monotonic() + 60, context, network_idle=FakeIdleTracker())
+    tools = browser_tools(FakeDriver(), configured(tmp_path), time.monotonic() + 60, context)
     assert {item.name for item in tools} == {"navigate_to_page", "extract_text", "inspect_page"}
 
 
@@ -473,6 +472,6 @@ def test_cancelled_context_closes_late_session_and_blocks_tools(tmp_path):
     with pytest.raises(RuntimeError, match="cancelled"):
         context.bind_browser(driver.quit)
     assert driver.closed
-    tools = browser_tools(driver, configured(tmp_path), time.monotonic() + 60, context, network_idle=FakeIdleTracker())
+    tools = browser_tools(driver, configured(tmp_path), time.monotonic() + 60, context)
     with pytest.raises(BrowserPolicyStop, match="cancelled"):
         tools[0].invoke({"url": "https://example.com"})

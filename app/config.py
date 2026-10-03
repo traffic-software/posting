@@ -32,8 +32,6 @@ class Settings(BaseSettings):
     browser_window_height: int = Field(default=768, ge=480, le=2160)
     max_active_tasks: int = 20
     model_timeout_seconds: int = 45
-    network_idle_quiet_ms: int = Field(default=500, ge=100, le=5000)
-    network_idle_max_wait_seconds: float = Field(default=20, ge=0.1, le=60)
     browser_timeout_seconds: int = 20
     task_timeout_seconds: int = 180
     max_agent_steps: int = 20

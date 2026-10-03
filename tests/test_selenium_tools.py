@@ -1,4 +1,3 @@
-from browser_helpers import FakeIdleTracker
 import socket
 import time
 
@@ -129,7 +128,7 @@ class FakeBrowser:
 def test_read_only_tools_and_navigation():
     browser = FakeBrowser()
     settings = Settings(_env_file=None)
-    tools = browser_tools(browser, settings, time.monotonic() + 60, network_idle=FakeIdleTracker())
+    tools = browser_tools(browser, settings, time.monotonic() + 60)
     assert {item.name for item in tools} == {"navigate_to_page", "extract_text", "inspect_page"}
     assert "Example" in tools[0].invoke({"url": "https://another.example"})
 
@@ -138,7 +137,7 @@ def test_private_redirect_blocks_further_actions():
     browser = FakeBrowser()
     browser.current_url = "http://127.0.0.1/"
     settings = Settings(_env_file=None)
-    tools = browser_tools(browser, settings, time.monotonic() + 60, network_idle=FakeIdleTracker())
+    tools = browser_tools(browser, settings, time.monotonic() + 60)
     with pytest.raises(ToolException):
         tools[1].invoke({"selector": "body"})
 
@@ -152,7 +151,7 @@ def test_navigation_checks_redirect_destination(destination, blocked):
         def get(self, url):
             self.current_url = destination
 
-    tools = browser_tools(RedirectBrowser(), Settings(_env_file=None), time.monotonic() + 60, network_idle=FakeIdleTracker())
+    tools = browser_tools(RedirectBrowser(), Settings(_env_file=None), time.monotonic() + 60)
     if blocked:
         with pytest.raises(ToolException):
             tools[0].invoke({"url": "https://example.com"})
@@ -162,7 +161,7 @@ def test_navigation_checks_redirect_destination(destination, blocked):
 
 def test_write_tools_require_explicit_opt_in():
     settings = Settings(_env_file=None, enable_write_actions=True)
-    tools = browser_tools(FakeBrowser(), settings, time.monotonic() + 60, network_idle=FakeIdleTracker())
+    tools = browser_tools(FakeBrowser(), settings, time.monotonic() + 60)
     assert {item.name for item in tools} == {
         "navigate_to_page", "extract_text", "inspect_page", "click_element", "fill_element"
     }
@@ -172,7 +171,7 @@ def test_tool_stop_observation_is_bounded_and_preserves_policy():
     from types import SimpleNamespace
     from app.task_context import TaskContext
     context = TaskContext()
-    tools = browser_tools(SimpleNamespace(current_url="about:blank"), Settings(_env_file=None), time.monotonic() + 30, context, network_idle=FakeIdleTracker())
+    tools = browser_tools(SimpleNamespace(current_url="about:blank"), Settings(_env_file=None), time.monotonic() + 30, context)
     navigate = next(item for item in tools if item.name == "navigate_to_page")
     with pytest.raises(ToolException):
         navigate.invoke({"url": "http://localhost/"})
