@@ -10,11 +10,11 @@ import pyotp
 from langchain_core.tools import ToolException, tool
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
 from app.browser_dom import DISCOVER_PAGE
 from app.config import Settings
+from app.element_readiness import ElementReadinessTimeout, readiness, wait_for_ready
 from app.desktop_tools import DesktopInputError
 from app.login_forms import continuation_control, login_input
 from app.schemas import https_origin
@@ -159,17 +159,27 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
         if current and current != "data:," and not current.startswith("about:blank"):
             check_url(current)
 
-    def find_element(selector: str, clickable: bool = False):
+    def find_element(selector: str, clickable: bool = False, *, editable=False, policy=None):
         if len(selector) > 300 or not selector.strip():
             raise ToolException("Invalid CSS selector")
-        check_session()
-        condition = (conditions.element_to_be_clickable if clickable else conditions.visibility_of_element_located)
+        def guard():
+            check_session()
+            if policy:
+                policy()
+        mode = "fill" if editable else "click" if clickable else "read"
         try:
-            return WebDriverWait(driver, min(settings.browser_timeout_seconds, max(0, deadline - time.monotonic()))).until(
-                condition((By.CSS_SELECTOR, selector))
-            )
+            return wait_for_ready(
+                driver, lambda: [driver.find_element(By.CSS_SELECTOR, selector)], [mode],
+                deadline, settings.browser_timeout_seconds, guard,
+                context.cancelled if context else None,
+            )[0]
         except WebDriverException as exc:
-            raise ToolException("Element not available") from exc
+            raise ToolException("Could not verify element readiness") from exc
+
+    def readiness_error(exc):
+        if isinstance(exc, ElementReadinessTimeout):
+            return str(exc)
+        raise exc
 
     @tool
     @observe
@@ -242,7 +252,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
         def click_element(selector: str) -> str:
             """Click the first clickable element matching a CSS selector on the public website."""
             check_write_page()
-            element = find_element(selector, clickable=True)
+            element = find_element(selector, clickable=True, policy=check_write_page)
             try:
                 check_write_page()
                 if (element.get_attribute("type") or "").lower() == "file":
@@ -266,7 +276,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             if len(value) > 2000:
                 raise ToolException("Input is too long")
             check_write_page()
-            element = find_element(selector)
+            element = find_element(selector, editable=True, policy=check_write_page)
             previous = inspected_controls.get(selector)
             if previous is not None and previous != element:
                 raise BrowserPolicyStop("Control changed; inspect_page again")
@@ -296,7 +306,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
         if desktop is not None:
             def desktop_target(selector):
                 check_write_page()
-                element = find_element(selector, clickable=True)
+                element = find_element(selector, clickable=True, policy=check_write_page)
                 check_write_page()
                 previous = inspected_controls.get(selector)
                 if previous is not None and previous != element:
@@ -411,7 +421,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                 credential = login_credential(credential_id)
                 credential_origin(credential)
                 try:
-                    element = find_element(selector)
+                    element = find_element(selector, editable=True, policy=lambda: credential_origin(credential))
                 except ToolException as exc:
                     if isinstance(exc.__cause__, WebDriverException):
                         raise ToolException("Credential element unavailable; use inspect_login_form again for a current selector") from None
@@ -517,18 +527,31 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                         check_totp_page(credential)
                         if not selector.strip() or len(selector) > 2000:
                             raise BrowserPolicyStop("Invalid authenticator selector")
-                        remaining = min(settings.browser_timeout_seconds, deadline - time.monotonic())
-                        if remaining <= 0:
-                            raise BrowserPolicyStop("Task time limit reached")
-                        elements = WebDriverWait(driver, remaining).until(lambda browser: browser.find_elements(By.CSS_SELECTOR, selector))
+                        def resolve_controls():
+                            inputs = driver.find_elements(By.CSS_SELECTOR, selector)
+                            if not inputs:
+                                return []
+                            if len(inputs) not in (1, 6):
+                                raise BrowserPolicyStop('Unsupported authenticator input layout')
+                            return inputs + [driver.find_element(By.CSS_SELECTOR, submit_selector)]
+
+                        controls = wait_for_ready(
+                            driver, resolve_controls,
+                            lambda found: ["fill"] * max(0, len(found) - 1) + ["click"],
+                            deadline, settings.browser_timeout_seconds,
+                            lambda: check_totp_page(credential), context.cancelled,
+                        )
+                        elements, submit = controls[:-1], controls[-1]
                         check_totp_page(credential)
-                        submit = find_element(submit_selector, clickable=True)
                         previous = discovered_totp_controls.get((credential_id, selector, submit_selector))
                         if previous is not None and previous != (elements, submit):
                             raise BrowserPolicyStop("Authenticator controls changed; inspect_totp_form again")
 
                         def check_controls():
                             check_submission(elements, submit, credential)
+                            for target, mode in [(item, "fill") for item in elements] + [(submit, "click")]:
+                                if readiness(driver, target, mode) != "ready":
+                                    raise BrowserPolicyStop("Authenticator controls are no longer ready")
                             if driver.find_elements(By.CSS_SELECTOR, selector) != elements or driver.find_element(By.CSS_SELECTOR, submit_selector) != submit:
                                 raise BrowserPolicyStop("Authenticator controls changed")
 
@@ -563,10 +586,14 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                         check_session()
                         page_text()
                         return "Authenticator code submitted; login outcome must be observed separately"
+                    except ElementReadinessTimeout:
+                        raise
                     except BrowserPolicyStop:
                         raise
                     except (WebDriverException, ToolException, ValueError, RuntimeError):
                         raise BrowserPolicyStop("Authenticator entry failed") from None
 
                 tools.extend([inspect_totp_form, fill_totp])
+    for browser_tool in tools:
+        browser_tool.handle_tool_error = readiness_error
     return tools

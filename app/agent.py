@@ -28,7 +28,10 @@ Before each username or password entry, use inspect_login_form with the authoriz
 Use the returned live field and continuation selectors, not selectors guessed from visible page text.
 Inspect again after navigation or a username-to-password transition; old selectors may no longer match.
 Do not guess among ambiguous inputs or buttons; explain when discovery cannot identify the intended control.
-If an element is unavailable, inspect the current form again rather than repeating a guessed selector.
+Action tools wait dynamically for the specific target to become ready, bounded by the remaining task time.
+A readiness timeout means that invocation did not click or enter data; inspect the current page/form again
+and choose a freshly discovered target. Do not blindly repeat a selector or retry an uncertain write.
+Network idle is not required; unrelated network traffic is not a reason to wait.
 Use fill_credential with credential IDs; never request or repeat secret values.
 For an explicit authenticator-app form with a supplied authenticator-enabled credential ID,
 use inspect_totp_form to discover supported selectors, then fill_totp to generate the current

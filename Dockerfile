@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM knthony/run_chrome_driver_in_container
 
 ARG VCS_REF=local
 ENV PYTHONDONTWRITEBYTECODE=1 \

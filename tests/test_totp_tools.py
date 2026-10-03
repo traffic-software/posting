@@ -65,6 +65,9 @@ class Driver(FakeDriver):
         return super().find_element(by, value)
 
     def execute_script(self, script, *args):
+        from app.element_readiness import READINESS, SCROLL_TARGET
+        if script in (READINESS, SCROLL_TARGET):
+            return super().execute_script(script, *args)
         if script == selenium_tools.DISCOVER_CONTROLS:
             inputs = self.cells if self.cells is not None else [self.element]
             return [{"element": element, "selector": f"*:nth-child({index + 1})", "form": 0} for index, element in enumerate(inputs)] + [
@@ -151,8 +154,12 @@ def test_totp_guards_prevent_entry(setup, restriction):
         driver.action = "https://other.example/collect"
     elif restriction == "form":
         driver.same_form = False
-    with pytest.raises(BrowserPolicyStop):
-        invoke(tool)
+    if restriction == "readonly":
+        setup[1].browser_timeout_seconds = 0
+        assert "readiness timed out" in invoke(tool)
+    else:
+        with pytest.raises(BrowserPolicyStop):
+            invoke(tool)
     assert not driver.element.values and not driver.submit.clicked
     assert not context._totp_codes
 
@@ -415,8 +422,12 @@ def test_invalid_split_layout_rejected_before_entry(setup, monkeypatch, restrict
         cells[-1].attributes.pop("inputmode")
     elif restriction == "form":
         cells[-1].other_form = True
-    with pytest.raises(BrowserPolicyStop):
-        invoke(get_tool(setup))
+    if restriction in ("hidden", "disabled", "readonly"):
+        setup[1].browser_timeout_seconds = 0
+        assert "readiness timed out" in invoke(get_tool(setup))
+    else:
+        with pytest.raises(BrowserPolicyStop):
+            invoke(get_tool(setup))
     assert all(not element.values for element in cells) and not context._totp_codes
     assert not driver.submit.clicked
 

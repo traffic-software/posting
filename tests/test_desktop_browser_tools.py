@@ -129,3 +129,39 @@ def test_inspected_replaced_text_target_requires_reinspection(setup):
     with pytest.raises(BrowserPolicyStop, match="inspect_page again"):
         tools["fill_element"].invoke({"selector": "*:nth-child(1)", "value": "synthetic"})
     assert not setup[1].calls
+
+
+@pytest.mark.parametrize('name,args', [
+    ('click_element', {'selector': '*:nth-child(1)'}),
+    ('fill_element', {'selector': '*:nth-child(1)', 'value': 'synthetic'}),
+    ('press_key', {'selector': '*:nth-child(1)', 'key': 'enter'}),
+])
+def test_readiness_timeout_is_actionable_without_input(setup, monkeypatch, name, args):
+    driver, desktop, context, settings = setup
+    settings.browser_timeout_seconds = .01
+    original = driver.execute_script
+    from app.element_readiness import READINESS
+    def script(code, *values):
+        if code == READINESS:
+            return 'covered'
+        return original(code, *values)
+    monkeypatch.setattr(driver, 'execute_script', script)
+    result = bind(setup)[name].invoke(args)
+    assert 'readiness timed out (covered)' in result
+    assert 'Inspect the current page/form again' in result
+    assert not desktop.calls and not driver.element.values
+    assert any(item['outcome'] == 'stopped' for item in context.observations())
+
+
+def test_overlay_disappears_before_one_click(setup, monkeypatch):
+    driver, desktop, _, _ = setup
+    original = driver.execute_script
+    from app.element_readiness import READINESS
+    states = iter(['covered', 'ready'])
+    def script(code, *values):
+        if code == READINESS:
+            return next(states)
+        return original(code, *values)
+    monkeypatch.setattr(driver, 'execute_script', script)
+    assert bind(setup)['click_element'].invoke({'selector': '*:nth-child(1)'}) == 'Element clicked'
+    assert [name for name, _ in desktop.calls] == ['click']

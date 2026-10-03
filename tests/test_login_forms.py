@@ -58,7 +58,7 @@ class Driver(FakeDriver):
                  "value": PASSWORD, "name": USERNAME, "label": "secret-label"}
                 for index, element in enumerate(self.elements)
             ]
-        return super().execute_script(script)
+        return super().execute_script(script, *args)
 
     def find_element(self, by, value):
         if value.startswith("*:nth-child("):
@@ -215,9 +215,9 @@ def test_unavailable_credential_selector_requests_fresh_inspection(setup, monkey
         return original(by, value)
 
     monkeypatch.setattr(driver, "find_element", missing)
-    with pytest.raises(ToolException, match="inspect_login_form") as error:
-        tools(setup)["fill_credential"].invoke({"selector": "#guessed", "credential_id": "account", "field": "username"})
-    assert "internal secret" not in str(error.value)
+    result = tools(setup)["fill_credential"].invoke({"selector": "#guessed", "credential_id": "account", "field": "username"})
+    assert "Inspect the current page/form again" in result
+    assert "internal secret" not in result
     assert not driver.element.values and not driver.button.clicked
 
 

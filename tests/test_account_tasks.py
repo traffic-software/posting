@@ -259,7 +259,12 @@ class FakeDriver:
     def find_element(self, by, value):
         return self.body if value == "body" else self.element
 
-    def execute_script(self, _):
+    def execute_script(self, _, *args):
+        from app.element_readiness import READINESS, SCROLL_TARGET
+        if _ == READINESS:
+            return "ready"
+        if _ == SCROLL_TARGET:
+            return None
         return {"origin": "https://login.example", "top": self.top}
 
     def set_page_load_timeout(self, _):
