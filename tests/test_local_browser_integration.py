@@ -21,9 +21,21 @@ pytestmark = pytest.mark.skipif(
 def test_real_display_click_type_scroll_and_repeated_sessions():
     settings = Settings(_env_file=None)
     html = '<html><body><input id="entry"><button id="action" onclick="this.textContent=\'clicked\'">Click</button><div style="height:2000px"></div></body></html>'
+    from pathlib import Path
+    from selenium.webdriver.chrome.webdriver import WebDriver
+
+    previous_profiles = set()
     for _ in range(2):
         context = TaskContext()
         with local_browser(settings, context, time.monotonic() + 60) as session:
+            assert isinstance(session.driver, WebDriver)
+            assert session.driver.execute_script("return navigator.webdriver") is True
+            profile = Path(session.driver.capabilities["chrome"]["userDataDir"])
+            driver_path = Path(session.driver.service.path)
+            assert profile not in previous_profiles
+            previous_profiles.add(profile)
+            assert driver_path == settings.chromedriver_binary
+            assert driver_path.exists()
             session.driver.get("data:text/html," + quote(html))
             entry = session.driver.find_element(By.ID, "entry")
             session.desktop.type_text(entry, "synthetic text")
@@ -34,6 +46,8 @@ def test_real_display_click_type_scroll_and_repeated_sessions():
             session.desktop.scroll(button, -3)
             time.sleep(0.2)
             assert session.driver.execute_script("return window.scrollY") > 0
+        assert not profile.exists()
+        assert driver_path.exists()
 
 
 def test_actual_discovery_javascript_handles_deep_dom():

@@ -1,9 +1,13 @@
+import asyncio
+from unittest.mock import AsyncMock
+
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
 
 from app.display_viewer import DisplayViewer, _Display, create_router
 
@@ -32,6 +36,23 @@ def client_for(viewer):
 
 def login(client, token="test-token"):
     return client.post("/desktop/login", headers={"Origin": ORIGIN}, json={"token": token})
+
+
+@pytest.mark.parametrize("close_error", [RuntimeError("already closed"), WebSocketDisconnect(1006)])
+def test_websocket_cleanup_tolerates_disconnected_client(monkeypatch, close_error):
+    viewer = DisplayViewer(settings())
+    monkeypatch.setattr(viewer, "authenticate", lambda *_: True)
+    monkeypatch.setattr(viewer, "claim_connection", lambda: ("generation", 5900))
+    released = []
+    monkeypatch.setattr(viewer, "release_connection", released.append)
+    monkeypatch.setattr(asyncio, "open_connection", AsyncMock(side_effect=OSError))
+    websocket = SimpleNamespace(
+        headers={"origin": ORIGIN}, cookies={"desktop_session": "session"},
+        close=AsyncMock(side_effect=[None, close_error]),
+    )
+    route = next(route for route in create_router(viewer).routes if route.path == "/desktop/ws")
+    asyncio.run(route.endpoint(websocket))
+    assert released == ["generation"]
 
 
 def test_disabled_routes_are_hidden_and_spawn_nothing():

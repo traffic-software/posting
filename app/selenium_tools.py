@@ -88,8 +88,9 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
         return wrapped
 
     hard_markers = (
-        "captcha", "verify you are human", "verify it's you", "access denied", "suspicious login",
-        "this browser or app may not be secure", "unusual traffic",
+        "unusual traffic", "stop automated access", "access denied",
+        "access to this page has been denied", "access to this site has been blocked",
+        "captcha", "suspicious login", "this browser or app may not be secure",
     )
     mfa_markers = (
         "two-step verification", "two-factor", "verification code", "authenticator",

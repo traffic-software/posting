@@ -28,6 +28,7 @@ from fastapi import APIRouter, Request, WebSocket
 from fastapi.responses import JSONResponse, Response
 from pydantic import SecretStr
 from starlette.staticfiles import StaticFiles
+from starlette.websockets import WebSocketDisconnect
 
 
 _COOKIE_NAME = "desktop_session"
@@ -505,7 +506,11 @@ def create_router(viewer: DisplayViewer) -> APIRouter:
             if not still_authorized():
                 await websocket.close(code=1001)
                 return
-            await websocket.accept(headers=[(key.encode("latin-1"), value.encode("latin-1")) for key, value in _SECURITY_HEADERS.items()])
+            protocols = websocket.scope.get("subprotocols", [])
+            await websocket.accept(
+                subprotocol="binary" if "binary" in protocols else None,
+                headers=[(key.encode("latin-1"), value.encode("latin-1")) for key, value in _SECURITY_HEADERS.items()],
+            )
 
             async def browser_to_vnc() -> None:
                 while still_authorized():
@@ -555,7 +560,7 @@ def create_router(viewer: DisplayViewer) -> APIRouter:
             viewer.release_connection(generation)
             try:
                 await websocket.close()
-            except RuntimeError:
+            except (RuntimeError, WebSocketDisconnect):
                 pass
 
     # APIRouter mounts are not reliably copied by FastAPI.include_router(), so

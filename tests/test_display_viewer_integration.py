@@ -129,7 +129,8 @@ def test_real_viewer_auth_stream_read_only_and_task_teardown(tmp_path):
             with tempfile.TemporaryDirectory() as profile:
                 options = webdriver.ChromeOptions()
                 options.binary_location = str(settings.chromium_binary)
-                options.add_argument("--headless=new")
+                options.add_argument("--headless")
+                options.add_argument("--no-sandbox")
                 options.add_argument("--window-size=1100,900")
                 options.add_argument("--user-data-dir=" + profile)
                 options.add_argument("--disable-dev-shm-usage")

@@ -103,9 +103,19 @@ def _stop_window_manager(process):
             process.wait(timeout=3)
 
 
+def _close_driver(driver) -> None:
+    """Close the WebDriver and stop its owned service even if quit fails."""
+    try:
+        driver.quit()
+    finally:
+        service = getattr(driver, "service", None)
+        if service is not None:
+            service.stop()
+
+
 @contextmanager
 def local_browser(settings: Settings, context: TaskContext, deadline: float) -> Iterator[LocalBrowserSession]:
-    """Start one task-local standard Chromium instance under an exclusive Xvfb.
+    """Start one task-local Selenium Chromium instance under an exclusive Xvfb.
 
     The browser is only supported in the Linux container.  It has a temporary
     profile and never attempts to access a host display or remote WebDriver.
@@ -115,7 +125,7 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
     if not browser_ready(settings):
         raise BrowserRuntimeError("Local Chromium runtime prerequisites are unavailable")
     _wait_for_runtime(context, deadline)
-    display = profile = driver = pyautogui = window_manager = None
+    display = profile = service = driver = pyautogui = window_manager = None
     viewer = settings._display_viewer if settings.display_viewer_enabled else None
     viewer_generation = None
     prior_display = os.environ.get("DISPLAY")
@@ -138,14 +148,13 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
         stop_viewer()
         if driver is not None:
             try:
-                driver.quit()
+                _close_driver(driver)
             except Exception:
-                pass
+                context.record_observation("cleanup", "failed", "Browser process cleanup could not be confirmed")
 
     try:
         from pyvirtualdisplay import Display  # pylint: disable=import-outside-toplevel
         from selenium import webdriver  # pylint: disable=import-outside-toplevel
-        from selenium.webdriver.chrome.options import Options  # pylint: disable=import-outside-toplevel
         from selenium.webdriver.chrome.service import Service  # pylint: disable=import-outside-toplevel
 
         check = _guard(context, deadline)
@@ -157,22 +166,21 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
         window_manager = _start_window_manager(check)
         check()
         profile = tempfile.TemporaryDirectory(prefix="posting-chromium-")
-        options = Options()
+        options = webdriver.ChromeOptions()
         options.binary_location = str(settings.chromium_binary)
         options.add_argument(f"--user-data-dir={profile.name}")
-        options.add_argument(f"--window-size={settings.browser_window_width},{settings.browser_window_height}")
-        options.add_argument("--no-first-run")
-        options.add_argument("--no-default-browser-check")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--force-device-scale-factor=1")
-        driver = webdriver.Chrome(
-            service=Service(executable_path=str(settings.chromedriver_binary)),
-            options=options,
-        )
+        # Explicit local service avoids Selenium Manager and runtime downloads.
+        service = Service(executable_path=str(settings.chromedriver_binary))
+        service.process = None
+        check()
+        driver = webdriver.Chrome(service=service, options=options)
         context.bind_browser(close_driver)
         check()
         # Start on a neutral page, not Chromium's internal new-tab UI.
         driver.set_page_load_timeout(settings.browser_timeout_seconds)
+        driver.set_script_timeout(settings.browser_timeout_seconds)
         driver.get("about:blank")
         # The mapping adapter relies on this explicit fixed window geometry.
         driver.set_window_position(0, 0)
@@ -196,18 +204,26 @@ def local_browser(settings: Settings, context: TaskContext, deadline: float) -> 
                 except Exception:
                     context.record_observation("cleanup", "failed", "Local browser cleanup could not be confirmed")
             finally:
-                close_driver()
+                try:
+                    close_driver()
+                finally:
+                    if driver is None and service is not None:
+                        try:
+                            service.stop()
+                        except Exception:
+                            context.record_observation("cleanup", "failed", "Browser service cleanup could not be confirmed")
         finally:
             try:
                 if pyautogui is not None:
                     close_pyautogui_xlib(pyautogui)
             finally:
                 try:
-                    if profile is not None:
-                        try:
-                            profile.cleanup()
-                        except Exception:
-                            context.record_observation("cleanup", "failed", "Temporary browser profile cleanup failed")
+                    for temporary in (profile,):
+                        if temporary is not None:
+                            try:
+                                temporary.cleanup()
+                            except Exception:
+                                context.record_observation("cleanup", "failed", "Temporary browser files cleanup failed")
                 finally:
                     try:
                         try:

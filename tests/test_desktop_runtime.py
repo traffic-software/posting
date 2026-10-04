@@ -139,9 +139,10 @@ def test_local_browser_wait_is_cancellable(monkeypatch):
 
 
 @pytest.mark.parametrize("viewer_fails", [False, True])
-def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch, viewer_fails):
+def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch, tmp_path, viewer_fails):
+    from pathlib import Path
     import pyvirtualdisplay
-    import selenium.webdriver
+    from selenium import webdriver
 
     displays = []
     viewer_events = []
@@ -163,6 +164,9 @@ def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch, view
             self.quit_calls = 0
 
         def set_page_load_timeout(self, timeout):
+            assert timeout > 0
+
+        def set_script_timeout(self, timeout):
             assert timeout > 0
 
         def get(self, url):
@@ -196,14 +200,33 @@ def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch, view
     monkeypatch.setattr("app.browser_runtime.rebind_pyautogui", lambda: FakePyAutoGUI())
     monkeypatch.setattr("app.browser_runtime._start_window_manager", lambda check: None)
     monkeypatch.setattr(pyvirtualdisplay, "Display", FakeDisplay)
-    monkeypatch.setattr(selenium.webdriver, "Chrome", lambda **_kwargs: browser)
+    source = tmp_path / "chromedriver"
+    source.write_bytes(b"synthetic driver")
+    paths = []
+
+    def create_browser(**kwargs):
+        options = kwargs["options"]
+        service = kwargs["service"]
+        assert Path(service.path) == source
+        assert Path(options.binary_location) == Path("/usr/bin/chromium")
+        assert "--no-sandbox" not in options.arguments
+        assert not options.experimental_options.get("excludeSwitches")
+        assert not any("AutomationControlled" in arg for arg in options.arguments)
+        profile = Path(next(arg.split("=", 1)[1] for arg in options.arguments if arg.startswith("--user-data-dir=")))
+        paths.append(profile)
+        assert profile.is_dir()
+        return browser
+
+    monkeypatch.setattr(webdriver, "Chrome", create_browser)
     context = TaskContext()
-    settings = Settings(_env_file=None, display_viewer_enabled=True)
+    settings = Settings(_env_file=None, display_viewer_enabled=True, chromedriver_binary=source)
     settings._display_viewer = Viewer()
     with local_browser(settings, context, time.monotonic() + 5) as session:
         assert session.driver is browser
         assert session.desktop._pyautogui.FAILSAFE is True
     assert browser.quit_calls == 1
+    assert source.read_bytes() == b"synthetic driver"
+    assert all(not path.exists() for path in paths)
     assert displays[0].stopped is True
     assert "DISPLAY" not in os.environ
     assert "viewer-started" in viewer_events

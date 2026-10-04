@@ -1,0 +1,9 @@
+# Opt-in local development: docker compose -f compose.yaml -f compose.dev.yaml up --build -d
+services:
+  app:
+    volumes:
+      - ./app:/srv/app/app:ro
+    command:
+      - sh
+      - -c
+      - exec uvicorn app.main:app --host 0.0.0.0 --port $${PORT:-8000} --reload --reload-dir /srv/app/app --reload-delay 0.5
