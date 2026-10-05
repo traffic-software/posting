@@ -110,6 +110,7 @@ class TaskRequest(BaseModel):
     allow_write_actions: bool | None = Field(default=None, strict=True)
     credentials: list[LoginCredential] = Field(default_factory=list, max_length=5)
     proxy: FixedProxy | None = None
+    browser_profile_id: str | None = Field(default=None, pattern=r"^[a-f0-9]{32}$")
 
     @field_validator("proxy", mode="before")
     @classmethod

@@ -18,7 +18,7 @@ from app.element_readiness import ElementReadinessTimeout, readiness, wait_for_r
 from app.desktop_tools import DesktopInputError
 from app.login_forms import continuation_control, login_input
 from app.schemas import https_origin
-from app.task_context import TaskContext
+from app.task_context import TaskContext, TaskControlError
 from app.totp_forms import (
     DISCOVER_CONTROLS, SUBMISSION_FORM, single_input, split_input, structural_selector,
     submit_control, validate_inputs,
@@ -63,9 +63,10 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
     def redact(text: str) -> str:
         return context.redact(text) if context else text
 
+    observed_epoch = context.control.epoch if context else 0
+
     def observe(function):
-        @wraps(function)
-        def wrapped(*args, **kwargs):
+        def execute(*args, **kwargs):
             if context:
                 context.record_observation(function.__name__, "started", "Browser action attempted")
             try:
@@ -85,6 +86,20 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             if context:
                 context.record_observation(function.__name__, "returned", str(result))
             return result
+
+        @wraps(function)
+        def wrapped(*args, **kwargs):
+            nonlocal observed_epoch
+            if not context:
+                return execute(*args, **kwargs)
+            try:
+                with context.control.action(context):
+                    if observed_epoch != context.control.epoch:
+                        inspected_controls.clear()
+                        observed_epoch = context.control.epoch
+                    return execute(*args, **kwargs)
+            except TaskControlError as exc:
+                raise BrowserPolicyStop(str(exc)) from None
         return wrapped
 
     hard_markers = (
@@ -152,8 +167,8 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             raise BrowserPolicyStop("Only an explicit authenticator-app form is supported")
 
     def check_session() -> None:
-        if context and context.cancelled.is_set():
-            raise BrowserPolicyStop("Task cancelled")
+        if context:
+            context.check_alive()
         if time.monotonic() >= deadline:
             raise ToolException("Task time limit reached")
         current = driver.current_url

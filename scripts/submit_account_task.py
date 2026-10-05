@@ -47,18 +47,33 @@ def account_payload(prompt: str, secrets: set[str]) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--task-id", help="Poll an existing task without submitting again")
+    parser.add_argument("--browser-profile", help="Persistent profile ID from the authenticated desktop panel")
+    parser.add_argument("--prompt", help="Task prompt for a selected profile; no embedded credentials are submitted")
+    parser.add_argument("--allow-write-actions", action="store_true", help="Explicit task write consent for profile tasks")
     parser.add_argument("--account", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--timeout", type=int, default=240)
     args = parser.parse_args()
+    if args.browser_profile:
+        import re
+        if not re.fullmatch(r"[a-f0-9]{32}", args.browser_profile) or not args.prompt or not args.prompt.strip():
+            parser.error("--browser-profile requires a valid panel profile ID and --prompt")
+    elif args.prompt or args.allow_write_actions:
+        parser.error("--prompt and --allow-write-actions require --browser-profile")
     load_dotenv(Path(__file__).resolve().parents[1] / ".env")
     base_url = os.getenv("TASK_API_URL", "http://127.0.0.1:8000").rstrip("/")
-    parsed = urlsplit(base_url)
-    if (
-        parsed.scheme != "https" or not parsed.hostname
-        or parsed.username is not None or parsed.password is not None
-        or parsed.path not in ("", "/") or parsed.query or parsed.fragment
-    ):
-        print("TASK_API_URL must be an HTTPS origin without credentials", file=sys.stderr)
+    try:
+        parsed = urlsplit(base_url)
+        loopback_profile = (args.browser_profile and parsed.scheme == "http"
+                            and parsed.hostname in {"127.0.0.1", "localhost", "::1"})
+        valid_origin = (
+            (parsed.scheme == "https" or loopback_profile) and parsed.hostname
+            and parsed.port != 0 and parsed.username is None and parsed.password is None
+            and parsed.path in ("", "/") and not parsed.query and not parsed.fragment
+        )
+    except ValueError:
+        valid_origin = False
+    if not valid_origin:
+        print("TASK_API_URL must be an HTTPS origin without credentials (profile-only mode also permits loopback HTTP)", file=sys.stderr)
         return 1
     token = os.getenv("TASK_API_TOKEN", "") or getpass.getpass("API token: ")
     if not token:
@@ -78,7 +93,7 @@ def main() -> int:
     with httpx.Client(base_url=base_url, headers={"Authorization": f"Bearer {token}"}, timeout=30) as client:
         try:
             if task_id is None:
-                print("Submitting the configured Gmail login test.")
+                print("Submitting a selected-profile task." if args.browser_profile else "Submitting the configured Gmail login test.")
                 prompt = """"Sign in to my authorized Gmail account using structured credential ID account.
 
 1. Open https://accounts.google.com/.
@@ -106,7 +121,13 @@ Stop on CAPTCHA, suspicious-login warnings, access restrictions,
 unsupported forms, SMS/email verification, recovery requests or device
 approval. Do not bypass restrictions or blindly retry a failed login.
 """
-                payload = account_payload(prompt, secrets)
+                if args.browser_profile:
+                    prompt = args.prompt.strip()
+                    payload = {"prompt": prompt, "browser_profile_id": args.browser_profile}
+                    if args.allow_write_actions:
+                        payload["allow_write_actions"] = True
+                else:
+                    payload = account_payload(prompt, secrets)
                 try:
                     response = client.post("/run-task", json=payload)
                 finally:

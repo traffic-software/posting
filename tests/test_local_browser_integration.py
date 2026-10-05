@@ -34,7 +34,7 @@ def test_real_display_click_type_scroll_and_repeated_sessions():
             driver_path = Path(session.driver.service.path)
             assert profile not in previous_profiles
             previous_profiles.add(profile)
-            assert driver_path == settings.chromedriver_binary
+            assert driver_path.samefile(settings.chromedriver_binary)
             assert driver_path.exists()
             session.driver.get("data:text/html," + quote(html))
             entry = session.driver.find_element(By.ID, "entry")
@@ -48,6 +48,109 @@ def test_real_display_click_type_scroll_and_repeated_sessions():
             assert session.driver.execute_script("return window.scrollY") > 0
         assert not profile.exists()
         assert driver_path.exists()
+
+
+def test_offline_worker_thread_cancellation_and_recovery(monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    from pathlib import Path
+    from threading import Event
+    from selenium.webdriver.common.selenium_manager import SeleniumManager
+    from seleniumbase.console_scripts import sb_install
+    from app.browser_runtime import BrowserRuntimeError, _RUNTIME_LOCK
+
+    downloads = []
+
+    def unexpected_download(*args, **kwargs):
+        downloads.append((args, kwargs))
+        raise AssertionError("Runtime driver provisioning must not run")
+
+    monkeypatch.setattr(sb_install, "main", unexpected_download)
+    monkeypatch.setattr(SeleniumManager, "binary_paths", unexpected_download)
+    settings = Settings(_env_file=None)
+    ready, cancelled = Event(), Event()
+    context = TaskContext()
+
+    def worker():
+        with pytest.raises(BrowserRuntimeError, match="cancelled"):
+            with local_browser(settings, context, time.monotonic() + 60) as session:
+                service = session.driver.service
+                process = service.process
+                profile = Path(session.driver.capabilities["chrome"]["userDataDir"])
+                assert Path(service.path).samefile(settings.chromedriver_binary)
+                geometry = session.driver.get_window_size()
+                # Openbox can reserve one pixel at the Xvfb screen boundary.
+                assert abs(geometry["width"] - settings.browser_window_width) <= 1
+                assert abs(geometry["height"] - settings.browser_window_height) <= 1
+                assert session.driver.execute_script("return devicePixelRatio") == 1
+                ready.set()
+                assert cancelled.wait(20)
+                session.desktop._guard()
+        assert process.poll() is not None
+        assert not profile.exists()
+        assert not _RUNTIME_LOCK.locked()
+        with local_browser(settings, TaskContext(), time.monotonic() + 60) as session:
+            assert session.driver.execute_script("return navigator.webdriver") is True
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(worker)
+        try:
+            if not ready.wait(30):
+                future.result(timeout=35)
+                pytest.fail("Worker did not signal browser readiness")
+            context.cancel()
+        finally:
+            cancelled.set()
+        future.result(timeout=60)
+    assert downloads == []
+
+
+def test_real_constructor_failure_releases_runtime(monkeypatch, tmp_path):
+    import subprocess
+    from pathlib import Path
+    from selenium.common.exceptions import WebDriverException
+    from seleniumbase.console_scripts import sb_install
+    from app import browser_runtime
+
+    settings = Settings(_env_file=None)
+    version = subprocess.check_output([str(settings.chromium_binary), "--version"], text=True).strip()
+    broken_browser = tmp_path / "chrome"
+    broken_browser.write_text(f'#!/bin/sh\nif [ "$1" = "--version" ]; then\n echo "{version}"\nelse\n exit 1\nfi\n')
+    broken_browser.chmod(0o755)
+    profiles = []
+    original_temporary = browser_runtime.tempfile.TemporaryDirectory
+
+    def temporary(**kwargs):
+        result = original_temporary(**kwargs)
+        profiles.append(Path(result.name))
+        return result
+
+    def driver_processes():
+        found = set()
+        for executable in Path("/proc").glob("[0-9]*/exe"):
+            try:
+                if executable.samefile(settings.chromedriver_binary):
+                    found.add(executable.parent.name)
+            except OSError:
+                pass
+        return found
+
+    def unexpected_download(*args, **kwargs):
+        pytest.fail("Failed browser startup must not provision a driver")
+
+    monkeypatch.setattr(sb_install, "main", unexpected_download)
+    monkeypatch.setattr(browser_runtime.tempfile, "TemporaryDirectory", temporary)
+    prior_display = os.environ.get("DISPLAY")
+    prior_processes = driver_processes()
+    broken_settings = settings.model_copy(update={"chromium_binary": broken_browser})
+    with pytest.raises(WebDriverException):
+        with local_browser(broken_settings, TaskContext(), time.monotonic() + 60):
+            pytest.fail("Broken browser must not yield a session")
+    assert not browser_runtime._RUNTIME_LOCK.locked()
+    assert os.environ.get("DISPLAY") == prior_display
+    assert profiles and all(not profile.exists() for profile in profiles)
+    assert driver_processes() == prior_processes
+    with local_browser(settings, TaskContext(), time.monotonic() + 60) as session:
+        assert session.driver.current_url == "about:blank"
 
 
 def test_actual_discovery_javascript_handles_deep_dom():

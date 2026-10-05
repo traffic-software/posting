@@ -59,7 +59,8 @@ class TaskWorker:
                 with self.active_lock:
                     if self.stopping.is_set():
                         break
-                    task = self.store.claim_execution()
+                    sessions = self.settings._browser_sessions
+                    task = sessions.claim_task(self.store) if sessions else self.store.claim_execution()
                     self.active_task_id = task["task_id"] if task else None
                 if task is None:
                     self.wakeup.wait(timeout=2)
@@ -73,6 +74,8 @@ class TaskWorker:
                         context = TaskContext()
                     with self.active_lock:
                         self.active_context = context
+                        if sessions:
+                            sessions.bind_task(task_id, context)
                         stopped = self.stopping.is_set()
                     if stopped:
                         if context is not None:
@@ -102,6 +105,8 @@ class TaskWorker:
                     with self.active_lock:
                         self.active_context = None
                         self.active_task_id = None
+                        if sessions:
+                            sessions.release_task()
                     task = None
             except Exception as exc:
                 logger.error("Task worker could not access task storage (%s)", type(exc).__name__)

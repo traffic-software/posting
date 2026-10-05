@@ -200,3 +200,37 @@ def test_connection_claims_are_bounded_and_never_retarget():
     assert not viewer.generation_is_live("first")
     viewer.release_connection("first")
     viewer.release_connection("first")
+
+
+def test_interactive_start_requires_owner_filters_wayland_and_retires_generations(monkeypatch):
+    viewer = DisplayViewer(settings())
+    owner = viewer.issue_session("owner", "test-token")
+    observer = viewer.issue_session("observer", "test-token")
+    spawned = []
+    monkeypatch.setattr("app.display_viewer.sys.platform", "linux")
+    monkeypatch.setattr("app.display_viewer.shutil.which", lambda _: "/usr/bin/x11vnc")
+    monkeypatch.setattr(viewer, "_wait_for_listener", lambda *args: None)
+    monkeypatch.setenv("WAYLAND_DISPLAY", "wayland-synthetic")
+    monkeypatch.setenv("XDG_SESSION_TYPE", "wayland")
+    def popen(args, **kwargs):
+        process = FakeProcess()
+        spawned.append((args, kwargs, process))
+        return process
+    monkeypatch.setattr("app.display_viewer.subprocess.Popen", popen)
+    with pytest.raises(RuntimeError, match="owner"):
+        viewer.start_display(":99", interactive=True, owner="invalid")
+    readonly = viewer.start_display(":99")
+    manual = viewer.start_display(":99", interactive=True, owner=owner)
+    assert readonly != manual and not viewer.generation_is_live(readonly)
+    assert spawned[0][2].stopped
+    assert "-viewonly" in spawned[0][0]
+    assert "-viewonly" not in spawned[1][0]
+    assert "-localhost" in spawned[1][0] and "-noclipboard" in spawned[1][0]
+    assert all("WAYLAND_DISPLAY" not in kwargs["env"] and "XDG_SESSION_TYPE" not in kwargs["env"]
+               for _, kwargs, _ in spawned)
+    assert viewer.connection_authorized(owner, manual)
+    assert not viewer.connection_authorized(observer, manual)
+    agent = viewer.start_display(":99")
+    assert not viewer.connection_authorized(owner, manual)
+    assert viewer.connection_authorized(observer, agent)
+    viewer.close()

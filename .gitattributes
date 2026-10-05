@@ -1,0 +1,2 @@
+run-wsl.sh text eol=lf
+scripts/wsl-bin/Xvfb text eol=lf

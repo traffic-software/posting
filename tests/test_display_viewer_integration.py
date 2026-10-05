@@ -32,7 +32,8 @@ def test_real_viewer_auth_stream_read_only_and_task_teardown(tmp_path):
     port = listener.getsockname()[1]
     origin = f"http://127.0.0.1:{port}"
     settings = Settings(_env_file=None, database_path=tmp_path / "tasks.db", display_viewer_enabled=True,
-                        display_viewer_token="synthetic-viewer-token", display_viewer_origin=origin)
+                        display_viewer_token="synthetic-viewer-token", display_viewer_origin=origin,
+                        browser_profiles_root=tmp_path / "profiles")
     app = create_app(settings, runner=lambda *_: {})
     server = uvicorn.Server(uvicorn.Config(app, log_level="error", lifespan="on"))
     thread = threading.Thread(target=lambda: server.run(sockets=[listener]), daemon=True)
@@ -57,7 +58,9 @@ def test_real_viewer_auth_stream_read_only_and_task_teardown(tmp_path):
             cookie = "desktop_session=" + client.cookies.get("desktop_session")
             ws_url = f"ws://127.0.0.1:{port}/desktop/ws"
             with local_browser(settings, TaskContext(), time.monotonic() + 90) as session:
-                assert client.get("/desktop/status").json()["state"] == "live"
+                info = client.get("/desktop/status").json()
+                assert info["state"] == "live"
+                ws_url += "?generation=" + info["generation"]
                 for headers, client_origin in [({}, origin), ({"Cookie": cookie}, "http://untrusted.example")]:
                     with pytest.raises(InvalidStatus):
                         with connect(ws_url, origin=client_origin, additional_headers=headers):
@@ -122,26 +125,25 @@ def test_real_viewer_auth_stream_read_only_and_task_teardown(tmp_path):
             # A separate headless observer exercises the real noVNC browser UI;
             # it does not appear on the task's Xvfb desktop or use real secrets.
             import tempfile
-            from selenium import webdriver
-            from selenium.webdriver.chrome.service import Service
+            from seleniumbase import Driver
             from selenium.webdriver.support.ui import WebDriverWait
+            from app.browser_runtime import _local_driver_version
 
             with tempfile.TemporaryDirectory() as profile:
-                options = webdriver.ChromeOptions()
-                options.binary_location = str(settings.chromium_binary)
-                options.add_argument("--headless")
-                options.add_argument("--no-sandbox")
-                options.add_argument("--window-size=1100,900")
-                options.add_argument("--user-data-dir=" + profile)
-                options.add_argument("--disable-dev-shm-usage")
-                observer = webdriver.Chrome(service=Service(str(settings.chromedriver_binary)), options=options)
+                observer = Driver(
+                    browser="chrome", headless2=True, undetectable=False,
+                    binary_location=str(settings.chromium_binary),
+                    driver_version=_local_driver_version(settings),
+                    user_data_dir=profile, window_size="1100,900",
+                    chromium_arg="disable-dev-shm-usage", enable_ws=True,
+                )
                 try:
                     observer.get(origin + "/desktop")
                     wait = WebDriverWait(observer, 12)
                     wait.until(lambda browser: browser.find_element(By.ID, "viewer-token").is_displayed())
                     observer.find_element(By.ID, "viewer-token").send_keys("synthetic-viewer-token")
                     observer.find_element(By.ID, "login-button").click()
-                    wait.until(lambda browser: "No active task" in browser.find_element(By.ID, "status").text)
+                    wait.until(lambda browser: "Desktop idle" in browser.find_element(By.ID, "status").text)
                     for _ in range(2):
                         with local_browser(settings, TaskContext(), time.monotonic() + 60) as task:
                             task.driver.get("data:text/html," + quote('<body style="background:rgb(17,71,91);color:white"><h1>Synthetic live desktop</h1></body>'))
@@ -157,7 +159,7 @@ def test_real_viewer_auth_stream_read_only_and_task_teardown(tmp_path):
                                 return matches > 100;
                             """))
                             assert observer.execute_script("return document.getElementById('viewer-token').value;") == ""
-                        wait.until(lambda browser: "No active task" in browser.find_element(By.ID, "status").text)
+                        wait.until(lambda browser: "Desktop idle" in browser.find_element(By.ID, "status").text)
                     observer.find_element(By.ID, "logout").click()
                     wait.until(lambda browser: browser.find_element(By.ID, "viewer-token").is_displayed())
                 finally:

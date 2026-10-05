@@ -5,6 +5,7 @@ services:
       - .env
     environment:
       DATABASE_PATH: /data/tasks.db
+      BROWSER_PROFILES_ROOT: /data/browser_profiles
       CHROMIUM_BINARY: /usr/bin/chromium
       CHROMEDRIVER_BINARY: /usr/bin/chromedriver
       ENABLE_WRITE_ACTIONS: ${ENABLE_WRITE_ACTIONS:-false}

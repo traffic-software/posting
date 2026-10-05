@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agent live display</title>
+  <title>Browser profiles and live desktop</title>
   <link rel="stylesheet" href="/desktop/static/viewer.css">
   <script type="module" src="/desktop/static/viewer.js"></script>
 </head>
 <body>
   <main>
     <header>
-      <div><h1>Agent live display</h1><p>Read-only view of the active task's virtual desktop.</p></div>
+      <div><h1>Browser profiles</h1><p>Authenticate manually in Chrome, then reuse the selected profile in a task.</p></div>
       <button id="logout" type="button" hidden>Sign out</button>
     </header>
-    <p class="warning">This screen may show account identifiers or other sensitive information. Do not share or record it. Mouse, keyboard and clipboard control are disabled.</p>
+    <p class="warning">This desktop may show sensitive signed-in accounts. Do not share or record it. The viewer token grants privileged browser control. Enter website passwords and OTPs only inside Chrome, never in this panel. Agent mode is enforced read-only by the backend.</p>
     <section id="login-panel" hidden>
       <form id="login-form">
         <label for="viewer-token">Display viewer token</label>
@@ -22,9 +22,30 @@
       </form>
       <p>Use the separate viewer token, not your task API token.</p>
     </section>
+    <section id="profile-panel" hidden>
+      <form id="profile-form">
+        <label for="profile-label">New profile display label (not a password)</label>
+        <input id="profile-label" maxlength="80" required autocomplete="off">
+        <button id="create-profile" type="submit">Create profile</button>
+      </form>
+      <label for="profiles">Selected browser profile</label>
+      <select id="profiles"><option value="">Select a profile</option></select>
+      <p id="profile-id"></p>
+      <div class="controls">
+        <button id="open-browser" type="button">Open browser</button>
+        <button id="close-browser" type="button" disabled>Close browser</button>
+        <button id="pause-task" type="button" disabled>Take manual control</button>
+        <button id="resume-task" type="button" disabled>Resume agent</button>
+      </div>
+      <p id="session-state" role="status"></p>
+      <p id="panel-error" role="alert"></p>
+      <p>Standalone browsing lasts up to 30 minutes by default. Closing Chrome saves this profile; it does not delete it. Tasks wait in the queue until you close standalone browsing. Live profile switching is not supported.</p>
+      <p>To select this profile for a task, include the displayed ID as <code>browser_profile_id</code> in your authenticated <code>/run-task</code> request, or use <code>--browser-profile ID --prompt "…"</code> in the submission helper. Task API authentication and write consent still apply.</p>
+      <p>Clipboard synchronization is disabled. Mouse and keyboard work only while the backend confirms your manual ownership.</p>
+    </section>
     <p id="status" role="status" aria-live="polite">Checking viewer session…</p>
     <section id="screen" aria-label="Read-only live desktop" hidden></section>
-    <footer>No screenshots are stored by this viewer. When no task is active, the display is idle.</footer>
+    <footer>No screenshots are stored by this viewer. Logging out, session expiry, a prolonged disconnect, or manual timeout closes manual access. A task manual timeout fails the task rather than resuming unattended. Restart retains profiles but interrupts live sessions.</footer>
   </main>
 </body>
 </html>

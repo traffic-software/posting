@@ -117,6 +117,8 @@ def test_browser_ready_does_not_spawn(monkeypatch, tmp_path):
     settings = Settings(_env_file=None, chromium_binary=browser, chromedriver_binary=driver)
     monkeypatch.setattr("app.browser_runtime.sys.platform", "linux")
     monkeypatch.setattr("app.browser_runtime.shutil.which", lambda name: "/usr/bin/Xvfb")
+    monkeypatch.setattr("app.browser_runtime._driver_slot", lambda: driver)
+    monkeypatch.setattr("app.browser_runtime.subprocess.check_output", lambda *a, **kw: pytest.fail("Readiness must not spawn"))
     assert browser_ready(settings) is True
 
 
@@ -142,7 +144,7 @@ def test_local_browser_wait_is_cancellable(monkeypatch):
 def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch, tmp_path, viewer_fails):
     from pathlib import Path
     import pyvirtualdisplay
-    from selenium import webdriver
+    import seleniumbase
 
     displays = []
     viewer_events = []
@@ -205,19 +207,36 @@ def test_local_browser_uses_mocked_xvfb_and_cleans_task_driver(monkeypatch, tmp_
     paths = []
 
     def create_browser(**kwargs):
-        options = kwargs["options"]
-        service = kwargs["service"]
-        assert Path(service.path) == source
-        assert Path(options.binary_location) == Path("/usr/bin/chromium")
-        assert "--no-sandbox" not in options.arguments
-        assert not options.experimental_options.get("excludeSwitches")
-        assert not any("AutomationControlled" in arg for arg in options.arguments)
-        profile = Path(next(arg.split("=", 1)[1] for arg in options.arguments if arg.startswith("--user-data-dir=")))
+        profile = Path(kwargs["user_data_dir"])
+        assert kwargs == {
+            "browser": "chrome",
+            "headed": True,
+            "headless": False,
+            "headless1": False,
+            "headless2": False,
+            "undetectable": False,
+            "uc": False,
+            "uc_cdp_events": False,
+            "uc_subprocess": False,
+            "log_cdp_events": False,
+            "enable_ws": True,
+            "disable_ws": False,
+            "disable_csp": False,
+            "binary_location": str(settings.chromium_binary),
+            "driver_version": "123.0.1.2",
+            "user_data_dir": str(profile),
+            "chromium_arg": "disable-dev-shm-usage,force-device-scale-factor=1",
+            "window_position": "0,0",
+            "window_size": f"{settings.browser_window_width},{settings.browser_window_height}",
+        }
         paths.append(profile)
         assert profile.is_dir()
+        browser.service = SimpleNamespace(path=str(source), stop=lambda: viewer_events.append("service-stopped"))
         return browser
 
-    monkeypatch.setattr(webdriver, "Chrome", create_browser)
+    monkeypatch.delenv("DISPLAY", raising=False)
+    monkeypatch.setattr("app.browser_runtime._local_driver_version", lambda _: "123.0.1.2")
+    monkeypatch.setattr(seleniumbase, "Driver", create_browser)
     context = TaskContext()
     settings = Settings(_env_file=None, display_viewer_enabled=True, chromedriver_binary=source)
     settings._display_viewer = Viewer()

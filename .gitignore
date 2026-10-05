@@ -9,6 +9,8 @@ profile
 docker
 .env
 .venv/
+.wsl-runtime/
+.wsl-downloads/
 .pytest_cache/
 .claude/
 .railway/
@@ -16,3 +18,5 @@ docker
 *.sqlite3
 *.db-*
 profiles/
+browser_profiles/
+Singleton*

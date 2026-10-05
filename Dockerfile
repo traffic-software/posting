@@ -8,7 +8,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     APP_REVISION=${VCS_REF} \
     HOME=/home/app \
-    XDG_RUNTIME_DIR=/tmp/runtime-app
+    XDG_RUNTIME_DIR=/tmp/runtime-app \
+    SE_OFFLINE=true \
+    SE_CHROMEDRIVER=/usr/bin/chromedriver
 
 # Install desktop and Chrome runtime libraries explicitly: slim has no GUI stack.
 # Keep download tools temporary and browser archives out of the final layer.
@@ -46,7 +48,7 @@ RUN test "$(dpkg --print-architecture)" = amd64 \
 WORKDIR /srv/app
 COPY requirements.lock ./
 RUN pip install --no-cache-dir -r requirements.lock \
-    && python -c "from selenium import webdriver; from selenium.webdriver.chrome.service import Service; import tkinter"
+    && python -c "from pathlib import Path; from seleniumbase import Driver, drivers; import tkinter; slot = Path(drivers.__file__).parent / 'chromedriver'; slot.unlink(missing_ok=True); slot.symlink_to('/usr/bin/chromedriver'); assert slot.samefile('/usr/bin/chromedriver')"
 COPY app ./app
 
 RUN groupadd --system app && useradd --system --gid app --create-home app \

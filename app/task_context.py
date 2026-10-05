@@ -3,6 +3,7 @@ import time
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from contextlib import contextmanager
 
 from cryptography.fernet import Fernet
 
@@ -10,10 +11,97 @@ from app.config import Settings
 from app.schemas import FixedProxy, LoginCredential, TaskRequest
 
 
+class TaskControlError(RuntimeError):
+    pass
+
+
+class ExecutionBudget:
+    """A shared, moving monotonic deadline; only acknowledged manual time is free."""
+    def __init__(self, seconds: float):
+        self._lock = threading.Lock()
+        self._deadline = time.monotonic() + seconds
+        self._frozen = None
+
+    @property
+    def deadline(self):
+        with self._lock:
+            return self._deadline + (time.monotonic() - self._frozen if self._frozen is not None else 0)
+
+    def freeze(self):
+        with self._lock:
+            if self._frozen is None:
+                self._frozen = time.monotonic()
+
+    def resume(self):
+        with self._lock:
+            if self._frozen is not None:
+                self._deadline += time.monotonic() - self._frozen
+                self._frozen = None
+
+    def __rsub__(self, value):
+        return value - self.deadline
+
+    def __sub__(self, value):
+        return self.deadline - value
+
+    def __le__(self, value):
+        return self.deadline <= value
+
+    def __lt__(self, value):
+        return self.deadline < value
+
+    def __ge__(self, value):
+        return self.deadline >= value
+
+    def __gt__(self, value):
+        return self.deadline > value
+
+
+class TaskControl:
+    """Gate complete tools/model calls, never individual click/type checkpoints."""
+    def __init__(self):
+        self.condition = threading.Condition(threading.RLock())
+        self.state = "agent"
+        self.owner = None
+        self.expires_at = None
+        self.active = 0
+        self.local = threading.local()
+        self.epoch = 0
+        self.transition = None
+        self.observe = None
+        self.budget = None
+
+    @contextmanager
+    def action(self, context):
+        nested = getattr(self.local, "depth", 0) > 0
+        with self.condition:
+            if not nested:
+                while self.state != "agent":
+                    context.check_alive()
+                    self.condition.wait(0.1)
+                context.check_alive()
+                self.active += 1
+            self.local.depth = getattr(self.local, "depth", 0) + 1
+        try:
+            yield
+        finally:
+            with self.condition:
+                self.local.depth -= 1
+                if not nested:
+                    self.active -= 1
+                self.condition.notify_all()
+
+    def wake(self):
+        with self.condition:
+            self.condition.notify_all()
+
+
 @dataclass(repr=False)
 class TaskContext:
     allow_write_actions: bool | None = None
     proxy: FixedProxy | None = None
+    browser_profile_id: str | None = None
+    control: TaskControl = field(default_factory=TaskControl)
     credentials: list[LoginCredential] = field(default_factory=list)
     credential_expires_at: float | None = None
     cancelled: threading.Event = field(default_factory=threading.Event)
@@ -24,6 +112,14 @@ class TaskContext:
     _secret_lock: threading.Lock = field(default_factory=threading.Lock)
     _observations: list[dict] = field(default_factory=list)
     _observation_lock: threading.Lock = field(default_factory=threading.Lock)
+
+    def check_alive(self) -> None:
+        if self.cancelled.is_set():
+            raise TaskControlError("Task cancelled")
+        if self.credential_expires_at is not None and time.time() >= self.credential_expires_at:
+            raise TaskControlError("Task credentials expired")
+        if self.control.budget is not None and time.monotonic() >= self.control.budget:
+            raise TimeoutError("Task time limit reached")
 
     def bind_browser(self, close: Callable) -> None:
         with self._browser_lock:
@@ -41,6 +137,7 @@ class TaskContext:
 
     def cancel(self) -> None:
         self.cancelled.set()
+        self.control.wake()
         try:
             self.close_browser()
         finally:
@@ -108,10 +205,11 @@ def credential_cipher(settings: Settings) -> Fernet:
 
 
 def encode_context(request: TaskRequest, settings: Settings) -> tuple[str | None, str | None]:
-    if not request.credentials and request.proxy is None and request.allow_write_actions is None:
+    if not request.credentials and request.proxy is None and request.allow_write_actions is None and request.browser_profile_id is None:
         return None, None
     options = json.dumps({
         "allow_write_actions": request.allow_write_actions,
+        "browser_profile_id": request.browser_profile_id,
         "proxy": request.proxy.model_dump() if request.proxy else None,
     })
     blob = None
@@ -146,6 +244,7 @@ def decode_context(options: str | None, blob: str | None, settings: Settings) ->
         credentials = [LoginCredential.model_validate(item) for item in json.loads(payload)]
     return TaskContext(
         allow_write_actions=data.get("allow_write_actions"),
+        browser_profile_id=data.get("browser_profile_id"),
         proxy=FixedProxy.model_validate(data["proxy"]) if data.get("proxy") else None,
         credentials=credentials, credential_expires_at=expires_at,
     )

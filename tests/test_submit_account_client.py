@@ -13,6 +13,13 @@ def client_script(monkeypatch):
     script = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(script)
     monkeypatch.setattr(script, "load_dotenv", lambda *_: None)
+    def synthetic_account(prompt, secrets):
+        secrets.update({"synthetic-user", "synthetic-password", "SYNTHETICSEED"})
+        return {"prompt": prompt, "allow_write_actions": True, "credentials": [{
+            "id": "account", "origins": ["https://accounts.example"],
+            "username": "synthetic-user", "password": "synthetic-password", "totp_secret": "SYNTHETICSEED",
+        }]}
+    monkeypatch.setattr(script, "account_payload", synthetic_account)
     monkeypatch.setenv("TASK_API_TOKEN", "fake-token")
     monkeypatch.setenv("TASK_API_URL", "https://api.example")
     monkeypatch.setattr(script.sys, "argv", ["submit_account_task.py"])
@@ -123,3 +130,23 @@ def test_network_failure_never_retries(client_script, monkeypatch, capsys):
     output = capsys.readouterr()
     assert "private-error-details" not in output.err
     assert "outcome may be unknown" in output.err
+
+
+def test_selected_profile_submission_has_no_credentials(client_script, monkeypatch):
+    submitted = []
+    pid = "a" * 32
+    monkeypatch.setattr(client_script.sys, "argv", ["client", "--browser-profile", pid, "--prompt", "Read a heading"])
+    monkeypatch.setattr(client_script, "account_payload", lambda *_: pytest.fail("Profile mode must not load account credentials"))
+    fake_client(monkeypatch, client_script, submitted)
+    assert client_script.main() == 0
+    assert submitted == [{"prompt": "Read a heading", "browser_profile_id": pid}]
+
+
+def test_profile_only_mode_accepts_loopback_http(client_script, monkeypatch):
+    submitted = []
+    monkeypatch.setenv("TASK_API_URL", "http://127.0.0.1:8001")
+    monkeypatch.setattr(client_script.sys, "argv", ["client", "--browser-profile", "a" * 32, "--prompt", "Read a heading"])
+    monkeypatch.setattr(client_script, "account_payload", lambda *_: pytest.fail("No account credentials in profile mode"))
+    fake_client(monkeypatch, client_script, submitted)
+    assert client_script.main() == 0
+    assert len(submitted) == 1 and "credentials" not in submitted[0]

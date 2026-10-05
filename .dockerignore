@@ -18,6 +18,10 @@ plan/
 __pycache__/
 .pytest_cache/
 profiles/
+browser_profiles/
+.wsl-runtime/
+.wsl-downloads/
+Singleton*
 data/
 img/
 py/

@@ -10,6 +10,7 @@ import asyncio
 import hashlib
 import hmac
 import json
+import os
 import re
 import secrets
 import shutil
@@ -66,6 +67,8 @@ class _Display:
     display_name: str
     port: int
     process: Any
+    interactive: bool = False
+    owner: str | None = None
 
 
 @dataclass
@@ -149,7 +152,7 @@ class DisplayViewer:
             self._origin_digest = hashlib.sha256(self._origin.encode("utf-8")).digest()
         except UnicodeError as exc:
             raise ValueError("display viewer origin is invalid") from exc
-        self._session_seconds = int(getattr(settings, "display_viewer_session_seconds", 900))
+        self._session_seconds = int(getattr(settings, "display_viewer_session_seconds", 1800))
         self._max_viewers = int(getattr(settings, "display_viewer_max_connections", 2))
         self._assets = Path(getattr(settings, "display_viewer_assets", Path("/usr/share/novnc")))
         self._lock = threading.RLock()
@@ -204,7 +207,7 @@ class DisplayViewer:
                 time.sleep(0.05)
         raise DisplayViewerError("read-only display server did not become ready")
 
-    def start_display(self, display_name: str) -> str | None:
+    def start_display(self, display_name: str, *, owner=None, interactive=False) -> str | None:
         """Synchronously start x11vnc, returning an opaque generation or ``None``.
 
         Viewer failure is intentionally non-fatal to the task runtime.  The
@@ -217,9 +220,11 @@ class DisplayViewer:
         # not take this lock so application shutdown can retire its generation
         # immediately; the publish check below then kills a late child.
         with self._start_lock:
-            return self._start_display_locked(display_name)
+            if interactive and not self.authenticate(owner):
+                raise DisplayViewerError("Interactive desktop requires its authenticated owner")
+            return self._start_display_locked(display_name, owner=owner, interactive=interactive)
 
-    def _start_display_locked(self, display_name: str) -> str | None:
+    def _start_display_locked(self, display_name: str, *, owner=None, interactive=False) -> str | None:
         if not isinstance(display_name, str) or not _DISPLAY_RE.fullmatch(display_name):
             with self._lock:
                 self._unavailable = True
@@ -243,16 +248,22 @@ class DisplayViewer:
             process = subprocess.Popen(
                 [
                     "x11vnc", "-display", display_name, "-localhost", "-rfbport", str(port),
-                    "-viewonly", "-noprimary", "-noclipboard", "-nosetclipboard", "-nosetprimary",
+                    *([] if interactive else ["-viewonly"]),
+                    "-noprimary", "-noclipboard", "-nosetclipboard", "-nosetprimary",
                     "-forever", "-shared", "-nopw", "-quiet",
                 ],
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 close_fds=True,
+                # WSLg's Wayland environment must not override the task's X11 display.
+                env={
+                    key: value for key, value in os.environ.items()
+                    if key not in {"WAYLAND_DISPLAY", "XDG_SESSION_TYPE"}
+                },
             )
             self._wait_for_listener(process, port, time.monotonic() + _STARTUP_SECONDS)
-            display = _Display(secrets.token_urlsafe(24), display_name, port, process)
+            display = _Display(secrets.token_urlsafe(24), display_name, port, process, interactive, owner)
             with self._lock:
                 rejected = self._closed
                 if rejected:
@@ -317,6 +328,11 @@ class DisplayViewer:
             session = self._sessions.get(session_id)
             return session is not None and session.expires_at > now
 
+    def session_deadline(self, session_id):
+        with self._lock:
+            session = self._sessions.get(session_id)
+            return session.expires_at if session and session.expires_at > time.monotonic() else time.monotonic()
+
     def issue_session(self, client: str, token: str) -> str | None:
         """Rate-limit login attempts and issue an opaque, short-lived cookie value."""
         if not self.enabled or not isinstance(token, str) or len(token) > 512:
@@ -373,6 +389,21 @@ class DisplayViewer:
             else:
                 self._connections.pop(generation, None)
 
+    def connection_authorized(self, session_id, generation):
+        with self._lock:
+            display = self._display
+            return bool(display and display.generation == generation
+                        and display.process.poll() is None
+                        and (not display.interactive or display.owner == session_id)
+                        and self.authenticate(session_id))
+
+    def mode(self, session_id):
+        with self._lock:
+            display = self._display
+            return {"mode": "manual" if display and display.interactive else "readonly",
+                    "input_allowed": bool(display and display.interactive and display.owner == session_id
+                                          and self.authenticate(session_id))}
+
     def generation_is_live(self, generation: str) -> bool:
         with self._lock:
             display = self._display
@@ -388,7 +419,7 @@ def _json(status_code: int, content: dict[str, Any]) -> JSONResponse:
     return _headers(JSONResponse(status_code=status_code, content=content))  # type: ignore[return-value]
 
 
-def create_router(viewer: DisplayViewer) -> APIRouter:
+def create_router(viewer: DisplayViewer, sessions=None, profiles=None, worker=None) -> APIRouter:
     """Build the isolated /desktop API, assets and authenticated WS endpoint."""
     router = APIRouter()
 
@@ -462,7 +493,17 @@ def create_router(viewer: DisplayViewer) -> APIRouter:
         if not authenticated(request):
             return _json(401, {"detail": "Unauthorized"})
         state, generation = viewer.status()
-        return _json(200, {"state": state, "generation": generation})
+        info = {"state": state, "generation": generation}
+        if sessions is not None:
+            session = session_from(request)
+            sessions.heartbeat(session)
+            info.update(viewer.mode(session))
+            info["browser"] = sessions.status(session)
+            if not viewer.connection_authorized(session, generation):
+                info["generation"] = None
+                if state == "live":
+                    info["state"] = "owner_only"
+        return _json(200, info)
 
     @router.post("/desktop/logout", include_in_schema=False)
     async def logout(request: Request) -> Response:
@@ -475,9 +516,86 @@ def create_router(viewer: DisplayViewer) -> APIRouter:
         if not authenticated(request):
             return _json(401, {"detail": "Unauthorized"})
         viewer.revoke(session)
+        if sessions is not None:
+            sessions.owner_gone(session)
         response = _json(200, {"status": "ok"})
         response.delete_cookie(_COOKIE_NAME, path="/desktop", httponly=True, samesite="strict", secure=viewer.secure_cookie)
         return response
+
+    async def panel_action(request, action):
+        if not viewer.enabled or sessions is None or not origin_ok(request):
+            return _json(404, {"detail": "Not found"})
+        if not authenticated(request):
+            return _json(401, {"detail": "Unauthorized"})
+        try:
+            raw = bytearray()
+            async for chunk in request.stream():
+                raw.extend(chunk)
+                if len(raw) > 4096:
+                    raise ValueError()
+            payload = json.loads(raw or b"{}")
+            if not isinstance(payload, dict):
+                raise ValueError()
+            owner = session_from(request)
+            sessions.heartbeat(owner)
+            return _json(200, action(owner, payload))
+        except (ValueError, TypeError, KeyError):
+            return _json(422, {"detail": "Invalid profile or browser control request"})
+        except Exception as exc:
+            from app.browser_sessions import SessionConflict
+            if isinstance(exc, SessionConflict):
+                return _json(409, {"detail": str(exc)})
+            return _json(503, {"detail": "Browser profiles or desktop control are unavailable"})
+
+    def exact(payload, keys):
+        if set(payload) != set(keys):
+            raise ValueError()
+
+    @router.post("/desktop/profiles/list", include_in_schema=False)
+    async def list_profiles(request: Request):
+        def action(owner, payload):
+            exact(payload, [])
+            return {"profiles": profiles.list()}
+        return await panel_action(request, action)
+
+    @router.get("/desktop/profiles", include_in_schema=False)
+    async def get_profiles(request: Request):
+        return await panel_action(request, lambda owner, payload: {"profiles": profiles.list()})
+
+    @router.post("/desktop/profiles", include_in_schema=False)
+    async def create_profile(request: Request):
+        def action(owner, payload):
+            exact(payload, ["label"])
+            return {"profile": profiles.create(payload["label"])}
+        return await panel_action(request, action)
+
+    @router.post("/desktop/browser/open", include_in_schema=False)
+    async def open_browser(request: Request):
+        def action(owner, payload):
+            exact(payload, ["browser_profile_id"])
+            return sessions.open(owner, payload["browser_profile_id"])
+        return await panel_action(request, action)
+
+    @router.post("/desktop/browser/close", include_in_schema=False)
+    async def close_browser(request: Request):
+        def action(owner, payload):
+            exact(payload, ["generation"])
+            return sessions.close_manual(owner, payload["generation"])
+        return await panel_action(request, action)
+
+    @router.post("/desktop/task/pause", include_in_schema=False)
+    async def pause_task(request: Request):
+        def action(owner, payload):
+            exact(payload, ["task_id", "generation"])
+            return sessions.control_task(owner, payload["task_id"], payload["generation"])
+        return await panel_action(request, action)
+
+    @router.post("/desktop/task/resume", include_in_schema=False)
+    async def resume_task(request: Request):
+        def action(owner, payload):
+            exact(payload, ["task_id", "generation"])
+            return sessions.control_task(owner, payload["task_id"], payload["generation"], resume=True)
+        return await panel_action(request, action)
 
     @router.websocket("/desktop/ws")
     async def websocket_bridge(websocket: WebSocket) -> None:
@@ -490,13 +608,21 @@ def create_router(viewer: DisplayViewer) -> APIRouter:
             await websocket.close(code=1013)
             return
         generation, port = claim
+        requested = getattr(websocket, "query_params", {}).get("generation")
+        if (sessions is not None and requested != generation) or (requested is not None and requested != generation):
+            viewer.release_connection(generation)
+            await websocket.close(code=1008)
+            return
         reader = writer = None
         tasks: list[asyncio.Task[Any]] = []
 
         def still_authorized() -> bool:
             # Both expiry/revocation and generation retirement are observed on
             # every bounded I/O cycle, so a socket never outlives either.
-            return viewer.authenticate(session_id) and viewer.generation_is_live(generation)
+            authorized = viewer.connection_authorized(session_id, generation)
+            if authorized and sessions is not None:
+                sessions.heartbeat(session_id, connection=True)
+            return authorized
         try:
             try:
                 reader, writer = await asyncio.wait_for(asyncio.open_connection("127.0.0.1", port), _IO_TIMEOUT_SECONDS)

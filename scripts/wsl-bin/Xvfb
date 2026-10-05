@@ -1,0 +1,3 @@
+#!/bin/sh
+# WSLg owns the filesystem X11 socket directory; use Linux abstract sockets.
+exec /usr/bin/Xvfb -nolisten unix "$@"

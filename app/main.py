@@ -18,6 +18,8 @@ from app.storage import QueueFullError, TaskStore
 from app.selenium_tools import check_url
 from app.task_context import encode_context
 from app.worker import TaskWorker
+from app.browser_profiles import BrowserProfileStore, ProfileError
+from app.browser_sessions import BrowserSessionManager
 
 
 def create_app(settings: Settings | None = None, runner: Callable = run_task) -> FastAPI:
@@ -25,27 +27,37 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
     viewer = DisplayViewer(settings)
     settings._display_viewer = viewer
     store = TaskStore(settings.database_path)
+    profiles = BrowserProfileStore(settings.browser_profiles_root)
+    sessions = BrowserSessionManager(settings, viewer, profiles)
+    settings._browser_sessions = sessions
     worker = TaskWorker(store, settings, runner=runner)
+    sessions.worker = worker
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if settings.require_task_api_token and not settings.task_api_token:
             raise RuntimeError("TASK_API_TOKEN is required for public deployment")
         store.initialize()
+        sessions.start()
         worker.start()
         try:
             yield
         finally:
             try:
-                worker.stop()
+                sessions.close()
             finally:
-                viewer.close()
+                try:
+                    worker.stop()
+                finally:
+                    viewer.close()
 
     app = FastAPI(title="Browser Task API", lifespan=lifespan)
     app.state.store = store
     app.state.worker = worker
     app.state.viewer = viewer
-    app.include_router(create_router(viewer))
+    app.state.browser_sessions = sessions
+    app.state.browser_profiles = profiles
+    app.include_router(create_router(viewer, sessions, profiles, worker))
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(_request, _exc):
@@ -64,6 +76,13 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
             raise HTTPException(status_code=503, detail="Task service is not configured")
         if not worker.alive:
             raise HTTPException(status_code=503, detail="Task worker is unavailable")
+        if request.browser_profile_id:
+            if not settings.task_api_token:
+                raise HTTPException(status_code=403, detail="Persistent profile tasks require API authentication")
+            try:
+                profiles.get(request.browser_profile_id)
+            except ProfileError as exc:
+                raise HTTPException(status_code=422, detail="Invalid browser profile") from exc
         if request.credentials and not settings.task_api_token:
             raise HTTPException(status_code=403, detail="Credential tasks require API authentication")
         if request.allow_write_actions is True and not settings.enable_write_actions:
