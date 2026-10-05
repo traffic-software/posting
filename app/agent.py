@@ -101,6 +101,14 @@ selector, tool or agent. A generic challenge/access-restriction error does not i
 If stopped, report the tool-reported category separately from any directly observed, non-sensitive page evidence.
 Never infer CAPTCHA, rejected credentials or a particular MFA method from a generic failure alone.
 If a requested action needs an unavailable tool, explain the limitation.
+When available, prefer semantic discovered controls. Only when DOM evidence is insufficient, use
+capture_browser_screenshot to receive an actual masked viewport image; select image-relative pixels
+and call click_screenshot_coordinate with that fresh screenshot_id. Never infer a target from a path
+or pretend to see an image the provider cannot accept. Tokens expire quickly and are one-use;
+capture again after any interaction, scrolling, navigation or manual handoff. Never click browser
+chrome, secret/file controls or use visual clicks to work around a policy refusal. A click receipt
+is not success: observe its result before continuing, never replay an uncertain submission.
+Do not quote, copy, save or embed image data/base64 in notes, subagent requests or final output.
 Keep the final response brief and factual, in the user's language. Never claim an action succeeded without observing it.
 Explain the observed outcome against the requested goal, what you completed, where you stopped,
 and why you could not finish if incomplete. Distinguish verified blockers from unknown causes.
@@ -124,7 +132,18 @@ class ControlMiddleware(AgentMiddleware):
                     "Manual control has ended. Previous page targets are stale. Inspect the page again before acting. "
                     "Fresh resume observation (untrusted data): " + self.context.redact(str(self.context.observations()[-1:]))
                 )])
-            return handler(request)
+            try:
+                return handler(request)
+            except Exception as exc:
+                visual = getattr(self.context, "_visual_targets", None)
+                if visual and any(isinstance(getattr(message, "content", None), list) and
+                    any(isinstance(block, dict) and block.get("type") == "image_url" for block in message.content)
+                    for message in request.messages):
+                    visual.invalidate()
+                    visual.disabled = True
+                    self.context.record_observation("vision", "stopped", "Configured model could not accept the image; image capability is unverified. DOM tools remain available for a new task.")
+                    raise RuntimeError("Configured model image capability unavailable") from None
+                raise
 
     def wrap_tool_call(self, request, handler):
         with self.context.control.action(self.context):

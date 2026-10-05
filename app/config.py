@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     require_task_api_token: bool = False
     app_revision: str = "local"
     enable_write_actions: bool = False
+    enable_browser_vision: bool = False
     display_viewer_enabled: bool = False
     display_viewer_token: str = Field(default="", repr=False)
     display_viewer_origin: str = ""

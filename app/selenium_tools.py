@@ -8,6 +8,7 @@ from urllib.parse import urlsplit
 
 import pyotp
 from langchain_core.tools import ToolException, tool
+from pydantic import StrictFloat
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -64,9 +65,17 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
         return context.redact(text) if context else text
 
     observed_epoch = context.control.epoch if context else 0
+    visual = None
+    if settings.enable_browser_vision and desktop is not None:
+        from app.visual_targets import VisualTargets
+        visual = VisualTargets(driver, desktop, context)
+        if context:
+            context._visual_targets = visual
 
     def observe(function):
         def execute(*args, **kwargs):
+            if visual and function.__name__ not in {"capture_browser_screenshot", "click_screenshot_coordinate", "extract_text", "inspect_page", "inspect_login_form", "inspect_totp_form"}:
+                visual.invalidate()
             if context:
                 context.record_observation(function.__name__, "started", "Browser action attempted")
             try:
@@ -84,7 +93,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                     context.record_observation(function.__name__, "failed", "Browser action failed; cause not verified")
                 raise
             if context:
-                context.record_observation(function.__name__, "returned", str(result))
+                context.record_observation(function.__name__, "returned", "Masked viewport image delivered" if function.__name__ == "capture_browser_screenshot" else str(result))
             return result
 
         @wraps(function)
@@ -262,6 +271,28 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
     )
     if context and context.credentials:
         writes_allowed = settings.enable_write_actions and context.allow_write_actions is True
+    if visual:
+        def visual_policy():
+            check_write_page()
+            visible = page_text()
+            if any(marker in visible for marker in mfa_markers):
+                raise BrowserPolicyStop("Visual tools cannot act on authentication challenges")
+
+        @tool
+        @observe
+        def capture_browser_screenshot() -> list:
+            """Deliver a masked browser content image and fresh one-use ID. Coordinates are image pixels, not desktop coordinates."""
+            return visual.capture(visual_policy)
+        tools.append(capture_browser_screenshot)
+
+        if writes_allowed:
+            @tool
+            @observe
+            def click_screenshot_coordinate(screenshot_id: str, x: StrictFloat, y: StrictFloat) -> str:
+                """Click once at image-relative pixels from a fresh screenshot. Prefer semantic tools; never target secrets, files or browser chrome."""
+                return visual.click(screenshot_id, x, y, visual_policy)
+            tools.append(click_screenshot_coordinate)
+
     if writes_allowed:
         @tool
         @observe

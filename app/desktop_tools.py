@@ -100,17 +100,43 @@ class DesktopTools:
             raw = self._driver.execute_script(_POINTER_TARGET, element)
             if not isinstance(raw, dict):
                 raise ValueError("no unambiguous target")
-            x, y, sx, sy, ow, oh, iw, ih, sw, sh, dpr = (float(raw[key]) for key in ("x", "y", "screenX", "screenY", "outerWidth", "outerHeight", "innerWidth", "innerHeight", "screenWidth", "screenHeight", "dpr"))
-            values = (x, y, sx, sy, ow, oh, iw, ih, sw, sh, dpr)
-            if not all(value == value and abs(value) != float("inf") for value in values) or dpr != 1 or ow < iw or oh < ih or sw <= 0 or sh <= 0:
-                raise ValueError("invalid geometry")
-            point = _ScreenPoint(round(sx + (ow - iw) / 2 + x), round(sy + oh - ih + y))
-            if not (0 <= point.x < round(sw) and 0 <= point.y < round(sh)):
-                raise ValueError("target lies outside Xvfb screen")
+            point = self._map_point(raw)
         except (KeyError, TypeError, ValueError) as exc:
             raise DesktopInputError("Desktop target is ambiguous or invalid") from exc
         self._guard()
         return point
+
+    @staticmethod
+    def _map_point(raw):
+        x, y, sx, sy, ow, oh, iw, ih, sw, sh, dpr = (float(raw[key]) for key in ("x", "y", "screenX", "screenY", "outerWidth", "outerHeight", "innerWidth", "innerHeight", "screenWidth", "screenHeight", "dpr"))
+        values = (x, y, sx, sy, ow, oh, iw, ih, sw, sh, dpr)
+        if not all(value == value and abs(value) != float("inf") for value in values) or dpr != 1 or ow < iw or oh < ih or sw <= 0 or sh <= 0:
+            raise ValueError("invalid geometry")
+        point = _ScreenPoint(round(sx + (ow - iw) / 2 + x), round(sy + oh - ih + y))
+        if not (0 <= point.x < round(sw) and 0 <= point.y < round(sh)):
+            raise ValueError("target lies outside Xvfb screen")
+        if not (0 <= x < iw and 0 <= y < ih):
+            raise ValueError("point outside content viewport")
+        return point
+
+    def click_viewport(self, x, y, expected, fresh, guard):
+        self._activate_page()
+        guard()
+        raw = self._driver.execute_script("return {screenX,screenY,outerWidth,outerHeight,innerWidth,innerHeight,screenWidth:screen.width,screenHeight:screen.height,dpr:devicePixelRatio};")
+        if any(raw[key] != expected[key] for key in ("screenX", "screenY", "outerWidth", "outerHeight", "dpr")):
+            raise DesktopInputError("Browser moved after screenshot")
+        raw.update(x=x, y=y)
+        try:
+            point = self._map_point(raw)
+        except (ValueError, TypeError, KeyError):
+            raise DesktopInputError("Screenshot geometry is unsupported") from None
+        guard()
+        self._pyautogui.moveTo(point.x, point.y)
+        guard()
+        if not fresh():
+            raise DesktopInputError("Screenshot changed before click")
+        self._pyautogui.click()
+        guard()
 
     def _move(self, element: Any) -> None:
         point = self._point(element)

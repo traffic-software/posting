@@ -156,6 +156,10 @@ class TaskContext:
         return self.redacted_result({"events": entries})["events"]
 
     def clear_sensitive_state(self) -> None:
+        visual = getattr(self, "_visual_targets", None)
+        if visual:
+            visual.invalidate()
+        self._vision_payload = None
         with self._observation_lock:
             self._observations.clear()
         with self._secret_lock:
@@ -174,6 +178,11 @@ class TaskContext:
             self._totp_codes.add(code)
 
     def redact(self, text: str) -> str:
+        import re
+        text = re.sub(r"data:image/[^;\s]+;base64,[A-Za-z0-9+/=]+", "[IMAGE OMITTED]", text)
+        image_payload = getattr(self, "_vision_payload", None)
+        if image_payload:
+            text = text.replace(image_payload, "[IMAGE OMITTED]")
         with self._secret_lock:
             secrets = self._totp_codes | {
                 secret.get_secret_value()
