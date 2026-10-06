@@ -1,7 +1,7 @@
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from uuid import uuid4
 
@@ -55,6 +55,19 @@ class TaskStore:
                 if name not in columns:
                     conn.execute(f"ALTER TABLE tasks ADD COLUMN {name} TEXT")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_tasks_status_created ON tasks(status, created_at)")
+            conn.execute(
+                """CREATE TABLE IF NOT EXISTS workflows (
+                    profile_id TEXT NOT NULL,
+                    origin TEXT NOT NULL,
+                    intent_key TEXT NOT NULL,
+                    data_json TEXT NOT NULL,
+                    source_task_id TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY (profile_id, origin, intent_key)
+                )"""
+            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_workflows_scope ON workflows(profile_id, origin, updated_at)")
 
     def create(
         self, prompt: str, max_active: int, *, context_json: str | None = None,
@@ -151,6 +164,85 @@ class TaskStore:
                 (TaskStatus.FAILED, "Task interrupted by application restart", json.dumps(failure_result("An application restart interrupted execution.")), utc_now(), TaskStatus.PROCESSING),
             )
             return updated.rowcount
+
+    def save_workflow(self, task_id: str, profile_id: str, data: dict, *, limit=100, days=90) -> None:
+        from app.browser_profiles import validate_profile_id
+        from app.workflow_memory import candidate_data, safe_text, workflow_key
+
+        validate_profile_id(profile_id)
+        candidate = candidate_data({key: data[key] for key in ("intent", "origin", "steps", "prerequisites")})
+        evidence = data.get("evidence")
+        if not isinstance(evidence, list) or not 1 <= len(evidence) <= 3:
+            raise ValueError("Verified evidence is required")
+        for item in evidence:
+            if set(item) != {"criterion", "source", "origin", "expected_text", "verified_at"} or item["source"] != "visible_dom" or item["origin"] != candidate["origin"]:
+                raise ValueError("Invalid workflow evidence")
+            safe_text(item["expected_text"], maximum=160)
+            datetime.fromisoformat(item["verified_at"])
+        candidate["evidence"] = evidence
+        encoded = json.dumps(candidate, ensure_ascii=False)
+        if len(encoded.encode()) > 8192 or not 1 <= limit <= 500 or not 1 <= days <= 365:
+            raise ValueError("Workflow storage bounds exceeded")
+        now = utc_now()
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        with self.connection() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            task = conn.execute("SELECT status, context_json FROM tasks WHERE task_id = ?", (task_id,)).fetchone()
+            if task is None or task["status"] != TaskStatus.COMPLETED:
+                raise ValueError("Only completed tasks may supply workflows")
+            options = json.loads(task["context_json"] or "{}")
+            if options.get("browser_profile_id") != profile_id:
+                raise ValueError("Workflow profile does not match task")
+            criteria = options.get("workflow_success_criteria", [])
+            if len(criteria) != len(evidence) or any(
+                item["criterion"] != index or item["origin"] != criterion.get("origin")
+                or item["expected_text"] != criterion.get("expected_text")
+                for index, (item, criterion) in enumerate(zip(evidence, criteria))
+            ):
+                raise ValueError("Workflow evidence does not match caller criteria")
+            conn.execute(
+                """INSERT INTO workflows (profile_id, origin, intent_key, data_json, source_task_id, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(profile_id, origin, intent_key) DO UPDATE SET
+                   data_json = excluded.data_json, source_task_id = excluded.source_task_id, updated_at = excluded.updated_at""",
+                (profile_id, candidate["origin"], workflow_key(candidate["intent"]), encoded, task_id, now, now),
+            )
+            conn.execute("DELETE FROM workflows WHERE profile_id = ? AND updated_at < ?", (profile_id, cutoff))
+            conn.execute(
+                """DELETE FROM workflows WHERE profile_id = ? AND rowid NOT IN
+                   (SELECT rowid FROM workflows WHERE profile_id = ? ORDER BY updated_at DESC, rowid DESC LIMIT ?)""",
+                (profile_id, profile_id, limit),
+            )
+
+    def find_workflows(self, profile_id: str, origin: str, intent: str, *, limit=3, days=90) -> list[dict]:
+        from app.browser_profiles import validate_profile_id
+        from app.workflow_memory import candidate_data, public_origin, safe_text, terms
+
+        validate_profile_id(profile_id)
+        origin = public_origin(origin)
+        intent = safe_text(intent, maximum=160)
+        if not 1 <= limit <= 3 or not 1 <= days <= 365:
+            raise ValueError("Invalid workflow retrieval bounds")
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        with self.connection() as conn:
+            rows = conn.execute(
+                """SELECT data_json FROM workflows WHERE profile_id = ? AND origin = ? AND updated_at >= ?
+                   ORDER BY updated_at DESC LIMIT 100""", (profile_id, origin, cutoff),
+            ).fetchall()
+        wanted = terms(intent)
+        matches = []
+        for row in rows:
+            try:
+                raw = json.loads(row["data_json"])
+                if raw.get("version") != 1 or raw.get("origin") != origin:
+                    continue
+                data = candidate_data({key: raw[key] for key in ("intent", "origin", "steps", "prerequisites")})
+                score = len(wanted & terms(data["intent"]))
+                if score:
+                    matches.append((score, data))
+            except (ValueError, TypeError, KeyError):
+                continue
+        return [data for _, data in sorted(matches, key=lambda item: item[0], reverse=True)[:limit]]
 
     def healthy(self) -> bool:
         with self.connection() as conn:

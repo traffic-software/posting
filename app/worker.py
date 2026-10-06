@@ -89,6 +89,18 @@ class TaskWorker:
                         self.store.cancel_processing(task_id)
                     else:
                         self.store.finish(task_id, TaskStatus.COMPLETED, result=result)
+                        if self.settings.enable_workflow_memory and context is not None:
+                            try:
+                                from app.workflow_memory import eligible_workflow
+                                workflow = eligible_workflow(context)
+                                if workflow is not None:
+                                    self.store.save_workflow(
+                                        task_id, context.browser_profile_id, workflow,
+                                        limit=self.settings.workflow_memory_limit,
+                                        days=self.settings.workflow_memory_days,
+                                    )
+                            except Exception as exc:
+                                logger.warning("Task %s workflow was not saved (%s)", task_id, type(exc).__name__)
                 except Exception as exc:
                     if self.stopping.is_set():
                         self.store.cancel_processing(task_id)

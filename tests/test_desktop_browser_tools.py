@@ -31,6 +31,15 @@ class Desktop:
     def click(self, element):
         self._act("click", element)
 
+    def double_click(self, element):
+        self._act("double", element)
+
+    def drag(self, source, destination):
+        self._act("drag", source, destination)
+
+    def select_all(self, element):
+        self._act("select-all", element)
+
     def hover(self, element):
         self._act("hover", element)
 

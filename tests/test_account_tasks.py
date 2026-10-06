@@ -265,6 +265,9 @@ class FakeDriver:
             return "ready"
         if _ == SCROLL_TARGET:
             return None
+        from app.browser_dom import SAFE_TEXT_TARGET
+        if _ == SAFE_TEXT_TARGET:
+            return True
         return {"origin": "https://login.example", "top": self.top}
 
     def set_page_load_timeout(self, _):

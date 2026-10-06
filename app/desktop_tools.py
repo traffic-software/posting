@@ -5,6 +5,8 @@ import os
 from dataclasses import dataclass
 from typing import Any, Callable
 
+from app.browser_dom import EDITING_HOST_JS
+
 
 class DesktopInputError(RuntimeError):
     pass
@@ -37,6 +39,33 @@ if (type === 'password' || type === 'file' || el.disabled || el.readOnly ||
     autocomplete === 'one-time-code') return false;
 try { el.focus({preventScroll: true}); } catch (_) { return false; }
 return document.activeElement === el || el.contains(document.activeElement);
+"""
+
+_TEXT_INPUT_FOCUS_TARGET = EDITING_HOST_JS + """
+const el = arguments[0];
+if (!el || !el.isConnected || !document.hasFocus()) return false;
+const native = el.matches('textarea,input[type="text"],input:not([type]),input[type="search"],input[type="email"],input[type="url"],input[type="tel"],input[type="number"]');
+if ((!native && !editingHost(el)) || el.disabled || el.readOnly || el.getAttribute('aria-readonly') === 'true') return false;
+const privateTarget = '[data-private],[data-sensitive],[autocomplete="current-password"],[autocomplete="new-password"],[autocomplete="one-time-code"],input[type="password"],input[type="file"],input[type="hidden"]';
+if (el.closest(privateTarget) || el.querySelector(privateTarget)) return false;
+if (arguments[1] !== false) {
+ try { el.focus({preventScroll: true}); } catch (_) { return false; }
+}
+return document.activeElement === el;
+"""
+_DRAG_TARGETS = """
+const targets = Array.from(arguments);
+if (!document.hasFocus()) return null;
+const unsafe = 'input,textarea,select,[contenteditable],iframe,frame,[data-private],[data-sensitive],[autocomplete="one-time-code"]';
+const points = [];
+for (const el of targets) {
+ if (!el || !el.isConnected || el.closest(unsafe) || el.querySelector(unsafe) || el.matches(':disabled') || el.getAttribute('aria-disabled') === 'true') return null;
+ const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+ const style = getComputedStyle(el), hit = document.elementFromPoint(x, y);
+ if (r.width <= 0 || r.height <= 0 || style.visibility !== 'visible' || style.display === 'none' || !(hit === el || el.contains(hit))) return null;
+ points.push({x,y,screenX,screenY,outerWidth,outerHeight,innerWidth,innerHeight,screenWidth:screen.width,screenHeight:screen.height,dpr:devicePixelRatio});
+}
+return {points, url: location.href, scrollX, scrollY};
 """
 
 
@@ -147,10 +176,11 @@ class DesktopTools:
             raise DesktopInputError("Could not move to desktop target") from exc
         self._guard()
 
-    def _focus(self, element: Any, *, safe_input: bool = False) -> None:
+    def _focus(self, element: Any, *, safe_input: bool = False, text_only: bool = False) -> None:
         self._activate_page()
         try:
-            focused = self._driver.execute_script(_SAFE_INPUT_FOCUS_TARGET if safe_input else _FOCUS_TARGET, element)
+            script = _TEXT_INPUT_FOCUS_TARGET if text_only else _SAFE_INPUT_FOCUS_TARGET if safe_input else _FOCUS_TARGET
+            focused = self._driver.execute_script(script, element)
         except Exception as exc:
             raise DesktopInputError("Could not focus desktop target") from exc
         if focused is not True:
@@ -161,6 +191,63 @@ class DesktopTools:
         self._move(element)
         self._guard()
         self._pyautogui.click()
+        self._guard()
+
+    def _safe_pointer_targets(self, *elements):
+        self._activate_page()
+        raw = self._driver.execute_script(_DRAG_TARGETS, *elements)
+        if not isinstance(raw, dict) or len(raw.get("points", [])) != len(elements):
+            raise DesktopInputError("Mouse targets are not safe visible controls")
+        try:
+            points = [self._map_point(point) for point in raw["points"]]
+        except (KeyError, TypeError, ValueError) as exc:
+            raise DesktopInputError("Mouse target geometry is unsupported") from exc
+        self._guard()
+        return raw, points
+
+    def double_click(self, element: Any) -> None:
+        snapshot, points = self._safe_pointer_targets(element)
+        self._pyautogui.moveTo(points[0].x, points[0].y)
+        self._guard()
+        fresh, _ = self._safe_pointer_targets(element)
+        if fresh != snapshot:
+            raise DesktopInputError("Mouse target changed before double click")
+        self._pyautogui.doubleClick(interval=0.1)
+        self._guard()
+
+    def drag(self, source: Any, destination: Any, duration: float = 0.5) -> None:
+        if isinstance(duration, bool) or not isinstance(duration, (int, float)) or not 0.1 <= duration <= 2:
+            raise DesktopInputError("Drag duration must be between 0.1 and 2 seconds")
+        snapshot, points = self._safe_pointer_targets(source, destination)
+        self._pyautogui.moveTo(points[0].x, points[0].y)
+        fresh, _ = self._safe_pointer_targets(source, destination)
+        if fresh != snapshot:
+            raise DesktopInputError("Drag targets changed before input")
+        self._guard()
+        try:
+            self._pyautogui.mouseDown(button="left")
+            self._guard()
+            self._pyautogui.moveTo(points[1].x, points[1].y, duration=duration)
+            self._guard()
+        finally:
+            self._pyautogui.mouseUp(button="left")
+        self._guard()
+
+    def _verify_text_focus(self, element: Any) -> None:
+        if self._driver.execute_script(_TEXT_INPUT_FOCUS_TARGET, element, False) is not True:
+            raise DesktopInputError("Editable target or focus changed before input")
+
+    def select_all(self, element: Any) -> None:
+        self._focus(element, text_only=True)
+        self._guard()
+        self._verify_text_focus(element)
+        try:
+            self._pyautogui.keyDown("ctrl")
+            self._guard()
+            self._verify_text_focus(element)
+            self._pyautogui.press("a")
+        finally:
+            self._pyautogui.keyUp("ctrl")
         self._guard()
 
     def hover(self, element: Any) -> None:
@@ -185,8 +272,9 @@ class DesktopTools:
     def type_text(self, element: Any, text: str) -> None:
         if not isinstance(text, str) or not text or any(ord(char) < 32 or ord(char) == 127 for char in text):
             raise DesktopInputError("Text must be non-empty and contain no control characters")
-        self._focus(element, safe_input=True)
+        self._focus(element, text_only=True)
         self._guard()
+        self._verify_text_focus(element)
         if text.isascii():
             self._pyautogui.write(text)
         else:

@@ -103,6 +103,30 @@ class FixedProxy(BaseModel):
         return f"{host}:{self.port}"
 
 
+class WorkflowSuccessCriterion(BaseModel):
+    """Caller-selected visible outcome, not an agent's claim of completion."""
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
+
+    origin: str = Field(max_length=500)
+    selector: str = Field(min_length=1, max_length=300)
+    expected_text: str = Field(min_length=3, max_length=160)
+
+    @field_validator("origin")
+    @classmethod
+    def exact_origin(cls, value: str) -> str:
+        parsed = urlsplit(value)
+        if parsed.path not in ("", "/") or parsed.query or parsed.fragment:
+            raise ValueError("Supply an exact HTTPS origin")
+        return https_origin(value)
+
+    @field_validator("selector", "expected_text")
+    @classmethod
+    def printable_value(cls, value: str) -> str:
+        if not value.strip() or any(ord(char) < 32 for char in value):
+            raise ValueError("Supply printable outcome criteria")
+        return value.strip()
+
+
 class TaskRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
 
@@ -111,6 +135,7 @@ class TaskRequest(BaseModel):
     credentials: list[LoginCredential] = Field(default_factory=list, max_length=5)
     proxy: FixedProxy | None = None
     browser_profile_id: str | None = Field(default=None, pattern=r"^[a-f0-9]{32}$")
+    workflow_success_criteria: list[WorkflowSuccessCriterion] = Field(default_factory=list, max_length=3)
 
     @field_validator("proxy", mode="before")
     @classmethod

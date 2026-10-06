@@ -98,6 +98,8 @@ Agent `inspect_page` → discovered control → click/type/hover/scroll/key → 
 
 Image rebuild/redeploy প্রয়োজন; পুরোনো Selenium service আর প্রয়োজন নেই। Existing production container সরানো/deploy করা আলাদা operational action; migration আগে active task শেষ ও data backup নিশ্চিত করুন। `CHROMIUM_BINARY`, `CHROMEDRIVER_BINARY`, `BROWSER_WINDOW_WIDTH/HEIGHT` local config, default screen `1024×768`। `/ready` শুধু prerequisites যাচাই করে; real browser smoke test আলাদা।
 
+Guarded `double_click_element`, `drag_element`, `select_all_text` এবং ordinary `contenteditable` fill support-ও আছে। Optional Cloudflare `web-search` অপরিচিত/অস্পষ্ট কাজে public documentation খুঁজতে সাহায্য করে। Optional workflow memory একই profile ও HTTPS origin-এর যাচাইকৃত semantic flow task DB-তে রাখে; শুধু `COMPLETED` বা model-এর দাবি দিয়ে save হয় না। Configuration, caller-defined success criteria, privacy ও limitations: [agent capability docs](docs/agent-capabilities.md)।
+
 ### Browser compatibility ও login সীমাবদ্ধতা
 
 Docker base `python:3.14.8-slim`। Slim image-এ desktop runtime libraries explicitly install করে official Chrome for Testing **154.0.8037.92** browser এবং একই exact version-এর ChromeDriver `/opt/chrome-for-testing`-এ install করা হয়। `/usr/bin/chromium` এবং `/usr/bin/chromedriver` নতুন pair-এ link করা; existing configuration বদলাতে হবে না। Build exact versions ও missing shared libraries যাচাই করে। CfT Linux64-এর জন্য **linux/amd64** প্রয়োজন; native arm64 supported নয়।

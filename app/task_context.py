@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from cryptography.fernet import Fernet
 
 from app.config import Settings
-from app.schemas import FixedProxy, LoginCredential, TaskRequest
+from app.schemas import FixedProxy, LoginCredential, TaskRequest, WorkflowSuccessCriterion
 
 
 class TaskControlError(RuntimeError):
@@ -101,6 +101,12 @@ class TaskContext:
     allow_write_actions: bool | None = None
     proxy: FixedProxy | None = None
     browser_profile_id: str | None = None
+    workflow_success_criteria: list[WorkflowSuccessCriterion] = field(default_factory=list)
+    _workflow_candidate: dict | None = field(default=None, init=False)
+    _workflow_evidence: list[dict] = field(default_factory=list, init=False)
+    _workflow_lock: threading.Lock = field(default_factory=threading.Lock, init=False)
+    _workflow_verifier: Callable | None = field(default=None, init=False)
+    _workflow_terminal_verified: bool = field(default=False, init=False)
     control: TaskControl = field(default_factory=TaskControl)
     credentials: list[LoginCredential] = field(default_factory=list)
     credential_expires_at: float | None = None
@@ -155,11 +161,35 @@ class TaskContext:
             entries = [dict(entry) for entry in self._observations]
         return self.redacted_result({"events": entries})["events"]
 
+    def stage_workflow(self, candidate: dict) -> None:
+        from copy import deepcopy
+        with self._workflow_lock:
+            self._workflow_candidate = deepcopy(candidate)
+            self._workflow_evidence.clear()
+            self._workflow_terminal_verified = False
+
+    def record_workflow_evidence(self, evidence: list[dict]) -> None:
+        from copy import deepcopy
+        with self._workflow_lock:
+            self._workflow_evidence = deepcopy(evidence) if not self.cancelled.is_set() else []
+            self._workflow_terminal_verified = False
+
+    def workflow_state(self) -> tuple[dict | None, list[dict]]:
+        from copy import deepcopy
+        with self._workflow_lock:
+            return deepcopy(self._workflow_candidate), deepcopy(self._workflow_evidence)
+
     def clear_sensitive_state(self) -> None:
         visual = getattr(self, "_visual_targets", None)
         if visual:
             visual.invalidate()
         self._vision_payload = None
+        with self._workflow_lock:
+            self._workflow_candidate = None
+            self._workflow_evidence.clear()
+            self._workflow_verifier = None
+            self._workflow_terminal_verified = False
+            self.workflow_success_criteria.clear()
         with self._observation_lock:
             self._observations.clear()
         with self._secret_lock:
@@ -214,11 +244,12 @@ def credential_cipher(settings: Settings) -> Fernet:
 
 
 def encode_context(request: TaskRequest, settings: Settings) -> tuple[str | None, str | None]:
-    if not request.credentials and request.proxy is None and request.allow_write_actions is None and request.browser_profile_id is None:
+    if not request.credentials and request.proxy is None and request.allow_write_actions is None and request.browser_profile_id is None and not request.workflow_success_criteria:
         return None, None
     options = json.dumps({
         "allow_write_actions": request.allow_write_actions,
         "browser_profile_id": request.browser_profile_id,
+        "workflow_success_criteria": [item.model_dump() for item in request.workflow_success_criteria],
         "proxy": request.proxy.model_dump() if request.proxy else None,
     })
     blob = None
@@ -254,6 +285,7 @@ def decode_context(options: str | None, blob: str | None, settings: Settings) ->
     return TaskContext(
         allow_write_actions=data.get("allow_write_actions"),
         browser_profile_id=data.get("browser_profile_id"),
+        workflow_success_criteria=[WorkflowSuccessCriterion.model_validate(item) for item in data.get("workflow_success_criteria", [])],
         proxy=FixedProxy.model_validate(data["proxy"]) if data.get("proxy") else None,
         credentials=credentials, credential_expires_at=expires_at,
     )

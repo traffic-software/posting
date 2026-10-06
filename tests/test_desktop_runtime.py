@@ -16,8 +16,23 @@ class FakePyAutoGUI:
     def __init__(self):
         self.calls = []
 
-    def moveTo(self, x, y):
+    def moveTo(self, x, y, **kwargs):
         self.calls.append(("move", x, y))
+
+    def doubleClick(self, **kwargs):
+        self.calls.append(("double",))
+
+    def mouseDown(self, **kwargs):
+        self.calls.append(("down",))
+
+    def mouseUp(self, **kwargs):
+        self.calls.append(("up",))
+
+    def keyDown(self, key):
+        self.calls.append(("key-down", key))
+
+    def keyUp(self, key):
+        self.calls.append(("key-up", key))
 
     def click(self):
         self.calls.append(("click",))
@@ -46,7 +61,7 @@ class FakeDriver:
         assert command == "Page.bringToFront" and arguments == {}
         return {}
 
-    def execute_script(self, script, _element):
+    def execute_script(self, script, _element, *_args):
         self.scripts.append(script)
         if "return document.activeElement" in script:
             return True

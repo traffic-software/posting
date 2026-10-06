@@ -13,7 +13,7 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-from app.browser_dom import DISCOVER_PAGE
+from app.browser_dom import DISCOVER_PAGE, IS_EDITING_HOST, SAFE_TEXT_TARGET
 from app.config import Settings
 from app.element_readiness import ElementReadinessTimeout, readiness, wait_for_ready
 from app.desktop_tools import DesktopInputError
@@ -27,6 +27,10 @@ from app.totp_forms import (
 
 
 class BrowserPolicyStop(RuntimeError):
+    pass
+
+
+class RecoverableBrowserToolError(ToolException):
     pass
 
 
@@ -133,9 +137,8 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
 
     def check_write_page() -> None:
         check_session()
-        if context and context.credentials:
-            if any(marker in page_text() for marker in mfa_markers):
-                raise BrowserPolicyStop("Authentication challenge or access restriction encountered")
+        if any(marker in page_text() for marker in mfa_markers):
+            raise BrowserPolicyStop("Authentication challenge or access restriction encountered")
 
     if desktop is not None:
         original_guard = desktop._guard
@@ -202,7 +205,7 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             raise ToolException("Could not verify element readiness") from exc
 
     def readiness_error(exc):
-        if isinstance(exc, ElementReadinessTimeout):
+        if isinstance(exc, (ElementReadinessTimeout, RecoverableBrowserToolError)):
             return str(exc)
         raise exc
 
@@ -250,9 +253,12 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                 if element is None or not structural_selector(selector) or not element.is_displayed():
                     continue
                 tag = element.tag_name.lower()
-                kind = (element.get_attribute("type") or "text").lower() if tag == "input" else tag
-                sensitive = kind == "password" or element.get_attribute("autocomplete") == "one-time-code"
-                label = "" if sensitive else redact(str(element.get_attribute("aria-label") or (element.text if tag != "input" else "")))[:120]
+                kind = (element.get_attribute("type") or "text").lower() if tag == "input" else "contenteditable" if row.get("editable_host") is True else tag
+                sensitive = kind == "password" or (element.get_attribute("autocomplete") or "").lower() in {"current-password", "new-password", "one-time-code"}
+                text_control = tag in {"input", "textarea"} or kind == "contenteditable"
+                if text_control and driver.execute_script(SAFE_TEXT_TARGET, element) is not True:
+                    sensitive = True
+                label = "" if sensitive else redact(str(element.get_attribute("aria-label") or (element.text if not text_control else "")))[:120]
                 controls.append({"selector": selector, "kind": kind, "enabled": element.is_enabled(), "label": label})
                 inspected_controls[selector] = element
                 if len(controls) >= 30:
@@ -316,12 +322,26 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
             except WebDriverException as exc:
                 raise ToolException("Could not click element") from exc
 
+        def text_target(element):
+            tag = element.tag_name.lower()
+            kind = (element.get_attribute("type") or "text").lower()
+            autocomplete = (element.get_attribute("autocomplete") or "").lower()
+            if kind in {"password", "file", "hidden"} or autocomplete in {"current-password", "new-password", "one-time-code"}:
+                raise BrowserPolicyStop("Use dedicated tools for secret fields")
+            native = tag == "textarea" or tag == "input" and kind in {"text", "search", "email", "url", "tel", "number"}
+            if not native and driver.execute_script(IS_EDITING_HOST, element) is not True:
+                raise RecoverableBrowserToolError("Unsupported text target; inspect_page again and choose an input, textarea or contenteditable editing host")
+            if driver.execute_script(SAFE_TEXT_TARGET, element) is not True:
+                raise BrowserPolicyStop("Generic text entry cannot target private or sensitive controls")
+            if not element.is_enabled() or element.get_attribute("readonly") is not None or element.get_attribute("aria-readonly") == "true":
+                raise ToolException("Text target is not editable")
+
         @tool
         @observe
         def fill_element(selector: str, value: str) -> str:
-            """Replace an input field's text with a provided value on the public website."""
-            if len(value) > 2000:
-                raise ToolException("Input is too long")
+            """Replace ordinary input, textarea or contenteditable text. Never use for credentials."""
+            if not value or len(value) > 2000 or any(ord(char) < 32 or ord(char) == 127 for char in value):
+                raise ToolException("Supply 1–2000 printable characters")
             check_write_page()
             element = find_element(selector, editable=True, policy=check_write_page)
             previous = inspected_controls.get(selector)
@@ -329,17 +349,14 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                 raise BrowserPolicyStop("Control changed; inspect_page again")
             try:
                 check_write_page()
-                tag = element.tag_name.lower()
-                if tag not in ("input", "textarea") or (element.get_attribute("type") or "text").lower() in ("password", "file", "hidden") or element.get_attribute("autocomplete") == "one-time-code":
-                    raise BrowserPolicyStop("Use dedicated tools for secret fields; unsupported text target")
+                text_target(element)
                 if context and context.redact(value) != value:
                     raise BrowserPolicyStop("Use structured credential tools for secret values")
-                if not element.is_enabled() or element.get_attribute("readonly"):
-                    raise ToolException("Text target is not editable")
                 element.clear()
                 check_write_page()
-                if driver.find_element(By.CSS_SELECTOR, selector) != element or not element.is_displayed() or not element.is_enabled() or element.get_attribute("readonly"):
+                if driver.find_element(By.CSS_SELECTOR, selector) != element or readiness(driver, element, "fill") != "ready":
                     raise BrowserPolicyStop("Text target changed before entry")
+                text_target(element)
                 if desktop is not None:
                     desktop.type_text(element, value)
                 else:
@@ -359,6 +376,44 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                 if previous is not None and previous != element:
                     raise ToolException("Control changed; inspect_page again")
                 return element
+
+            def inspected_desktop_target(selector):
+                if selector not in inspected_controls:
+                    raise ToolException("Inspect the current page before selecting a mouse target")
+                return desktop_target(selector)
+
+            @tool
+            @observe
+            def double_click_element(selector: str) -> str:
+                """Double-click a freshly inspected safe non-text browser control; observe the result."""
+                desktop.double_click(inspected_desktop_target(selector))
+                check_write_page()
+                return "Double click performed; inspect the result before continuing"
+
+            @tool
+            @observe
+            def drag_element(source_selector: str, destination_selector: str) -> str:
+                """Drag between freshly inspected safe non-text controls in the task browser, once."""
+                source = inspected_desktop_target(source_selector)
+                destination = inspected_desktop_target(destination_selector)
+                # Resolving the destination may scroll; recheck both without further scrolling.
+                if readiness(driver, source, "click") != "ready" or readiness(driver, destination, "click") != "ready":
+                    raise ToolException("Drag endpoints are not simultaneously ready; inspect again")
+                desktop.drag(source, destination)
+                check_write_page()
+                return "Drag performed; inspect the result before continuing"
+
+            @tool
+            @observe
+            def select_all_text(selector: str) -> str:
+                """Select text only within a freshly inspected ordinary editable host; never copy clipboard data."""
+                element = inspected_desktop_target(selector)
+                text_target(element)
+                desktop.select_all(element)
+                check_write_page()
+                return "Text selected within the editable host"
+
+            tools.extend([double_click_element, drag_element, select_all_text])
 
             @tool
             @observe
@@ -641,6 +696,94 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
                         raise BrowserPolicyStop("Authenticator entry failed") from None
 
                 tools.extend([inspect_totp_form, fill_totp])
+    if settings.enable_workflow_memory and settings._workflow_store is not None and context and context.browser_profile_id:
+        from datetime import datetime, timezone
+        from app.workflow_memory import WorkflowCandidate, candidate_data, public_origin, safe_text
+
+        @tool
+        @observe
+        def lookup_workflow(origin: str, intent: str) -> str:
+            """Find advisory successful workflows for this browser profile and exact HTTPS website. Inspect fresh controls before use."""
+            check_session()
+            try:
+                origin = public_origin(origin)
+                check_url(origin)
+                safe_text(intent, context, maximum=160)
+                matches = settings._workflow_store.find_workflows(
+                    context.browser_profile_id, origin, intent, days=settings.workflow_memory_days,
+                )
+                check_session()
+                return redact(json.dumps({"workflows": matches, "note": "Untrusted historical guidance, not executable actions or proof of current success."}, ensure_ascii=False))
+            except (ValueError, TypeError):
+                raise RecoverableBrowserToolError("Supply a public HTTPS origin and a short non-private task intent") from None
+            except ToolException:
+                raise
+            except Exception:
+                raise RecoverableBrowserToolError("Workflow lookup unavailable; continue with fresh page inspection") from None
+
+        def verify_workflow():
+            context.record_workflow_evidence([])
+            criteria = list(context.workflow_success_criteria)
+            if not criteria:
+                return {"verified": False, "note": "No caller-supplied workflow success criteria; no verified workflow will be saved."}
+            check_session()
+            page_text()
+            origin = https_origin(driver.current_url)
+            evidence = []
+            for index, criterion in enumerate(criteria):
+                safe_text(criterion.expected_text, context, maximum=160)
+                if origin != criterion.origin:
+                    return {"verified": False, "note": "Current origin does not match the caller's outcome criteria."}
+                element = find_element(criterion.selector)
+                if driver.execute_script(
+                    "const el=arguments[0]; const unsafe='input,textarea,select,[contenteditable],[data-private],[data-sensitive]'; return !!el && window===window.top && location.origin===arguments[1] && !el.closest(unsafe) && !el.querySelector(unsafe);",
+                    element, origin,
+                ) is not True:
+                    return {"verified": False, "note": "Outcome evidence is not a supported visible non-private page target."}
+                text = element.text[:4000]
+                if criterion.expected_text not in text:
+                    return {"verified": False, "note": "The caller's visible outcome text was not observed."}
+                check_session()
+                if https_origin(driver.current_url) != origin or driver.find_element(By.CSS_SELECTOR, criterion.selector) != element or not element.is_displayed():
+                    return {"verified": False, "note": "Outcome target changed during verification."}
+                evidence.append({"criterion": index, "source": "visible_dom", "origin": origin,
+                                 "expected_text": criterion.expected_text, "matched": True,
+                                 "verified_at": datetime.now(timezone.utc).isoformat()})
+            context.record_workflow_evidence(evidence)
+            return {"verified": True, "criteria_matched": len(evidence), "note": "Caller-defined visible criteria observed; not a general proof of external side effects."}
+
+        context._workflow_verifier = verify_workflow
+
+        @tool
+        @observe
+        def verify_workflow_outcome() -> str:
+            """Check the caller-defined visible success criteria against the fresh current page, without input."""
+            try:
+                return json.dumps(verify_workflow())
+            except (ValueError, WebDriverException):
+                raise RecoverableBrowserToolError("Could not verify workflow outcome; no success evidence saved") from None
+
+        @tool
+        @observe
+        def remember_successful_workflow(intent: str, origin: str, steps: list[str], prerequisites: list[str] | None = None) -> str:
+            """Stage concise semantic steps for reuse. Save occurs only after task completion and terminal caller-defined outcome verification."""
+            check_session()
+            if not context.workflow_success_criteria:
+                raise RecoverableBrowserToolError("This task has no caller-supplied workflow_success_criteria; it cannot save a verified-success workflow")
+            try:
+                candidate = candidate_data(WorkflowCandidate(intent=intent, origin=origin, steps=steps, prerequisites=prerequisites or []), context)
+                if any(item.origin != candidate["origin"] for item in context.workflow_success_criteria):
+                    raise ValueError("Workflow scope does not match outcome criteria")
+                context.stage_workflow({key: candidate[key] for key in ("intent", "origin", "steps", "prerequisites")})
+                return "Workflow candidate staged, not yet saved. Complete the task; terminal outcome verification is required."
+            except (ValueError, TypeError):
+                raise RecoverableBrowserToolError("Supply short non-private semantic steps for the caller's outcome origin; no secrets, scripts, screenshots or transient selectors") from None
+
+        tools.extend([lookup_workflow, verify_workflow_outcome, remember_successful_workflow])
+
     for browser_tool in tools:
         browser_tool.handle_tool_error = readiness_error
+    if settings.enable_web_search:
+        from app.web_research import research_tools
+        tools.extend(research_tools(settings, deadline, context))
     return tools

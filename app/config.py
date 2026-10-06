@@ -16,6 +16,17 @@ class Settings(BaseSettings):
     app_revision: str = "local"
     enable_write_actions: bool = False
     enable_browser_vision: bool = False
+    enable_web_search: bool = False
+    cloudflare_account_id: str = Field(default="", pattern=r"^(?:[a-fA-F0-9]{32})?$")
+    cloudflare_api_token: str = Field(default="", repr=False)
+    cloudflare_web_search_gateway: str = Field(default="default", pattern=r"^[a-zA-Z0-9_-]{1,64}$")
+    cloudflare_web_search_provider: str = Field(default="ceramic", pattern=r"^(ceramic|exa|linkup)$")
+    web_search_timeout_seconds: float = Field(default=10, ge=1, le=30)
+    max_web_search_calls: int = Field(default=3, ge=1, le=10)
+    enable_workflow_memory: bool = False
+    workflow_memory_limit: int = Field(default=100, ge=1, le=500)
+    workflow_memory_days: int = Field(default=90, ge=1, le=365)
+    _workflow_store: object = PrivateAttr(default=None)
     display_viewer_enabled: bool = False
     display_viewer_token: str = Field(default="", repr=False)
     display_viewer_origin: str = ""

@@ -27,6 +27,7 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
     viewer = DisplayViewer(settings)
     settings._display_viewer = viewer
     store = TaskStore(settings.database_path)
+    settings._workflow_store = store
     profiles = BrowserProfileStore(settings.browser_profiles_root)
     sessions = BrowserSessionManager(settings, viewer, profiles)
     settings._browser_sessions = sessions
@@ -88,13 +89,21 @@ def create_app(settings: Settings | None = None, runner: Callable = run_task) ->
         if request.allow_write_actions is True and not settings.enable_write_actions:
             raise HTTPException(status_code=403, detail="Write actions are disabled")
         try:
+            from app.workflow_memory import safe_text
+            from app.task_context import TaskContext
+            criterion_context = TaskContext(credentials=list(request.credentials))
+            for criterion in request.workflow_success_criteria:
+                check_url(criterion.origin)
+                safe_text(criterion.expected_text, criterion_context, maximum=160)
+                if criterion_context.redact(criterion.selector) != criterion.selector:
+                    raise ValueError("Private outcome selector")
             for credential in request.credentials:
                 for origin in credential.origins:
                     check_url(origin)
             if request.proxy:
                 check_url(f"http://{request.proxy.endpoint}")
-        except ToolException as exc:
-            raise HTTPException(status_code=422, detail="Invalid task destination") from exc
+        except (ToolException, ValueError) as exc:
+            raise HTTPException(status_code=422, detail="Invalid task destination or outcome criterion") from exc
         try:
             options, blob = encode_context(request, settings)
         except (ValueError, UnicodeError) as exc:
