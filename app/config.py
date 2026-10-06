@@ -27,6 +27,20 @@ class Settings(BaseSettings):
     workflow_memory_limit: int = Field(default=100, ge=1, le=500)
     workflow_memory_days: int = Field(default=90, ge=1, le=365)
     _workflow_store: object = PrivateAttr(default=None)
+    enable_file_transfers: bool = False
+    artifact_root: Path = Path("data/artifacts")
+    artifact_public_base_url: str = ""
+    artifact_link_signing_key: str = Field(default="", repr=False)
+    artifact_retention_seconds: int = Field(default=86400, ge=60, le=2592000)
+    artifact_max_file_bytes: int = Field(default=512 * 1024 * 1024, ge=1)
+    artifact_max_task_bytes: int = Field(default=1024 * 1024 * 1024, ge=1)
+    artifact_max_storage_bytes: int = Field(default=5 * 1024 * 1024 * 1024, ge=1)
+    artifact_max_files_per_task: int = Field(default=10, ge=1, le=50)
+    artifact_max_objects: int = Field(default=1000, ge=10, le=100000)
+    file_source_ttl_seconds: int = Field(default=3600, ge=60, le=86400)
+    file_network_timeout_seconds: float = Field(default=10, ge=1, le=60)
+    file_download_wait_seconds: float = Field(default=10, ge=1, le=60)
+    _artifact_manager: object = PrivateAttr(default=None)
     display_viewer_enabled: bool = False
     display_viewer_token: str = Field(default="", repr=False)
     display_viewer_origin: str = ""

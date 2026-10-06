@@ -279,6 +279,21 @@ def browser_session(settings: Settings, context: TaskContext, deadline, *, owner
         driver.set_window_position(0, 0)
         driver.set_window_size(settings.browser_window_width, settings.browser_window_height)
         check()
+        if context._artifact_session is not None:
+            # Browser defaults must not write unrequested files into a shared directory.
+            driver.execute_cdp_cmd("Browser.setDownloadBehavior", {"behavior": "deny"})
+            if context.allow_file_downloads and settings.enable_write_actions and context.allow_write_actions is True:
+                from app.browser_downloads import BrowserDownloads
+                from app.selenium_tools import check_url
+                artifact_session = context._artifact_session
+
+                def transfer_guard():
+                    check()
+                    artifact_session.check()
+
+                context._browser_downloads = BrowserDownloads(driver, artifact_session, transfer_guard, check_url)
+                if not context._browser_downloads.available:
+                    context.record_observation("download", "unavailable", "Native download events are unavailable; public HTTPS file downloads remain supported")
         display_name = os.environ["DISPLAY"]
 
         def change_mode(manual_owner):
@@ -325,6 +340,17 @@ def browser_session(settings: Settings, context: TaskContext, deadline, *, owner
                 context.cancelled.set()
             context.control.condition.notify_all()
         stop_viewer()
+        downloads, context._browser_downloads = context._browser_downloads, None
+        if downloads is not None:
+            try:
+                downloads.finalize()  # Import only confirmed completions while Chrome is alive.
+            except Exception:
+                context.record_observation("download", "unverified", "Final download collection could not be confirmed")
+            finally:
+                try:
+                    downloads.close()
+                except Exception:
+                    context.record_observation("download", "unverified", "Download cleanup could not be confirmed")
         # Every layer has its own finally so a failed profile/context cleanup
         # cannot leave Xvfb or the exclusive lock behind.
         try:

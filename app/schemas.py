@@ -127,6 +127,33 @@ class WorkflowSuccessCriterion(BaseModel):
         return value.strip()
 
 
+class UploadSource(BaseModel):
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
+
+    id: str = Field(pattern=r"^[a-zA-Z][a-zA-Z0-9_-]{0,49}$")
+    url: SecretStr
+    filename: str | None = Field(default=None, max_length=255)
+
+    @field_validator("url")
+    @classmethod
+    def valid_source_url(cls, value: SecretStr) -> SecretStr:
+        raw = value.get_secret_value()
+        parsed = urlsplit(raw)
+        if (not raw or len(raw) > 4096 or any(ord(char) < 32 or ord(char) == 127 for char in raw)
+            or parsed.scheme != "https" or not parsed.hostname or parsed.port == 0
+            or parsed.username is not None or parsed.password is not None
+            or "\\" in parsed.netloc or "%" in parsed.hostname):
+            raise ValueError("Supply a public HTTPS source URL without embedded credentials")
+        return value
+
+    @field_validator("filename")
+    @classmethod
+    def safe_filename(cls, value):
+        if value is not None and (not value.strip() or value in {".", ".."} or any(char in value for char in "/\\") or any(ord(char) < 32 or ord(char) == 127 for char in value)):
+            raise ValueError("Supply a display filename, not a path")
+        return value
+
+
 class TaskRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
 
@@ -136,6 +163,14 @@ class TaskRequest(BaseModel):
     proxy: FixedProxy | None = None
     browser_profile_id: str | None = Field(default=None, pattern=r"^[a-f0-9]{32}$")
     workflow_success_criteria: list[WorkflowSuccessCriterion] = Field(default_factory=list, max_length=3)
+    upload_sources: list[UploadSource] = Field(default_factory=list, max_length=10)
+    upload_origins: list[str] = Field(default_factory=list, max_length=10)
+    allow_file_downloads: bool = Field(default=False, strict=True)
+
+    @field_validator("upload_origins")
+    @classmethod
+    def exact_upload_origins(cls, values):
+        return LoginCredential.valid_origins(values)
 
     @field_validator("proxy", mode="before")
     @classmethod
@@ -151,6 +186,13 @@ class TaskRequest(BaseModel):
         ids = [credential.id for credential in self.credentials]
         if len(ids) != len(set(ids)):
             raise ValueError("Credential IDs must be unique")
+        source_ids = [source.id for source in self.upload_sources]
+        if len(source_ids) != len(set(source_ids)):
+            raise ValueError("Upload source IDs must be unique")
+        if self.upload_sources and not self.upload_origins:
+            raise ValueError("Upload sources require explicit destination origins")
+        if (self.upload_sources or self.upload_origins) and self.allow_write_actions is not True:
+            raise ValueError("File uploads require task write consent")
         return self
 
     @field_validator("prompt")
@@ -166,8 +208,21 @@ class TaskAccepted(BaseModel):
     status: TaskStatus
 
 
+class ArtifactSummary(BaseModel):
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
+
+    id: str = Field(pattern=r"^[a-f0-9]{32}$")
+    name: str = Field(max_length=255)
+    size_bytes: int = Field(ge=0)
+    media_type: str = Field(max_length=120)
+    sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    download_url: str = Field(max_length=2048, repr=False)
+    expires_at: datetime
+
+
 class TaskResponse(TaskAccepted):
     result: dict | None
+    artifacts: list[ArtifactSummary] = Field(default_factory=list, max_length=50)
     error: str | None
     created_at: datetime
     updated_at: datetime

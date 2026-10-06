@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from cryptography.fernet import Fernet
 
 from app.config import Settings
-from app.schemas import FixedProxy, LoginCredential, TaskRequest, WorkflowSuccessCriterion
+from app.schemas import FixedProxy, LoginCredential, TaskRequest, UploadSource, WorkflowSuccessCriterion
 
 
 class TaskControlError(RuntimeError):
@@ -101,6 +101,13 @@ class TaskContext:
     allow_write_actions: bool | None = None
     proxy: FixedProxy | None = None
     browser_profile_id: str | None = None
+    task_id: str | None = None
+    allow_file_downloads: bool = False
+    upload_sources: list[UploadSource] = field(default_factory=list)
+    upload_origins: list[str] = field(default_factory=list)
+    file_sources_expires_at: float | None = None
+    _artifact_session: object | None = field(default=None, init=False)
+    _browser_downloads: object | None = field(default=None, init=False)
     workflow_success_criteria: list[WorkflowSuccessCriterion] = field(default_factory=list)
     _workflow_candidate: dict | None = field(default=None, init=False)
     _workflow_evidence: list[dict] = field(default_factory=list, init=False)
@@ -180,6 +187,18 @@ class TaskContext:
             return deepcopy(self._workflow_candidate), deepcopy(self._workflow_evidence)
 
     def clear_sensitive_state(self) -> None:
+        downloads, self._browser_downloads = self._browser_downloads, None
+        if downloads is not None:
+            try:
+                downloads.close()
+            except Exception:
+                pass
+        artifacts, self._artifact_session = self._artifact_session, None
+        if artifacts is not None:
+            try:
+                artifacts.close()
+            except Exception:
+                pass
         visual = getattr(self, "_visual_targets", None)
         if visual:
             visual.invalidate()
@@ -194,6 +213,8 @@ class TaskContext:
             self._observations.clear()
         with self._secret_lock:
             self.credentials.clear()
+            self.upload_sources.clear()
+            self.upload_origins.clear()
             self._totp_codes.clear()
             self._totp_attempts.clear()
 
@@ -220,6 +241,16 @@ class TaskContext:
                 for secret in (credential.username, credential.password, credential.totp_secret)
                 if secret is not None
             }
+            from urllib.parse import quote, quote_plus, unquote_plus, urlsplit
+            for source in self.upload_sources:
+                url = source.url.get_secret_value()
+                secrets.add(url)
+                query = urlsplit(url).query
+                for item in query.split("&"):
+                    raw_key, separator, raw_value = item.partition("=")
+                    key, value = unquote_plus(raw_key).lower(), unquote_plus(raw_value)
+                    if separator and len(value) >= 4 and (key in {"signature", "sig", "token", "key", "access_token", "auth"} or key.endswith(("-signature", "-credential", "-security-token"))):
+                        secrets.update((value, raw_value, quote(value, safe=""), quote_plus(value, safe="")))
         for secret in sorted(secrets, key=len, reverse=True):
             text = text.replace(secret, "[REDACTED]")
         return text
@@ -244,11 +275,13 @@ def credential_cipher(settings: Settings) -> Fernet:
 
 
 def encode_context(request: TaskRequest, settings: Settings) -> tuple[str | None, str | None]:
-    if not request.credentials and request.proxy is None and request.allow_write_actions is None and request.browser_profile_id is None and not request.workflow_success_criteria:
+    if not request.credentials and request.proxy is None and request.allow_write_actions is None and request.browser_profile_id is None and not request.workflow_success_criteria and not request.upload_sources and not request.upload_origins and not request.allow_file_downloads:
         return None, None
     options = json.dumps({
         "allow_write_actions": request.allow_write_actions,
         "browser_profile_id": request.browser_profile_id,
+        "allow_file_downloads": request.allow_file_downloads,
+        "upload_origins": request.upload_origins,
         "workflow_success_criteria": [item.model_dump() for item in request.workflow_success_criteria],
         "proxy": request.proxy.model_dump() if request.proxy else None,
     })
@@ -268,8 +301,15 @@ def encode_context(request: TaskRequest, settings: Settings) -> tuple[str | None
     return options, blob
 
 
-def decode_context(options: str | None, blob: str | None, settings: Settings) -> TaskContext | None:
-    if options is None and blob is None:
+def encode_file_sources(request: TaskRequest, settings: Settings) -> str | None:
+    if not request.upload_sources:
+        return None
+    payload = [{"id": source.id, "url": source.url.get_secret_value(), "filename": source.filename} for source in request.upload_sources]
+    return credential_cipher(settings).encrypt(json.dumps(payload).encode()).decode("ascii")
+
+
+def decode_context(options: str | None, blob: str | None, settings: Settings, *, file_sources_blob: str | None = None) -> TaskContext | None:
+    if options is None and blob is None and file_sources_blob is None:
         return None
     data = json.loads(options or "{}")
     credentials = []
@@ -282,8 +322,20 @@ def decode_context(options: str | None, blob: str | None, settings: Settings) ->
         if time.time() >= expires_at:
             raise ValueError("Credentials expired")
         credentials = [LoginCredential.model_validate(item) for item in json.loads(payload)]
+    sources, sources_expires_at = [], None
+    if file_sources_blob is not None:
+        cipher = credential_cipher(settings)
+        encoded_sources = file_sources_blob.encode("ascii")
+        raw_sources = cipher.decrypt(encoded_sources, ttl=settings.file_source_ttl_seconds)
+        sources_expires_at = cipher.extract_timestamp(encoded_sources) + settings.file_source_ttl_seconds
+        if time.time() >= sources_expires_at:
+            raise ValueError("File-source grants expired")
+        sources = [UploadSource.model_validate(item) for item in json.loads(raw_sources)]
     return TaskContext(
         allow_write_actions=data.get("allow_write_actions"),
+        allow_file_downloads=data.get("allow_file_downloads", False),
+        upload_sources=sources, upload_origins=data.get("upload_origins", []),
+        file_sources_expires_at=sources_expires_at,
         browser_profile_id=data.get("browser_profile_id"),
         workflow_success_criteria=[WorkflowSuccessCriterion.model_validate(item) for item in data.get("workflow_success_criteria", [])],
         proxy=FixedProxy.model_validate(data["proxy"]) if data.get("proxy") else None,

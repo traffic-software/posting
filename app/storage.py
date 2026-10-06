@@ -51,7 +51,7 @@ class TaskStore:
                 )"""
             )
             columns = {row["name"] for row in conn.execute("PRAGMA table_info(tasks)")}
-            for name in ("context_json", "credential_blob", "credential_expires_at"):
+            for name in ("context_json", "credential_blob", "credential_expires_at", "file_sources_blob", "file_sources_expires_at"):
                 if name not in columns:
                     conn.execute(f"ALTER TABLE tasks ADD COLUMN {name} TEXT")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_tasks_status_created ON tasks(status, created_at)")
@@ -68,10 +68,28 @@ class TaskStore:
                 )"""
             )
             conn.execute("CREATE INDEX IF NOT EXISTS idx_workflows_scope ON workflows(profile_id, origin, updated_at)")
+            conn.execute(
+                """CREATE TABLE IF NOT EXISTS file_artifacts (
+                    id TEXT PRIMARY KEY,
+                    task_id TEXT NOT NULL,
+                    purpose TEXT NOT NULL CHECK (purpose IN ('input', 'output')),
+                    state TEXT NOT NULL CHECK (state IN ('RESERVED', 'READY', 'FAILED', 'DELETING')),
+                    name TEXT NOT NULL,
+                    media_type TEXT NOT NULL,
+                    size_bytes INTEGER NOT NULL DEFAULT 0,
+                    reserved_bytes INTEGER NOT NULL DEFAULT 0,
+                    sha256 TEXT NOT NULL DEFAULT '',
+                    created_at TEXT NOT NULL,
+                    expires_at INTEGER NOT NULL
+                )"""
+            )
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_artifacts_task ON file_artifacts(task_id, state, purpose)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_artifacts_expiry ON file_artifacts(expires_at, state)")
 
     def create(
         self, prompt: str, max_active: int, *, context_json: str | None = None,
         credential_blob: str | None = None, credential_expires_at: str | None = None,
+        file_sources_blob: str | None = None, file_sources_expires_at: str | None = None,
     ) -> str:
         task_id = str(uuid4())
         now = utc_now()
@@ -85,9 +103,9 @@ class TaskStore:
                 raise QueueFullError()
             conn.execute(
                 """INSERT INTO tasks (task_id, prompt, status, created_at, updated_at,
-                   context_json, credential_blob, credential_expires_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (task_id, prompt, TaskStatus.PENDING, now, now, context_json, credential_blob, credential_expires_at),
+                   context_json, credential_blob, credential_expires_at, file_sources_blob, file_sources_expires_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (task_id, prompt, TaskStatus.PENDING, now, now, context_json, credential_blob, credential_expires_at, file_sources_blob, file_sources_expires_at),
             )
         return task_id
 
@@ -113,19 +131,25 @@ class TaskStore:
             conn.execute("BEGIN IMMEDIATE")
             conn.execute(
                 """UPDATE tasks SET status = ?, error = ?, result_json = ?, credential_blob = NULL,
-                   credential_expires_at = NULL, updated_at = ?
+                   credential_expires_at = NULL, file_sources_blob = NULL, file_sources_expires_at = NULL, updated_at = ?
                    WHERE status = ? AND credential_expires_at <= ?""",
                 (TaskStatus.FAILED, "Task credentials expired", json.dumps(failure_result("Queued task credentials expired before execution.")), utc_now(), TaskStatus.PENDING, utc_now()),
             )
+            conn.execute(
+                """UPDATE tasks SET status = ?, error = ?, result_json = ?, credential_blob = NULL,
+                   credential_expires_at = NULL, file_sources_blob = NULL, file_sources_expires_at = NULL, updated_at = ?
+                   WHERE status = ? AND file_sources_expires_at <= ?""",
+                (TaskStatus.FAILED, "Task file-source grants expired", json.dumps(failure_result("Queued task file-source grants expired before execution.")), utc_now(), TaskStatus.PENDING, utc_now()),
+            )
             row = conn.execute(
-                """SELECT task_id, prompt, context_json, credential_blob FROM tasks
+                """SELECT task_id, prompt, context_json, credential_blob, file_sources_blob FROM tasks
                    WHERE status = ? ORDER BY created_at, rowid LIMIT 1""",
                 (TaskStatus.PENDING,),
             ).fetchone()
             if row is None:
                 return None
             conn.execute(
-                "UPDATE tasks SET status = ?, updated_at = ? WHERE task_id = ? AND status = ?",
+                "UPDATE tasks SET status = ?, updated_at = ?, file_sources_blob = NULL, file_sources_expires_at = NULL WHERE task_id = ? AND status = ?",
                 (TaskStatus.PROCESSING, utc_now(), row["task_id"], TaskStatus.PENDING),
             )
             return dict(row)
@@ -139,7 +163,8 @@ class TaskStore:
         with self.connection() as conn:
             updated = conn.execute(
                 """UPDATE tasks SET status = ?, result_json = ?, error = ?, updated_at = ?,
-                   credential_blob = NULL, credential_expires_at = NULL
+                   credential_blob = NULL, credential_expires_at = NULL,
+                   file_sources_blob = NULL, file_sources_expires_at = NULL
                    WHERE task_id = ? AND status = ?""",
                 (status, data, error, utc_now(), task_id, TaskStatus.PROCESSING),
             )
@@ -150,7 +175,8 @@ class TaskStore:
         with self.connection() as conn:
             conn.execute(
                 """UPDATE tasks SET status = ?, error = ?, result_json = ?, updated_at = ?,
-                   credential_blob = NULL, credential_expires_at = NULL
+                   credential_blob = NULL, credential_expires_at = NULL,
+                   file_sources_blob = NULL, file_sources_expires_at = NULL
                    WHERE task_id = ? AND status = ?""",
                 (TaskStatus.FAILED, "Task cancelled by application shutdown", json.dumps(failure_result("The application shut down and cancelled execution.")), utc_now(), task_id, TaskStatus.PROCESSING),
             )
@@ -159,7 +185,8 @@ class TaskStore:
         with self.connection() as conn:
             updated = conn.execute(
                 """UPDATE tasks SET status = ?, error = ?, result_json = ?, updated_at = ?,
-                   credential_blob = NULL, credential_expires_at = NULL
+                   credential_blob = NULL, credential_expires_at = NULL,
+                   file_sources_blob = NULL, file_sources_expires_at = NULL
                    WHERE status = ?""",
                 (TaskStatus.FAILED, "Task interrupted by application restart", json.dumps(failure_result("An application restart interrupted execution.")), utc_now(), TaskStatus.PROCESSING),
             )

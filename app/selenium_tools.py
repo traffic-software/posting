@@ -781,6 +781,13 @@ def browser_tools(driver, settings: Settings, deadline: float, context: TaskCont
 
         tools.extend([lookup_workflow, verify_workflow_outcome, remember_successful_workflow])
 
+    if settings.enable_file_transfers:
+        from app.file_tools import file_tools
+        tools.extend(file_tools(
+            driver, settings, deadline, context, observe=observe,
+            check_session=check_session, check_write_page=check_write_page,
+            find_element=find_element, inspected_controls=inspected_controls, desktop=desktop,
+        ))
     for browser_tool in tools:
         browser_tool.handle_tool_error = readiness_error
     if settings.enable_web_search:

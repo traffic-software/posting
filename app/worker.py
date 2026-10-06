@@ -69,9 +69,13 @@ class TaskWorker:
                 task_id, prompt = task["task_id"], task["prompt"]
                 context = None
                 try:
-                    context = decode_context(task["context_json"], task["credential_blob"], self.settings)
+                    context = decode_context(task["context_json"], task["credential_blob"], self.settings, file_sources_blob=task.get("file_sources_blob"))
                     if context is None and self.runner is run_task:
                         context = TaskContext()
+                    if context is not None:
+                        context.task_id = task_id
+                        if self.settings._artifact_manager is not None:
+                            context._artifact_session = self.settings._artifact_manager.task_session(task_id, context.check_alive)
                     with self.active_lock:
                         self.active_context = context
                         if sessions:

@@ -12,6 +12,10 @@ Images are not hosted, written to disk or added to observations/diagnostic promp
 
 Visual-feature verification in WSL: final focused safety/agent/account regressions **135 passed in 6.15s**; real synthetic normal-mode canvas/image-adapter plus focused regressions **95 passed in 20.94s**. Full current-state default suite: **372 passed, 2 failed, 8 skipped in 14.40s**; the two existing runtime kwargs failures expect UC disabled while the user retains UC enabled. The synthetic visual integration explicitly forces normal mode only inside its isolated test fixture, without changing application flags or bypassing local driver identity checks; it is not UC-mode or live-provider certification. Images are delivered as actual multimodal ToolMessage blocks through the installed ChatOpenAI adapter, not stringified base64. Test coverage includes one-use/expiry/bounds/NaN/bools, geometry/document/scroll/mutation/manual-epoch invalidation, canvas redraws, masking restoration, image redaction, write/tool availability and provider rejection. No external provider request was made.
 
+## File uploads, downloads and expiring direct links
+
+Optional `ENABLE_FILE_TRANSFERS=true` enables URL-sourced uploads and task-scoped downloads of any file type as opaque bytes—no execution, installation or archive extraction. Completed output files appear in the top-level `artifacts` array of the authenticated task-status response with expiring direct download URLs; these links require no Authorization header, so anyone holding a link can download until expiry. Input-only and partial files are never published. Configuration, request examples, quotas and deployment precautions: [docs/file-transfers.md](docs/file-transfers.md).
+
 ## চালু করা
 
 1. `.env.example` অনুসরণ করে **নিজের** `.env` তৈরি করুন। আপনার বিদ্যমান `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `MODEL_NAME` রাখুন। Public website browse করার জন্য domain allowlist configure করতে হবে না। Base URL-র model-কে tool calling সমর্থন করতে হবে। `.env` Git বা Docker image-এ যায় না।

@@ -1,0 +1,51 @@
+Open https://labs.google/fx/tools/flow using the selected existing signed-in browser profile.
+
+Authentication and navigation:
+- If sign-in, CAPTCHA, or manual verification is required, stop and report that manual authentication or verification is needed. Do not bypass it.
+- Use DOM inspection as the primary method for locating and verifying controls.
+- If screenshot capture is unavailable, continue only when DOM tools can verify the required controls and their state. Otherwise, stop and report the observed blocker.
+- Never bypass visual safety checks, click guessed coordinates, or repeatedly click header links such as Google Flow, Flow Music, Flow TV, or Google Labs.
+
+Create the project:
+1. Inspect the landing page and locate the actual New project control.
+2. If it is not available, allow a bounded wait for page loading and inspect once more. If it cannot be verified after two inspections, stop and report the observed blocker.
+3. Click the verified New project control exactly once.
+4. Wait up to 30 seconds, within the remaining task deadline, for the project workspace to become available.
+5. Inspect the workspace at most twice, with a bounded wait between inspections. Do not click New project again if the workspace is still loading or the outcome is uncertain.
+6. Locate the actual prompt editor. It may be an input, textarea, or contenteditable editor. If no verified editor is available after the two workspace inspections, stop and report the observed blocker.
+
+Configure the video:
+- Select video generation or text-to-video mode if needed and if a verified control is available.
+- Enter the following prompt exactly once:
+
+"A beautiful Makoto Shinkai style anime illustration of a boy walking along a countryside pathway next to a blooming cherry blossom tree. Bright blue sky with fluffy white clouds, soft pastel colors, emotional atmosphere, highly detailed animation style."
+
+- Verify that the prompt is present in the editor before submitting.
+- Set the duration to 8 seconds if a verified duration control supports it. If no duration setting is available, keep the existing duration and report that limitation.
+- If an output-count setting is available, select one video.
+- Do not purchase credits, subscribe, upgrade a plan, change account settings, or publish/share the result publicly. If payment or an upgrade is required, stop and report the blocker.
+
+Generate:
+1. Locate and verify the actual generation submission control.
+2. Submit exactly one generation request.
+3. Observe the generation status using bounded waits and fresh DOM inspections within the task deadline.
+4. Never submit again because the first request is slow, pending, or uncertain.
+5. Treat completion as verified only when the page shows a completed video result associated with this request. A submission receipt, spinner, thumbnail, or elapsed time alone is not proof of completion.
+6. If generation fails, is blocked, or does not complete before the task deadline, report the observed state without claiming success or submitting a duplicate.
+
+Download:
+1. After generation completion is verified, inspect the download control associated with the generated video.
+2. Use the dedicated file-download tools to save the actual video as a task output artifact. Do not download a thumbnail, preview image, project page, or unrelated file.
+3. For an observed direct file link, prefer download_link so the tool reads the live URL server-side without copying a signed URL into model arguments or final text.
+4. For an authenticated browser or Blob download, use download_from_element on the verified download control. This tool must arm the download and perform the click exactly once; do not click separately beforehand.
+5. If the tool reports pending, use wait_for_download with the returned download_id. Never re-click or restart an uncertain download.
+6. If a download menu appears instead of a transfer, inspect it before selecting the verified video-download option. Do not repeatedly click the original menu control.
+7. Require the dedicated tools to confirm a READY output artifact. A browser completion notification or an apparently stable file size alone is not sufficient.
+8. Do not execute, install, extract, or otherwise run downloaded content.
+
+Final response:
+- On success, briefly state that the video was generated and downloaded as a verified output artifact. Mention any duration limitation.
+- Do not return or invent a website-provided direct URL, signed source URL, Blob URL, filesystem path, or project/page URL.
+- The server supplies the expiring direct download link separately in the task-status response at artifacts[].download_url.
+- If generation or download fails, report the precise observed blocker and clearly distinguish what was completed from what remains unverified.
+- Never claim that the video was downloaded unless a READY output artifact has been confirmed.

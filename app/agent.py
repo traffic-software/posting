@@ -35,6 +35,18 @@ semantic steps using remember_successful_workflow. A staged candidate is not sav
 caller-defined outcome checks and completed execution are required. Do not claim a workflow was saved from a tool receipt.
 If no supported success criteria were supplied, report the observed task result normally; do not invent criteria or
 claim verified workflow learning. Keep workflow steps account-independent, non-private and non-executable.
+When file tools are available, use list_upload_sources and fetch_upload_source for caller-granted URL inputs.
+inspect_file_inputs discovers real hidden/visible file inputs; upload_file accepts only current-task file IDs at
+approved origins. Never use OS file pickers, arbitrary paths, clipboard or generic typing to attach files. After
+assignment, observe the site's upload/save outcome: assignment alone does not prove acceptance or publication.
+For public HTTPS files use download_file or a freshly inspected download_link. For authenticated or Blob files,
+use download_from_element once, then wait_for_download/list_task_files while bounded progress and budget remain.
+Pending downloads are not completed files. A pending wait interval is not permission to re-click or resubmit.
+Native download clicks require write consent; downloads never justify using an upload/control tool outside its grant.
+Files are opaque: never execute software, extract archives or invent file-processing tools. Never send file bytes,
+source signatures, server paths, temporary IDs or download capabilities to research tools or workflow memory.
+Only ready verified output files receive server-generated links in task-status artifacts. Do not invent a URL,
+claim a partial file is downloadable, or claim a completed file is safe merely because its transfer/hash is verified.
 Identify the intended outcome, ordered steps, account assignments, constraints and observable completion criteria.
 Adapt to the observed interface rather than blindly following outdated labels, without changing the goal or permissions.
 Perform clear, authorized, reversible steps without unnecessary clarification. Ask when a missing prerequisite,
@@ -187,6 +199,7 @@ def workflow_hints(prompt: str, settings: Settings, context: TaskContext) -> lis
 
 
 def _execute_task(prompt: str, settings: Settings, context: TaskContext) -> dict:
+    prompt = context.redact(prompt)
     deadline = ExecutionBudget(settings.task_timeout_seconds)
     context.control.budget = deadline
     context.record_observation("execution", "stage", "Starting the local browser and virtual display")
@@ -274,6 +287,10 @@ def run_task(prompt: str, settings: Settings, context: TaskContext | None = None
         preflight = "Task proxies are disabled"
     elif context.credentials and (not settings.enable_write_actions or context.allow_write_actions is not True):
         preflight = "Credential writes are disabled"
+    elif (context.upload_sources or context.upload_origins or context.allow_file_downloads) and (not settings.enable_file_transfers or context._artifact_session is None):
+        preflight = "File capabilities require an authenticated server-owned task file session"
+    elif (context.upload_sources or context.upload_origins) and (not settings.enable_write_actions or context.allow_write_actions is not True):
+        preflight = "File uploads are disabled"
     if preflight:
         raise TaskExecutionFailure(failure_result(preflight + ". Execution did not start."), preflight)
     try:

@@ -8,6 +8,7 @@ services:
     environment:
       DATABASE_PATH: /data/tasks.db
       BROWSER_PROFILES_ROOT: /data/browser_profiles
+      ARTIFACT_ROOT: /data/artifacts
       CHROMIUM_BINARY: /usr/bin/chromium
       CHROMEDRIVER_BINARY: /usr/bin/chromedriver
       REQUIRE_TASK_API_TOKEN: "true"
