@@ -32,7 +32,15 @@ return !!el && !el.closest(privateTarget) && !el.querySelector(privateTarget);
 """
 
 DISCOVER_PAGE = STRUCTURAL_SELECTOR_JS + EDITING_HOST_JS + """
-return Array.from(document.querySelectorAll('input, button, textarea, select, a, [role="button"], [contenteditable]'))
+const focus = arguments[0] || 'controls';
+const selector = focus === 'media' ? 'video,audio' : focus === 'menus' ?
+    '[role="menuitem"],[role="menuitemradio"],[role="menuitemcheckbox"],[aria-haspopup],button,a,[role="button"]' :
+    'input,button,textarea,select,a,video,audio,[role="button"],[role="menuitem"],[role="menuitemradio"],[role="menuitemcheckbox"],[aria-haspopup],[contenteditable]';
+return Array.from(document.querySelectorAll(selector))
     .filter(element => !element.hasAttribute('contenteditable') || editingHost(element))
+    .filter(element => {
+        const r = element.getBoundingClientRect(), s = getComputedStyle(element);
+        return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden' && s.visibility !== 'collapse';
+    })
     .slice(0, 200).map(element => ({element, selector: structuralSelector(element), editable_host: editingHost(element)}));
 """

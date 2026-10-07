@@ -6,7 +6,9 @@ from selenium.common.exceptions import NoSuchElementException, StaleElementRefer
 
 
 class ElementReadinessTimeout(ToolException):
-    pass
+    def __init__(self, message, *, state=None):
+        super().__init__(message)
+        self.readiness_state = state if state in {'missing', 'hidden', 'disabled', 'readonly', 'offscreen', 'covered'} else 'unknown'
 
 
 READINESS = """
@@ -51,7 +53,8 @@ def wait_for_ready(driver, resolve, modes, deadline, timeout, guard, cancelled=N
         if clock() >= end:
             raise ElementReadinessTimeout(
                 f'Element readiness timed out ({state}); this invocation performed no input or click. '
-                'Inspect the current page/form again before choosing a current target.'
+                'Inspect the current page/form again before choosing a current target.',
+                state=state,
             )
         try:
             elements = resolve()

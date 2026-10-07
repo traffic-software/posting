@@ -7,15 +7,11 @@ from deepagents.backends import StateBackend
 from langchain.agents.middleware import TodoListMiddleware, AgentMiddleware
 from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
-from langgraph.errors import GraphRecursionError
-from openai import APIConnectionError, APITimeoutError, AuthenticationError, RateLimitError
-from selenium.common.exceptions import WebDriverException
-
-from app.browser_runtime import BrowserRuntimeError, local_browser
+from app.browser_runtime import local_browser
 from app.config import Settings
 from app.selenium_tools import browser_tools
-from app.task_report import TaskExecutionFailure, failure_result, output_result
-from app.task_context import TaskContext, ExecutionBudget
+from app.task_report import TaskExecutionFailure, diagnostic, failure_diagnostics, failure_result, output_result
+from app.task_context import TaskContext, ExecutionBudget, TaskDeadlineExceeded
 
 
 SYSTEM_PROMPT = """You operate a task-scoped browser to help with an authorized user request.
@@ -39,14 +35,57 @@ When file tools are available, use list_upload_sources and fetch_upload_source f
 inspect_file_inputs discovers real hidden/visible file inputs; upload_file accepts only current-task file IDs at
 approved origins. Never use OS file pickers, arbitrary paths, clipboard or generic typing to attach files. After
 assignment, observe the site's upload/save outcome: assignment alone does not prove acceptance or publication.
-For public HTTPS files use download_file or a freshly inspected download_link. For authenticated or Blob files,
-use download_from_element once, then wait_for_download/list_task_files while bounded progress and budget remain.
-Pending downloads are not completed files. A pending wait interval is not permission to re-click or resubmit.
-Native download clicks require write consent; downloads never justify using an upload/control tool outside its grant.
+DOWNLOAD WORKFLOW -- finish generation and file transfer as two separately verified stages:
+1. If the user requests a generated file, submit the generation once and verify the associated job/result.
+Observe processing with supported tools within the task deadline; never submit again because a job is slow.
+A thumbnail, spinner, submission receipt or elapsed time is not proof that the requested output is complete.
+After verified completion, prioritize obtaining that output; do not restart the project or change its prompt/settings.
+The agent owns browser navigation, output discovery and selecting the actual file link/control. Download tools
+only transfer the selected file and return artifact metadata; they do not search for projects, results or menus.
+Use inspect_page(focus="media") to discover video/audio hover targets, and inspect_page(focus="menus") for
+menu triggers/options and links. Follow next_offset with another inspection when the desired target is beyond
+the first page; only the latest inspection's selectors are current. Hover a verified media target to reveal
+its controls, then inspect again. Never claim controls are absent after checking only the default first page.
+2. Inspect the completed result and identify its own export/download control, not project settings, header links,
+a preview image, or a different result. A menu opener is not the file-download control. Use a freshly verified
+semantic click to open the relevant menu once, then inspect the revealed options before selecting a download.
+Hover or scroll a verified target only if the available tool and current evidence support it. Do not assume
+right-click, context-menu, sleep, or OS file-dialog tools exist. Never use browser Save As/keyboard shortcuts.
+If controls remain unverified after fresh inspection and one evidence-supported reveal/recovery, report the
+missing capability or control rather than repeatedly clicking unrelated menus or replaying stale selectors.
+3. Choose the transfer tool using observed evidence and only if it is actually available:
+- For a freshly inspected HTTPS anchor to the actual file, prefer download_link(selector). It reads the live href
+server-side; do not copy signed URLs into arguments, notes or final text. It fetches without browser cookies.
+- Use download_file(url) only for an observed public HTTPS file URL that needs no browser authentication;
+never invent a URL or substitute the project page. Do not use it for Blob URLs or copy secret source URLs.
+- For an authenticated browser or same-origin Blob transfer, prefer prepare_browser_download(selector) on the
+freshly inspected actual download option. It prepares Chrome collection WITHOUT clicking; keep the download_id.
+Only after status=armed, use ordinary click_element on that verified option exactly once, then call
+wait_for_download(download_id) to collect the completed file. Never click before preparation; never arm a native download against a menu opener.
+Do not visit chrome://downloads or scrape internal browser pages: the collector receives Chrome download events
+and imports the actual completed file. The API returns a server artifact link, not the original source URL.
+Combined alternative download_from_element(selector) arms capture AND clicks once. Use ONE flow only: never
+call it after prepare_browser_download or a separate download click. Native download clicks require write consent.
+A public fetch failure is not permission to bypass authentication or destination checks. Consider a native
+transfer only when supported by fresh evidence and no existing ready file or uncertain pending transfer.
+4. Interpret the tool result before any further action. For a native receipt with status=pending, retain its
+returned download_id and call wait_for_download(download_id). A bounded wait returning pending is not failure:
+observe the SAME attempt again while budget remains. Never re-click, re-arm or generate again to make it faster.
+Do not finish the task while a requested download is pending and a supported bounded wait remains; task cleanup
+closes the browser and cancels pending transfers. list_task_files lists verified files, not pending transfers;
+it does not replace wait_for_download. On status=failed, report the tool's safe reason; never treat it as ready.
+5. Verify the artifact, not just the website notification. Native success requires status=ready with an artifact.
+Public downloads must return verified artifact metadata. Confirm the matching file with purpose=output in
+list_task_files (this tool lists READY files only). Check the requested result/type using available evidence and
+metadata; do not invent a duration, MIME type or content inspection. A stable size, download click, filename,
+preview, or browser completion notification alone is insufficient. Do not download extra variants unnecessarily.
+6. Report generation and download independently: generated but not downloaded, transfer pending/failed, or
+verified output artifact saved. Never claim download success without a READY output artifact. The task-status
+API supplies artifacts[].download_url separately; do not invent or expose source/signed/Blob URLs or local paths.
+If blocked or out of time, describe the last verified stage and what remains unverified, without duplicates.
 Files are opaque: never execute software, extract archives or invent file-processing tools. Never send file bytes,
 source signatures, server paths, temporary IDs or download capabilities to research tools or workflow memory.
-Only ready verified output files receive server-generated links in task-status artifacts. Do not invent a URL,
-claim a partial file is downloadable, or claim a completed file is safe merely because its transfer/hash is verified.
+A completed transfer/hash is not proof that downloaded content is safe.
 Identify the intended outcome, ordered steps, account assignments, constraints and observable completion criteria.
 Adapt to the observed interface rather than blindly following outdated labels, without changing the goal or permissions.
 Perform clear, authorized, reversible steps without unnecessary clarification. Ask when a missing prerequisite,
@@ -129,8 +168,12 @@ If stopped, report the tool-reported category separately from any directly obser
 Never infer CAPTCHA, rejected credentials or a particular MFA method from a generic failure alone.
 If a requested action needs an unavailable tool, explain the limitation.
 When available, prefer semantic discovered controls. Only when DOM evidence is insufficient, use
-capture_browser_screenshot to receive an actual masked viewport image; select image-relative pixels
-and call click_screenshot_coordinate with that fresh screenshot_id. Never infer a target from a path
+capture_browser_screenshot(mode="page_content") to receive an actual ordinary-content viewport image.
+Use your image reasoning to identify the intended thumbnail/button and its image-relative center; then
+call click_screenshot_coordinate with that fresh screenshot_id. Secret fields and frame regions are covered;
+never target covered areas. Choose masked mode when ordinary editor content should also be hidden.
+Switch to this visual path when focused DOM inspection cannot expose a visible result, instead of declaring
+it absent or repeating selectors. After one verified click, inspect the editor/menu or take a fresh image. Never infer a target from a path
 or pretend to see an image the provider cannot accept. Tokens expire quickly and are one-use;
 capture again after any interaction, scrolling, navigation or manual handoff. Never click browser
 chrome, secret/file controls or use visual clicks to work around a policy refusal. A click receipt
@@ -169,12 +212,20 @@ class ControlMiddleware(AgentMiddleware):
                     visual.invalidate()
                     visual.disabled = True
                     self.context.record_observation("vision", "stopped", "Configured model could not accept the image; image capability is unverified. DOM tools remain available for a new task.")
-                    raise RuntimeError("Configured model image capability unavailable") from None
+                    failure = RuntimeError("Configured model image capability unavailable")
+                    code = failure_diagnostics(exc, self.context, phase="model")["code"]
+                    self.context.record_failure(failure, "model", code="model_image_unavailable" if code == "model_error" else code)
+                    raise failure from None
+                self.context.record_failure(exc, "model")
                 raise
 
     def wrap_tool_call(self, request, handler):
         with self.context.control.action(self.context):
-            return handler(request)
+            try:
+                return handler(request)
+            except Exception as exc:
+                self.context.record_failure(exc, "tool", getattr(getattr(request, "tool", None), "name", None))
+                raise
 
 
 def workflow_hints(prompt: str, settings: Settings, context: TaskContext) -> list[dict]:
@@ -202,8 +253,10 @@ def _execute_task(prompt: str, settings: Settings, context: TaskContext) -> dict
     prompt = context.redact(prompt)
     deadline = ExecutionBudget(settings.task_timeout_seconds)
     context.control.budget = deadline
+    context.execution_phase = "browser_startup"
     context.record_observation("execution", "stage", "Starting the local browser and virtual display")
     with local_browser(settings, context, deadline) as session:
+        context.execution_phase = "agent_setup"
         driver = session.driver
         driver.set_page_load_timeout(settings.browser_timeout_seconds)
         driver.set_script_timeout(settings.browser_timeout_seconds)
@@ -240,14 +293,16 @@ def _execute_task(prompt: str, settings: Settings, context: TaskContext) -> dict
                 "tools": [],
             }],
         )
+        context.execution_phase = "agent_execution"
         context.record_observation("execution", "stage", "Running the agent with browser tools")
         state = agent.invoke(
             {"messages": [{"role": "user", "content": prompt}]},
             config={"recursion_limit": settings.max_agent_steps},
         )
+        context.execution_phase = "verification"
         with context.control.action(context):
             if time.monotonic() >= deadline:
-                raise TimeoutError("Task exceeded its time limit")
+                raise TaskDeadlineExceeded("Task exceeded its time limit")
             # Complete under the gate; a pending pause cannot close beneath manual input.
             with context.control.condition:
                 context.control.transition = None
@@ -292,33 +347,19 @@ def run_task(prompt: str, settings: Settings, context: TaskContext | None = None
     elif (context.upload_sources or context.upload_origins) and (not settings.enable_write_actions or context.allow_write_actions is not True):
         preflight = "File uploads are disabled"
     if preflight:
-        raise TaskExecutionFailure(failure_result(preflight + ". Execution did not start."), preflight)
+        details = diagnostic("task_cancelled" if context.cancelled.is_set() else "preflight_rejected", "preflight")
+        raise TaskExecutionFailure(failure_result(preflight + ". Execution did not start.", details), preflight)
     try:
         return _execute_task(prompt, settings, context)
     except Exception as exc:
-        reason = "Execution stopped before the requested outcome could be verified."
-        if isinstance(exc, GraphRecursionError):
-            reason = "The agent reached its execution step limit."
-        elif isinstance(exc, TimeoutError):
-            reason = "Execution exceeded its time limit."
-        elif isinstance(exc, APITimeoutError):
-            reason = "The model service did not respond within its timeout."
-        elif isinstance(exc, AuthenticationError):
-            reason = "The model service rejected the configured authentication."
-        elif isinstance(exc, RateLimitError):
-            reason = "The model service rejected the request due to a rate or quota limit."
-        elif isinstance(exc, APIConnectionError):
-            reason = "A connection to the model service could not be established."
-        elif isinstance(exc, BrowserRuntimeError):
-            reason = "The local browser/display runtime could not proceed; its prerequisites or task availability could not be verified."
-        elif isinstance(exc, WebDriverException):
-            reason = "The browser service could not complete an operation."
+        details = failure_diagnostics(exc, context, phase=context.execution_phase)
+        reason = details["message"]
         if context.cancelled.is_set():
-            raise TaskExecutionFailure(failure_result("The task was cancelled.")) from None
-        stopped = [event for event in context.observations() if event["outcome"] == "stopped"]
-        if stopped:
-            reason += " Last observed blocker: " + stopped[-1]["detail"]
-        result = failure_result(reason)
+            raise TaskExecutionFailure(failure_result(reason, details)) from None
+        blocker = details.get("last_tool_blocker")
+        if blocker:
+            reason += " Last observed tool blocker (not necessarily the termination cause): " + blocker["message"]
+        result = failure_result(reason, details)
         if settings.openai_api_key and settings.openai_base_url and settings.model_name:
             try:
                 model = ChatOpenAI(
@@ -338,7 +379,7 @@ def run_task(prompt: str, settings: Settings, context: TaskContext | None = None
                 if isinstance(content, list):
                     content = "\n".join(block.get("text", "") for block in content if isinstance(block, dict))
                 if isinstance(content, str) and content.strip() and not context.cancelled.is_set():
-                    result = output_result(context.redact(content))
+                    result = output_result(context.redact(content), details)
             except Exception:
                 pass
         raise TaskExecutionFailure(result) from None

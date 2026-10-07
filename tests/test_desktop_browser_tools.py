@@ -80,6 +80,31 @@ def bind(setup):
     return {item.name: item for item in browser_tools(driver, settings, time.monotonic() + 30, context, desktop)}
 
 
+def test_inspection_pagination_exposes_later_targets(setup):
+    driver, _, _, _ = setup
+    driver.elements = [PageElement("button", "button") for _ in range(40)]
+    tools = bind(setup)
+    first = json.loads(tools["inspect_page"].invoke({}))
+    assert len(first["controls"]) == 30 and first["next_offset"] == 30
+    second = json.loads(tools["inspect_page"].invoke({"focus": "menus", "offset": 30}))
+    assert len(second["controls"]) == 10 and second["next_offset"] is None
+    assert second["controls"][0]["selector"] == "*:nth-child(31)"
+    assert second["focus"] == "menus"
+
+
+def test_inspected_video_can_be_hovered_without_click(setup):
+    driver, desktop, _, _ = setup
+    driver.element = PageElement("video", "video")
+    driver.elements = [driver.element]
+    tools = bind(setup)
+    page = json.loads(tools["inspect_page"].invoke({"focus": "media"}))
+    assert page["controls"][0]["kind"] == "video"
+    tools["hover_element"].invoke({"selector": page["controls"][0]["selector"]})
+    assert desktop.calls[0][0] == "hover"
+    assert not driver.element.clicked
+    assert "src" not in driver.element.reads and "href" not in driver.element.reads
+
+
 def test_mouse_and_keyboard_use_guarded_desktop(setup):
     driver, desktop, _, _ = setup
     tools = bind(setup)

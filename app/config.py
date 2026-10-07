@@ -59,8 +59,8 @@ class Settings(BaseSettings):
     database_path: Path = Path("data/tasks.db")
     chromium_binary: Path = Path("/usr/bin/chromium")
     chromedriver_binary: Path = Path("/usr/bin/chromedriver")
-    browser_window_width: int = Field(default=1024, ge=640, le=3840)
-    browser_window_height: int = Field(default=768, ge=480, le=2160)
+    browser_window_width: int = Field(default=1920, ge=640, le=3840)
+    browser_window_height: int = Field(default=1080, ge=480, le=2160)
     max_active_tasks: int = 20
     model_timeout_seconds: int = 45
     browser_timeout_seconds: int = 20

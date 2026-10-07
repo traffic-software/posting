@@ -6,7 +6,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from app.schemas import TaskStatus
-from app.task_report import failure_result
+from app.task_report import diagnostic, failure_result
 
 
 class QueueFullError(Exception):
@@ -133,13 +133,13 @@ class TaskStore:
                 """UPDATE tasks SET status = ?, error = ?, result_json = ?, credential_blob = NULL,
                    credential_expires_at = NULL, file_sources_blob = NULL, file_sources_expires_at = NULL, updated_at = ?
                    WHERE status = ? AND credential_expires_at <= ?""",
-                (TaskStatus.FAILED, "Task credentials expired", json.dumps(failure_result("Queued task credentials expired before execution.")), utc_now(), TaskStatus.PENDING, utc_now()),
+                (TaskStatus.FAILED, "Task credentials expired", json.dumps(failure_result("Queued task credentials expired before execution.", diagnostic("credentials_expired", "preflight"))), utc_now(), TaskStatus.PENDING, utc_now()),
             )
             conn.execute(
                 """UPDATE tasks SET status = ?, error = ?, result_json = ?, credential_blob = NULL,
                    credential_expires_at = NULL, file_sources_blob = NULL, file_sources_expires_at = NULL, updated_at = ?
                    WHERE status = ? AND file_sources_expires_at <= ?""",
-                (TaskStatus.FAILED, "Task file-source grants expired", json.dumps(failure_result("Queued task file-source grants expired before execution.")), utc_now(), TaskStatus.PENDING, utc_now()),
+                (TaskStatus.FAILED, "Task file-source grants expired", json.dumps(failure_result("Queued task file-source grants expired before execution.", diagnostic("file_sources_expired", "preflight"))), utc_now(), TaskStatus.PENDING, utc_now()),
             )
             row = conn.execute(
                 """SELECT task_id, prompt, context_json, credential_blob, file_sources_blob FROM tasks
@@ -178,7 +178,7 @@ class TaskStore:
                    credential_blob = NULL, credential_expires_at = NULL,
                    file_sources_blob = NULL, file_sources_expires_at = NULL
                    WHERE task_id = ? AND status = ?""",
-                (TaskStatus.FAILED, "Task cancelled by application shutdown", json.dumps(failure_result("The application shut down and cancelled execution.")), utc_now(), task_id, TaskStatus.PROCESSING),
+                (TaskStatus.FAILED, "Task cancelled by application shutdown", json.dumps(failure_result("The application shut down and cancelled execution.", diagnostic("application_shutdown", "worker"))), utc_now(), task_id, TaskStatus.PROCESSING),
             )
 
     def recover_interrupted(self) -> int:
@@ -188,7 +188,7 @@ class TaskStore:
                    credential_blob = NULL, credential_expires_at = NULL,
                    file_sources_blob = NULL, file_sources_expires_at = NULL
                    WHERE status = ?""",
-                (TaskStatus.FAILED, "Task interrupted by application restart", json.dumps(failure_result("An application restart interrupted execution.")), utc_now(), TaskStatus.PROCESSING),
+                (TaskStatus.FAILED, "Task interrupted by application restart", json.dumps(failure_result("An application restart interrupted execution.", diagnostic("application_restart", "worker"))), utc_now(), TaskStatus.PROCESSING),
             )
             return updated.rowcount
 

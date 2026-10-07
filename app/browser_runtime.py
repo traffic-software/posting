@@ -275,9 +275,10 @@ def browser_session(settings: Settings, context: TaskContext, deadline, *, owner
         driver.set_page_load_timeout(settings.browser_timeout_seconds)
         driver.set_script_timeout(settings.browser_timeout_seconds)
         driver.get("about:blank")
-        # The mapping adapter relies on this explicit fixed window geometry.
+        # Fill the configured desktop; the mapping adapter reads live window geometry.
         driver.set_window_position(0, 0)
         driver.set_window_size(settings.browser_window_width, settings.browser_window_height)
+        driver.maximize_window()
         check()
         if context._artifact_session is not None:
             # Browser defaults must not write unrequested files into a shared directory.

@@ -133,6 +133,66 @@ def test_tool_opt_in_permissions_and_observations_never_store_image(monkeypatch)
     assert not any('screenshot' in t.name for t in browser_tools(driver,settings,time.monotonic()+60,context,desktop=visual.desktop))
 
 
+def test_page_content_mode_and_live_target_revalidation():
+    from app.visual_targets import _PAGE_STATE, _PAGE_MASK
+    visual,state,events,_,_=fixture()
+    element=object()
+    original=visual.driver.execute_script
+    target={'element':element,'bounds':[10,20,30,40]}
+    def execute(script,*args):
+        if script==_PAGE_STATE:return dict(state)
+        if script==_PAGE_MASK:events.append('page-mask');return True
+        if script==_HIT:return target['element']
+        if 'getBoundingClientRect' in script:return target['bounds']
+        return original(script,*args)
+    visual.driver.execute_script=execute
+    token=json.loads(visual.capture(lambda:None,page_content=True)[0]['text'])['screenshot_id']
+    assert events==['page-mask','unmask']
+    state['revision']+=1  # An unrelated page change need not invalidate a stable local target.
+    def dispatch(x,y,expected,fresh,guard):
+        assert fresh()
+        target['element']=object()  # Simulate a replacement after pointer movement.
+        assert not fresh()
+    visual.desktop.click_viewport=dispatch
+    visual.click(token,20,30,lambda:None)
+    assert 'click' not in events and visual.current is None
+
+
+def test_page_content_script_keeps_secrets_and_frames_protected():
+    from app.visual_targets import _PAGE_STATE, _PAGE_MASK
+    assert "document.querySelector('iframe,frame')" not in _PAGE_STATE
+    assert 'const canvases=[]' not in _PAGE_STATE
+    assert 'document.getAnimations' not in _PAGE_STATE
+    assert 'window !== window.top' in _PAGE_STATE
+    assert 'el.shadowRoot' in _PAGE_STATE
+    assert 'input[type="password"]' in _PAGE_MASK
+    assert 'autocomplete="one-time-code"' in _PAGE_MASK
+    assert 'iframe,frame' in _PAGE_MASK
+    assert 'input,textarea,select,[contenteditable]' not in _PAGE_MASK
+
+
+def test_page_content_click_rejects_changed_target_bounds():
+    from app.visual_targets import _PAGE_STATE, _PAGE_MASK
+    visual,state,events,_,_=fixture()
+    original=visual.driver.execute_script
+    element=object()
+    bounds=[10,20,30,40]
+    def execute(script,*args):
+        if script==_PAGE_STATE:return dict(state)
+        if script==_PAGE_MASK:return True
+        if script==_HIT:return element
+        if 'getBoundingClientRect' in script:return list(bounds)
+        return original(script,*args)
+    visual.driver.execute_script=execute
+    token=json.loads(visual.capture(lambda:None,page_content=True)[0]['text'])['screenshot_id']
+    def dispatch(x,y,expected,fresh,guard):
+        bounds[0]+=10
+        assert not fresh()
+    visual.desktop.click_viewport=dispatch
+    visual.click(token,20,30,lambda:None)
+    assert 'click' not in events
+
+
 def test_provider_rejection_invalidates_images_and_reports_safe_capability():
     from app.agent import ControlMiddleware
     visual,_,_,_,context=fixture()

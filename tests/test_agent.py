@@ -228,7 +228,8 @@ def test_startup_failure_is_reported_without_raw_exception(monkeypatch, failure)
         agent.run_task("Read title", settings)
     assert "raw" not in str(error.value.result)
     if failure is TimeoutError:
-        assert "time limit" in error.value.result["output"]
+        assert "operation timed out" in error.value.result["output"]
+        assert error.value.result["diagnostics"]["code"] == "operation_timeout"
 
 
 def test_cleanup_error_does_not_discard_success(monkeypatch):

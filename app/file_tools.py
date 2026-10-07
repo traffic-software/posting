@@ -32,7 +32,8 @@ _DOWNLOAD_TARGET = """
 const el=arguments[0];
 const unsafe='input,textarea,select,[contenteditable],iframe,frame,[data-private],[data-sensitive]';
 return !!el&&el.isConnected&&window===window.top&&!el.closest(unsafe)&&!el.querySelector(unsafe)&&
- (el.matches('a,button,[role="button"]'));
+ !el.matches(':disabled,[aria-disabled="true"]')&&
+ (el.matches('a,button,[role="button"],[role="menuitem"]'));
 """
 
 
@@ -231,10 +232,7 @@ def file_tools(driver, settings, deadline, context, *, observe, check_session, c
             except (FileFetchError, ArtifactError, OSError, WebDriverException):
                 raise RecoverableBrowserToolError("The inspected link could not be downloaded safely; no partial file is available") from None
 
-        @tool
-        @observe
-        def download_from_element(selector: str) -> str:
-            """Arm one native authenticated/Blob download and click one inspected control once. A pending receipt is not a completed file."""
+        def prepare_native_target(selector):
             current = origin(uploading=False)
             check_write_page()
             collector = context._browser_downloads
@@ -256,6 +254,21 @@ def file_tools(driver, settings, deadline, context, *, observe, check_session, c
                 download_id = collector.arm(current)
             except (ArtifactError, RuntimeError, ValueError):
                 raise RecoverableBrowserToolError("Could not arm native download; observe any existing pending transfer before retrying") from None
+            return collector, download_id, element
+
+        @tool
+        @observe
+        def prepare_browser_download(selector: str) -> str:
+            """Prepare Chrome collection for one freshly inspected download control; does NOT click. Then click once with browser tools and wait_for_download."""
+            collector, download_id, _ = prepare_native_target(selector)
+            return encode({"download_id": download_id, "status": "armed", "click_performed": False,
+                           "note": "Collection is prepared. Use click_element on this verified actual download option exactly once, then wait_for_download with this download_id. Do not call download_from_element or prepare again for this attempt. A menu opener is not a download option."})
+
+        @tool
+        @observe
+        def download_from_element(selector: str) -> str:
+            """Combined alternative: arm AND click once. Never use after prepare_browser_download or a separate download click."""
+            collector, download_id, element = prepare_native_target(selector)
             try:
                 origin()
                 check_write_page()
@@ -282,5 +295,5 @@ def file_tools(driver, settings, deadline, context, *, observe, check_session, c
 
         tools.extend([download_file, download_link])
         if writes:
-            tools.extend([download_from_element, wait_for_download])
+            tools.extend([prepare_browser_download, download_from_element, wait_for_download])
     return tools

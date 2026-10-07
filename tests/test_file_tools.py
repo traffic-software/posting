@@ -228,9 +228,55 @@ def test_permission_gates_do_not_expose_click_upload_bypasses(setup):
     setup[2].allow_write_actions = False
     bound = tools(setup)
     assert "upload_file" not in bound and "download_from_element" not in bound
+    assert "prepare_browser_download" not in bound
     assert "download_file" in bound
     setup[2].allow_file_downloads = False
     assert "download_file" not in tools(setup)
+
+
+def test_prepared_browser_download_agent_click_then_collect(setup):
+    driver, _, context, *_ = setup
+    clicks = []
+    driver.link.click = lambda: clicks.append(True)
+
+    class Collector:
+        available = True
+        active = False
+        def arm(self, origin):
+            assert origin == ORIGIN
+            if self.active:
+                raise RuntimeError('already armed')
+            self.active = True
+            return 'synthetic-download'
+        def wait(self, identifier, timeout):
+            assert identifier == 'synthetic-download'
+            if not clicks:
+                return {'status': 'pending'}
+            writer = context._artifact_session.reserve(purpose='output', name='video.mp4', media_type='video/mp4')
+            writer.write(b'verified fixture video bytes')
+            self.active = False
+            return {'status': 'ready', 'artifact': writer.finish()}
+        def close(self):
+            pass
+
+    context._browser_downloads = Collector()
+    bound = tools(setup)
+    assert 'Inspect the current page' in bound['prepare_browser_download'].invoke({'selector': 'a:nth-child(2)'})
+    bound['inspect_page'].invoke({})
+    receipt = json.loads(bound['prepare_browser_download'].invoke({'selector': 'a:nth-child(2)'}))
+    assert receipt['status'] == 'armed' and receipt['click_performed'] is False
+    assert not clicks
+    assert 'Could not arm' in bound['prepare_browser_download'].invoke({'selector': 'a:nth-child(2)'})
+    assert not clicks
+    pending = json.loads(bound['wait_for_download'].invoke({'download_id': receipt['download_id']}))
+    assert pending['status'] == 'pending'
+    assert bound['click_element'].invoke({'selector': 'a:nth-child(2)'}) == 'Element clicked'
+    ready = json.loads(bound['wait_for_download'].invoke({'download_id': receipt['download_id']}))
+    assert ready['status'] == 'ready' and clicks == [True]
+    files = json.loads(bound['list_task_files'].invoke({}))['files']
+    assert files[0]['id'] == ready['artifact']['id'] and files[0]['purpose'] == 'output'
+    assert setup[3].links(context.task_id)[0]['id'] == files[0]['id']
+    assert 'https://' not in json.dumps(receipt) and 'download_url' not in ready['artifact']
 
 
 def test_challenge_stop_applies_to_direct_downloads(setup):

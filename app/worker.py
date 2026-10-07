@@ -7,7 +7,7 @@ from app.config import Settings
 from app.schemas import TaskStatus
 from app.storage import TaskStore
 from app.task_context import TaskContext, decode_context
-from app.task_report import TaskExecutionFailure, failure_result, output_result
+from app.task_report import TaskExecutionFailure, failure_diagnostics, failure_result, output_result
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +68,7 @@ class TaskWorker:
                     continue
                 task_id, prompt = task["task_id"], task["prompt"]
                 context = None
+                phase = "context_setup"
                 try:
                     context = decode_context(task["context_json"], task["credential_blob"], self.settings, file_sources_blob=task.get("file_sources_blob"))
                     if context is None and self.runner is run_task:
@@ -85,6 +86,7 @@ class TaskWorker:
                         if context is not None:
                             context.cancel()
                         raise RuntimeError("Task cancelled")
+                    phase = "execution"
                     if context is not None:
                         result = context.redacted_result(self.runner(prompt, self.settings, context))
                     else:
@@ -92,6 +94,7 @@ class TaskWorker:
                     if self.stopping.is_set():
                         self.store.cancel_processing(task_id)
                     else:
+                        phase = "storage"
                         self.store.finish(task_id, TaskStatus.COMPLETED, result=result)
                         if self.settings.enable_workflow_memory and context is not None:
                             try:
@@ -110,10 +113,16 @@ class TaskWorker:
                         self.store.cancel_processing(task_id)
                     else:
                         logger.error("Task %s failed (%s)", task_id, type(exc).__name__)
-                        report = exc.result if isinstance(exc, TaskExecutionFailure) else failure_result()
+                        report = exc.result if isinstance(exc, TaskExecutionFailure) else failure_result(
+                            diagnostics=failure_diagnostics(exc, context, phase=phase),
+                        )
                         if context is not None:
                             report = context.redacted_result(report)
-                        report = output_result(report["output"])
+                        report = output_result(report["output"], report.get("diagnostics"))
+                        details = report.get("diagnostics")
+                        if details:
+                            logger.error("Task %s termination: category=%s phase=%s code=%s", task_id,
+                                         details["category"], details["phase"], details["code"])
                         self.store.finish(task_id, TaskStatus.FAILED, result=report, error="Task execution failed")
                 finally:
                     if context is not None:

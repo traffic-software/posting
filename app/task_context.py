@@ -15,6 +15,10 @@ class TaskControlError(RuntimeError):
     pass
 
 
+class TaskDeadlineExceeded(TimeoutError):
+    pass
+
+
 class ExecutionBudget:
     """A shared, moving monotonic deadline; only acknowledged manual time is free."""
     def __init__(self, seconds: float):
@@ -125,6 +129,20 @@ class TaskContext:
     _secret_lock: threading.Lock = field(default_factory=threading.Lock)
     _observations: list[dict] = field(default_factory=list)
     _observation_lock: threading.Lock = field(default_factory=threading.Lock)
+    execution_phase: str = field(default="execution", init=False)
+    _failure_origin: tuple | None = field(default=None, init=False, repr=False)
+
+    def record_failure(self, exc: Exception, phase: str, tool: str | None = None, code: str | None = None) -> None:
+        with self._observation_lock:
+            # Preserve the innermost boundary for this exact exception, not a past refusal.
+            if self._failure_origin is None or self._failure_origin[0] is not exc:
+                self._failure_origin = (exc, phase, tool, code)
+
+    def failure_origin(self, exc: Exception, fallback: str) -> tuple:
+        with self._observation_lock:
+            if self._failure_origin is not None and self._failure_origin[0] is exc:
+                return self._failure_origin[1:]
+        return fallback, None, None
 
     def check_alive(self) -> None:
         if self.cancelled.is_set():
@@ -132,7 +150,7 @@ class TaskContext:
         if self.credential_expires_at is not None and time.time() >= self.credential_expires_at:
             raise TaskControlError("Task credentials expired")
         if self.control.budget is not None and time.monotonic() >= self.control.budget:
-            raise TimeoutError("Task time limit reached")
+            raise TaskDeadlineExceeded("Task time limit reached")
 
     def bind_browser(self, close: Callable) -> None:
         with self._browser_lock:
@@ -156,8 +174,10 @@ class TaskContext:
         finally:
             self.clear_sensitive_state()
 
-    def record_observation(self, tool: str, outcome: str, detail: str) -> None:
+    def record_observation(self, tool: str, outcome: str, detail: str, *, code: str | None = None) -> None:
         entry = {"tool": tool, "outcome": outcome, "detail": self.redact(detail)[:500]}
+        if code is not None:
+            entry["code"] = code
         with self._observation_lock:
             if not self.cancelled.is_set():
                 self._observations.append(entry)
@@ -211,6 +231,7 @@ class TaskContext:
             self.workflow_success_criteria.clear()
         with self._observation_lock:
             self._observations.clear()
+            self._failure_origin = None
         with self._secret_lock:
             self.credentials.clear()
             self.upload_sources.clear()

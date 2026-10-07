@@ -88,7 +88,17 @@ For authenticated website or same-origin Blob downloads, also grant writes becau
 }
 ```
 
-`download_file` streams public HTTPS bytes without account cookies. `download_link` reads an observed link server-side so a signed href need not be copied into the model's arguments. `download_from_element` arms one browser download and performs one inspected click; `wait_for_download` observes it without re-clicking. Browser downloads retain browser authentication internally. If reliable download-event transport is unavailable, the native capability reports unavailable instead of guessing from a stable file size.
+`download_file` streams public HTTPS bytes without account cookies. `download_link` reads an observed link server-side so a signed href need not be copied into the model's arguments.
+
+For agent-owned browser clicks, use this order:
+
+1. Inspect and select the actual download option (not its menu opener).
+2. Call `prepare_browser_download(selector)`. It validates the inspected control and prepares collection **without clicking**, returning `status: armed` and a `download_id`.
+3. Use ordinary `click_element(selector)` exactly once on that verified download option.
+4. Call `wait_for_download(download_id)` for the same attempt until `status: ready` with an artifact, or a verified failure/deadline. A `pending` result is not permission to re-click or prepare another attempt.
+5. Confirm the output in `list_task_files`; retrieve its server-generated link from task-status `artifacts[].download_url`.
+
+`download_from_element` remains a combined alternative that prepares and clicks once. Never mix it with the separate preparation/click flow. Browser downloads retain authentication internally; the collector uses Chrome download events, not `chrome://downloads/` scraping. Returned links address verified server artifacts, not original signed/authenticated/Blob source URLs. If reliable event transport is unavailable, the native capability reports unavailable instead of guessing from a stable file size.
 
 Only fully verified and atomically stored output files become artifacts. Partial, canceled or oversized downloads have no links. Already completed output artifacts may remain available even when another part of the task fails; their presence does not imply the entire task succeeded.
 
